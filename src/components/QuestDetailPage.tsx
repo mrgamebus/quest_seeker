@@ -186,6 +186,7 @@ export default function QuestDetailPage() {
     setPdfLoading(false)
     return resolved // Return for immediate use
   }
+
   // 🔜 REMOVE MyQuest dependency — now uses UserQuest status
   const completedParticipants = participantProfiles.filter((profile) => {
     const userQuest = questParticipants?.find(
@@ -195,25 +196,22 @@ export default function QuestDetailPage() {
     if (userQuest.status === 'COMPLETED') return true
 
     // Fallback: check if all tasks are completed
-    const tasks = Array.isArray(userQuest.tasks)
-      ? userQuest.tasks
-      : (() => {
-          try {
-            return typeof userQuest.tasks === 'string'
-              ? JSON.parse(userQuest.tasks)
-              : []
-          } catch {
-            return []
-          }
-        })()
+    const participantTasks = ensureArray<Task>(
+      Array.isArray(userQuest.tasks)
+        ? userQuest.tasks
+        : typeof userQuest.tasks === 'string'
+          ? JSON.parse(userQuest.tasks)
+          : [],
+    )
 
-    const taskCount = tasks.length
-    if (taskCount === 0) return false
+    if (participantTasks.length === 0) return false
+
     return (
-      tasks.filter((t: { completed: boolean }) => t.completed).length ===
-      taskCount
+      participantTasks.filter((t) => t.completed).length ===
+      participantTasks.length
     )
   })
+
   const pickRandomWinner = () => {
     if (completedParticipants.length === 0) return
 
