@@ -33,25 +33,27 @@ export default function InlineEditField({
   }
 
   return (
-    <div className="flex flex-col gap-1">
-      <div className="flex items-center gap-2">
-        <strong>{label}:</strong>
+    <div className="flex flex-col gap-1 w-full">
+      <div className="flex flex-wrap items-start sm:items-center gap-2">
+        <strong className="whitespace-nowrap">{label}:</strong>
         {editing ? (
           <>
             <input
               type="text"
               value={inputValue}
               onChange={(e) => setInputValue(e.target.value)}
-              className={`border p-1 rounded flex-1 ${error ? 'border-red-500' : ''}`}
+              className={`border p-1 rounded flex-1 min-w-[150px] ${
+                error ? 'border-red-500' : ''
+              }`}
               autoFocus
             />
-            <Button size="small" onClick={handleSave}>
+            <Button size="small" onClick={handleSave} className="ml-auto">
               Save
             </Button>
           </>
         ) : (
           <div
-            className="flex-1 cursor-pointer border p-1 rounded bg-gray-50"
+            className="flex-1 cursor-pointer border p-1 rounded bg-gray-50 break-words"
             onClick={() => setEditing(true)}
           >
             {inputValue || (

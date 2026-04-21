@@ -2,7 +2,7 @@ import { type ClientSchema, a, defineData } from '@aws-amplify/backend'
 import { expiredQuests } from '../functions/expiredQuests/resource'
 import { postRegistration } from '../functions/postRegistration/resource'
 import { joinQuest } from '../functions/joinQuest/resource'
-import { becomeCreator } from '../functions/becomeCreator/resource'
+import { approveCreator } from '../functions/approveCreator/resource'
 import { becomePending } from '../functions/becomePending/resource'
 import { mutateQuest } from '../functions/mutateQuest/resource'
 import { createQuestEntrySession } from '../functions/createQuestEntrySession/resource'
@@ -21,14 +21,14 @@ export const schema = a
       .returns(a.boolean())
       .authorization((allow) => [allow.authenticated()])
       .handler(a.handler.function(joinQuest)),
-    becomeCreator: a
+    approveCreator: a
       .mutation()
       .arguments({
         profileId: a.string().required(),
       })
       .returns(a.json())
-      .authorization((allow) => [allow.authenticated()])
-      .handler(a.handler.function(becomeCreator)),
+      .authorization((allow) => [allow.group('Admin')])
+      .handler(a.handler.function(approveCreator)),
     becomePending: a
       .mutation()
       .arguments({
@@ -36,7 +36,7 @@ export const schema = a
         userId: a.string().required(),
         accountName: a.string().required(),
         bankAccount: a.string().required(),
-        profileData: a.json().required(),
+        profileData: a.string().required(),
       })
       .returns(a.json())
       .authorization((allow) => [allow.authenticated()])
@@ -159,7 +159,7 @@ export const schema = a
         image_thumbnail: a.string(),
         points: a.integer(),
         leaderboard: a.string().default('GLOBAL'),
-        role: a.enum(['seeker', 'creator', 'pending']),
+        role: a.enum(['seeker', 'creator', 'Admin', 'pending']),
       })
       .secondaryIndexes((index) => [
         index('leaderboard').sortKeys(['points']).queryField('listLeaderboard'),
@@ -203,7 +203,7 @@ export const schema = a
     allow.resource(joinQuest),
     allow.resource(expiredQuests).to(['query', 'mutate']),
     allow.resource(postRegistration).to(['mutate']),
-    allow.resource(becomeCreator).to(['query', 'mutate']),
+    allow.resource(approveCreator).to(['query', 'mutate']),
     allow.resource(becomePending).to(['query', 'mutate']),
     allow.resource(mutateQuest).to(['mutate', 'query']),
     allow.resource(createStripeSession).to(['query']),

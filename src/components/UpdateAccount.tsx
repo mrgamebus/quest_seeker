@@ -136,10 +136,7 @@ export default function UpdateAccount({
       return { fullPath: '', thumbPath: '' }
     }
   }
-  // console.log('Current Profile: ', profile)
   return (
-    // <Card className="bg-white/80 backdrop-blur-md shadow-xl rounded-2xl p-8 max-w-md w-full text-center">
-    //   <CardContent className="flex flex-col gap-4">
     <div className="flex flex-col gap-4 w-full max-w-md mx-auto mb-2">
       {forceNameUpdate && (
         <div className="w-full bg-yellow-100 border border-yellow-300 text-yellow-800 rounded-lg px-4 py-3 text-sm font-medium mb-2">
@@ -194,50 +191,65 @@ export default function UpdateAccount({
       />
 
       {/* Creator-only fields */}
-      {profile.role === 'creator' && (
-        <>
-          <InlineEditField
-            label="Organisation Name"
-            value={profile.organization_name || ''}
-            onSave={(newValue) => onUpdate({ organization_name: newValue })}
-            required
-          />
-
-          <label className="text-base font-bold">Business Type</label>
-
-          <Select
-            key={profile.business_type ?? 'empty'}
-            value={profile.business_type || ''}
-            onValueChange={(newValue) => onUpdate({ business_type: newValue })}
-          >
-            <SelectTrigger className="w-full">
-              <SelectValue placeholder="Select Business Type" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="Registered Company">
-                Registered Company
-              </SelectItem>
-              <SelectItem value="Small Business">Small Business</SelectItem>
-              <SelectItem value="Charitable Trust">Charitable Trust</SelectItem>
-              <SelectItem value="Not for Profit">Not for Profit</SelectItem>
-              <SelectItem value="Whanau Fund Raising">
-                Whanau Fund Raising
-              </SelectItem>
-              <SelectItem value="Registered Charity">
-                Registered Charity
-              </SelectItem>
-            </SelectContent>
-          </Select>
-
-          {profile.business_type === 'Registered Company' && (
+      {profile.role !== 'seeker' && (
+        <div className="flex flex-col gap-6 w-full max-w-md mx-auto px-1">
+          {/* Basic Info Section */}
+          <section className="space-y-4">
             <InlineEditField
-              label="Registration Number"
-              value={profile.registration_number || ''}
-              onSave={(newValue) => onUpdate({ registration_number: newValue })}
+              label="Organisation Name"
+              value={profile.organization_name || ''}
+              onSave={(newValue) => onUpdate({ organization_name: newValue })}
               required
             />
-          )}
 
+            <div className="space-y-2">
+              <label className="text-sm font-bold text-gray-700 ml-1">
+                Business Type
+              </label>
+              <Select
+                key={profile.business_type ?? 'empty'}
+                value={profile.business_type || ''}
+                onValueChange={(newValue) =>
+                  onUpdate({ business_type: newValue })
+                }
+              >
+                <SelectTrigger className="w-full h-12 text-base">
+                  {' '}
+                  {/* Larger height for mobile taps */}
+                  <SelectValue placeholder="Select Business Type" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="Registered Company">
+                    Registered Company
+                  </SelectItem>
+                  <SelectItem value="Small Business">Small Business</SelectItem>
+                  <SelectItem value="Charitable Trust">
+                    Charitable Trust
+                  </SelectItem>
+                  <SelectItem value="Not for Profit">Not for Profit</SelectItem>
+                  <SelectItem value="Whanau Fund Raising">
+                    Whanau Fund Raising
+                  </SelectItem>
+                  <SelectItem value="Registered Charity">
+                    Registered Charity
+                  </SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            {(profile.business_type === 'Registered Company' ||
+              profile.business_type === 'Registered Charity') && (
+              <div className="bg-slate-50 p-3 rounded-lg border border-slate-100 animate-in fade-in duration-300">
+                <InlineEditField
+                  label="Registration Number"
+                  value={profile.registration_number || ''}
+                  onSave={(newValue) =>
+                    onUpdate({ registration_number: newValue })
+                  }
+                  required
+                />
+              </div>
+            )}
+          </section>
           {profile.business_type === 'Registered Charity' && (
             <InlineEditField
               label="Registered Charity Number"
@@ -255,49 +267,64 @@ export default function UpdateAccount({
             }
             required
           />
+          <section className="bg-gray-50/50 p-4 rounded-xl space-y-4 border border-gray-100">
+            <h3 className="text-sm font-bold uppercase tracking-wider text-gray-500 mb-2">
+              Primary Contact
+            </h3>
 
-          <InlineEditField
-            label="Primary Contact Name"
-            value={profile.primary_contact_name || ''}
-            onSave={(newValue) => onUpdate({ primary_contact_name: newValue })}
-            required
-          />
-          <InlineEditField
-            label="Primary Contact Position"
-            value={profile.primary_contact_position || ''}
-            onSave={(newValue) =>
-              onUpdate({ primary_contact_position: newValue })
-            }
-            required
-          />
-          <InlineEditField
-            label="Primary Contact Phone"
-            value={profile.primary_contact_phone || ''}
-            onSave={(newValue) => onUpdate({ primary_contact_phone: newValue })}
-            required
-          />
-          <InlineEditField
-            label="Secondary Contact Name"
-            value={profile.secondary_contact_name || ''}
-            onSave={(newValue) =>
-              onUpdate({ secondary_contact_name: newValue })
-            }
-          />
-          <InlineEditField
-            label="Secondary Contact Position"
-            value={profile.secondary_contact_position || ''}
-            onSave={(newValue) =>
-              onUpdate({ secondary_contact_position: newValue })
-            }
-          />
-          <InlineEditField
-            label="Secondary Contact Phone"
-            value={profile.secondary_contact_phone || ''}
-            onSave={(newValue) =>
-              onUpdate({ secondary_contact_phone: newValue })
-            }
-          />
-        </>
+            <InlineEditField
+              label="Primary Contact Name"
+              value={profile.primary_contact_name || ''}
+              onSave={(newValue) =>
+                onUpdate({ primary_contact_name: newValue })
+              }
+              required
+            />
+            <InlineEditField
+              label="Primary Contact Position"
+              value={profile.primary_contact_position || ''}
+              onSave={(newValue) =>
+                onUpdate({ primary_contact_position: newValue })
+              }
+              required
+            />
+            <InlineEditField
+              label="Primary Contact Phone"
+              value={profile.primary_contact_phone || ''}
+              onSave={(newValue) =>
+                onUpdate({ primary_contact_phone: newValue })
+              }
+              required
+            />
+          </section>
+          <section className="bg-gray-50/50 p-4 rounded-xl space-y-4 border border-gray-100">
+            <h3 className="text-sm font-bold uppercase tracking-wider text-gray-500 mb-2">
+              Secondary Contact (Optional)
+            </h3>
+
+            <InlineEditField
+              label="Secondary Contact Name"
+              value={profile.secondary_contact_name || ''}
+              onSave={(newValue) =>
+                onUpdate({ secondary_contact_name: newValue })
+              }
+            />
+            <InlineEditField
+              label="Secondary Contact Position"
+              value={profile.secondary_contact_position || ''}
+              onSave={(newValue) =>
+                onUpdate({ secondary_contact_position: newValue })
+              }
+            />
+            <InlineEditField
+              label="Secondary Contact Phone"
+              value={profile.secondary_contact_phone || ''}
+              onSave={(newValue) =>
+                onUpdate({ secondary_contact_phone: newValue })
+              }
+            />
+          </section>
+        </div>
       )}
       {!isProfileComplete && (
         <div className="mb-3 rounded bg-red-100 p-2 text-sm text-red-700">
@@ -319,10 +346,12 @@ export default function UpdateAccount({
             {profile.role === 'creator' &&
               profile.business_type === 'Registered Charity' &&
               !profile.charity_number && <li>Registered Charity Number</li>}
+
             {profile.role === 'creator' &&
               !profile.organization_description && (
                 <li>Organization Description</li>
               )}
+
             {profile.role === 'creator' && !profile.primary_contact_name && (
               <li>Primary Contact Name</li>
             )}

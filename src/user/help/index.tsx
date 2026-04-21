@@ -105,7 +105,7 @@ export default function Help() {
                   variant={activeTab === 'help' ? 'default' : 'yellow'}
                   onClick={() => navigate('/user/help')}
                 >
-                  Help
+                  About Quest Seeker
                 </Button>
                 <SignOutButton />
               </Toolbar>

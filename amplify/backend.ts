@@ -8,7 +8,7 @@ import { storage } from './storage/resource'
 import { expiredQuests } from './functions/expiredQuests/resource'
 import { postRegistration } from './functions/postRegistration/resource'
 import { joinQuest } from './functions/joinQuest/resource'
-import { becomeCreator } from './functions/becomeCreator/resource'
+import { approveCreator } from './functions/approveCreator/resource'
 import { becomePending } from './functions/becomePending/resource'
 import { mutateQuest } from './functions/mutateQuest/resource'
 import { createQuestEntrySession } from './functions/createQuestEntrySession/resource'
@@ -22,7 +22,7 @@ const backend = defineBackend({
   expiredQuests,
   postRegistration,
   joinQuest,
-  becomeCreator,
+  approveCreator,
   becomePending,
   mutateQuest,
   createQuestEntrySession,
@@ -129,8 +129,14 @@ stripeWebhookLambda.addToRolePolicy(sesPolicy)
 expiredQuestsLambda.addToRolePolicy(sesPolicy)
 
 const cognitoPolicy = new iam.PolicyStatement({
-  actions: ['cognito-idp:AdminGetUser'],
-  resources: [backend.auth.resources.userPool.userPoolArn],
+  actions: [
+    'cognito-idp:AdminGetUser',
+    'cognito-idp:AdminUpdateUserAttributes',
+    'cognito-idp:AdminAddUserToGroup',
+  ],
+  resources: [
+    `arn:aws:cognito-idp:ap-southeast-2:469642840324:userpool/${backend.auth.resources.userPool.userPoolId}`,
+  ],
 })
 
 joinQuestLambda.addToRolePolicy(cognitoPolicy)
@@ -146,8 +152,6 @@ expiredQuestsLambda.addEnvironment(
   'AMPLIFY_USER_POOL_ID',
   backend.auth.resources.userPool.userPoolId,
 )
-
-// Add this to your backend.ts after the existing code
 
 // -----------------------------
 // becomePending permissions
@@ -167,6 +171,28 @@ becomePendingLambda.addToRolePolicy(cognitoPolicy)
 
 // Add User Pool ID
 becomePendingLambda.addEnvironment(
+  'AMPLIFY_USER_POOL_ID',
+  backend.auth.resources.userPool.userPoolId,
+)
+
+// -----------------------------
+// approveCreator permissions
+// -----------------------------
+const approveCreatorLambda = backend.approveCreator.resources
+  .lambda as lambda.Function
+
+// Grant DynamoDB permissions
+profileTable.grantReadWriteData(approveCreatorLambda)
+approveCreatorLambda.addEnvironment(
+  'PROFILE_TABLE_NAME',
+  profileTable.tableName,
+)
+
+// Grant Cognito permissions
+approveCreatorLambda.addToRolePolicy(cognitoPolicy)
+
+// ✅ Add User Pool ID environment variable
+approveCreatorLambda.addEnvironment(
   'AMPLIFY_USER_POOL_ID',
   backend.auth.resources.userPool.userPoolId,
 )

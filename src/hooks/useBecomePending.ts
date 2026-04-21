@@ -1,4 +1,3 @@
-// hooks/useCreatorApplication.ts
 import { useState } from 'react'
 import type { Profile } from '@/types'
 import { generateClient } from 'aws-amplify/data'
@@ -18,33 +17,67 @@ export function useBecomePending() {
   const submitApplication = async (
     profile: Profile,
     bankDetails: BankDetails,
-    isProfileComplete: boolean,
+    _isProfileComplete: boolean,
     onProfileUpdate: (updates: Partial<Profile>) => void,
+    refetchProfile?: () => Promise<void>, // ✅ Add refetch callback
   ) => {
     setIsSending(true)
     setError(null)
 
     try {
-      const type = isProfileComplete
-        ? 'BANK_ACCOUNT_UPDATE'
-        : 'CREATOR_APPLICATION'
+      const type =
+        profile.role === 'seeker'
+          ? 'CREATOR_APPLICATION'
+          : 'BANK_ACCOUNT_UPDATE'
 
-      // Call your becomePending function
+      // ✅ CHANGE 2: Strip out metadata before stringifying
+      const profileFields = {
+        full_name: profile.full_name,
+        email: profile.email,
+        phone: profile.phone,
+        organization_name: profile.organization_name,
+        business_type: profile.business_type,
+        organization_description: profile.organization_description,
+        primary_contact_name: profile.primary_contact_name,
+        primary_contact_position: profile.primary_contact_position,
+        primary_contact_phone: profile.primary_contact_phone,
+        secondary_contact_name: profile.secondary_contact_name,
+        secondary_contact_position: profile.secondary_contact_position,
+        secondary_contact_phone: profile.secondary_contact_phone,
+        about_me: profile.about_me,
+        role: profile.role,
+        ...(profile.registration_number && {
+          registration_number: profile.registration_number,
+        }),
+        ...(profile.charity_number && {
+          charity_number: profile.charity_number,
+        }),
+      }
+
+      const cleanProfile = Object.fromEntries(
+        Object.entries(profileFields).filter(
+          ([_, value]) => value != null && value !== '',
+        ),
+      )
+
       const { data, errors } = await client.mutations.becomePending({
         type,
         userId: profile.id,
         accountName: bankDetails.accountName,
         bankAccount: bankDetails.accountNumber,
-        profileData: JSON.stringify(profile), // Stringify if needed
+        profileData: JSON.stringify(cleanProfile),
       })
 
       if (errors || !data) {
         throw new Error(errors?.[0]?.message || 'Failed to submit')
       }
 
-      // Update role to 'pending' if coming from 'seeker' and submitting full application
-      if (type === 'CREATOR_APPLICATION' && profile.role === 'seeker') {
+      // ✅ Update local state and refetch
+      if (type === 'CREATOR_APPLICATION') {
         onProfileUpdate({ role: 'pending' })
+        if (refetchProfile) {
+          await refetchProfile() // ✅ Wait for refetch to complete
+        }
       }
 
       return { success: true }

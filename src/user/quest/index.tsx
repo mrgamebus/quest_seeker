@@ -197,7 +197,7 @@ export default function QuestPage() {
               </Button>
 
               <Button variant="yellow" onClick={() => navigate('/user/help')}>
-                Help
+                About Quest Seeker
               </Button>
 
               <SignOutButton />
