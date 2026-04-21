@@ -76,6 +76,7 @@ const PrizeCreatorButton: React.FC<PrizeCreatorButtonProps> = ({
     onNewPrize(updatedPrizes)
     // reset form
     setPrize('')
+    setPrizeImage(false)
     setImageFile(null)
     setPreviewUrl(null)
     setEditIndex(-1)

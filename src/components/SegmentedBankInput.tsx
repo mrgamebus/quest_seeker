@@ -99,10 +99,10 @@ export const SegmentedBankInput = ({
         <label className="text-sm font-medium text-gray-700">
           Bank Account Number
         </label>
-        <div className="flex items-center gap-1 md:gap-2">
+        <div className="flex items-center justify-between gap-0.5 md:gap-2 w-full max-w-full overflow-x-hidden">
           <Input
             ref={refs.bank}
-            className="w-12 px-1 text-center"
+            className="w-[12%] min-w-[38px] px-0 text-center text-sm md:text-base"
             placeholder="00"
             maxLength={2}
             inputMode="numeric"
@@ -112,7 +112,7 @@ export const SegmentedBankInput = ({
           <span className="text-gray-400">-</span>
           <Input
             ref={refs.branch}
-            className="w-16 px-1 text-center"
+            className="w-[18%] min-w-[50px] px-0 text-center text-sm md:text-base"
             placeholder="0000"
             maxLength={4}
             inputMode="numeric"
@@ -122,7 +122,7 @@ export const SegmentedBankInput = ({
           <span className="text-gray-400">-</span>
           <Input
             ref={refs.account}
-            className="w-28 px-1 text-center"
+            className="flex-1 min-w-[80px] px-0 text-center text-sm md:text-base"
             placeholder="0000000"
             maxLength={7}
             inputMode="numeric"
@@ -132,7 +132,7 @@ export const SegmentedBankInput = ({
           <span className="text-gray-400">-</span>
           <Input
             ref={refs.suffix}
-            className="w-14 px-1 text-center"
+            className="w-[15%] min-w-[42px] px-0 text-center text-sm md:text-base"
             placeholder="00"
             maxLength={3}
             inputMode="numeric"

@@ -13,7 +13,6 @@ import { Home } from 'lucide-react'
 import SignOutButton from '@/components/SignOutButton'
 import MyQuests from '@/components/MyQuests'
 import CurrentUserStatus from '@/components/CurrentUserStatus'
-// import { useBecomePending } from '@/hooks/useBecomePending'
 import {
   Dialog,
   DialogContent,
@@ -22,6 +21,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog'
+import AdminPage from '@/components/AdminPage'
 
 export default function AccountPage() {
   const { data: currentProfile, isLoading, refetch } = useCurrentUserProfile()
@@ -29,7 +29,6 @@ export default function AccountPage() {
   const location = useLocation()
   const navigate = useNavigate()
 
-  // const { becomePending } = useBecomePending()
   const [modalOpen, setModalOpen] = useState(false)
   const [loading, setLoading] = useState(false)
 
@@ -50,50 +49,34 @@ export default function AccountPage() {
   // ✅ EARLY RETURN COMES AFTER ALL HOOKS
   if (isLoading || !currentProfile) return null
 
+  const admin = currentProfile?.role === 'Admin'
   const isComplete = isProfileComplete(currentProfile)
 
   const handleUpdate = async (updates: Partial<Profile>) => {
-    await updateProfile.mutateAsync({
-      input: {
-        id: currentProfile.id,
-        full_name: updates.full_name,
-        email: updates.email,
-        phone: updates.phone,
-        organization_name: updates.organization_name,
-        registration_number: updates.registration_number,
-        charity_number: updates.charity_number,
-        business_type: updates.business_type,
-        organization_description: updates.organization_description,
-        primary_contact_name: updates.primary_contact_name,
-        primary_contact_position: updates.primary_contact_position,
-        primary_contact_phone: updates.primary_contact_phone,
-        about_me: updates.about_me,
-        secondary_contact_name: updates.secondary_contact_name,
-        secondary_contact_position: updates.secondary_contact_position,
-        secondary_contact_phone: updates.secondary_contact_phone,
-        image: updates.image,
-        image_thumbnail: updates.image_thumbnail,
-        role: toProfileRole(currentProfile.role),
-      },
-    })
+    // Only send the id plus whatever fields are in updates
+    const input: any = {
+      id: currentProfile.id,
+      ...updates,
+    }
+
+    // Handle role conversion if role is being updated
+    if ('role' in updates && updates.role) {
+      input.role = toProfileRole(updates.role)
+    }
+
+    await updateProfile.mutateAsync({ input })
+    await refetch()
   }
 
   const handleClick = () => {
     if (!currentProfile) return
-
-    // if (role === ProfileRole.creator) {
-    //   navigate(to)
-    // } else {
     setModalOpen(true)
-    // }
   }
 
   const handleBecomeCreator = async () => {
     setLoading(true)
     try {
-      // await becomePending()
       setModalOpen(false)
-      // Pass the state object here:
       navigate('/user/account', { state: { defaultTab: 'status' } })
     } catch (err) {
       console.error('Failed to become creator:', err)
@@ -107,6 +90,7 @@ export default function AccountPage() {
   if (currentProfile.role == 'creator') buttonText = 'Creator'
   if (currentProfile.role == 'seeker') buttonText = 'Become a Quest Creator'
   if (currentProfile.role == 'pending') buttonText = 'Creator Status'
+  if (currentProfile.role == 'Admin') buttonText = 'Admin'
   return (
     <div
       className="relative h-screen flex items-center justify-center bg-cover bg-center p-4"
@@ -144,7 +128,7 @@ export default function AccountPage() {
               </Button>
 
               <Button variant="yellow" onClick={() => navigate('/user/help')}>
-                Help
+                About Quest Seeker
               </Button>
               <SignOutButton />
             </Toolbar>
@@ -157,10 +141,8 @@ export default function AccountPage() {
                   variant={activeTab === 'status' ? 'default' : 'yellow'}
                   onClick={() => {
                     if (currentProfile.role === 'seeker') {
-                      // Trigger the async logic if they aren't pending/creator yet
                       handleClick()
                     } else {
-                      // Otherwise, just switch the tab view
                       setActiveTab('status')
                     }
                   }}
@@ -170,13 +152,14 @@ export default function AccountPage() {
               </div>
 
               {/* Tab content */}
-              {activeTab === 'status' && (
+              {activeTab === 'status' && !admin && (
                 <CurrentUserStatus
                   profile={currentProfile}
                   onUpdate={handleUpdate}
                   isProfileComplete={isComplete}
                 />
               )}
+              {activeTab === 'status' && admin && <AdminPage />}
               {activeTab === 'account' && (
                 <UpdateAccount
                   profile={currentProfile}
