@@ -150,10 +150,10 @@ export default function Leader() {
                           }
                           onClick={() => setSelectedProfile(profile)}
                         >
-                          <TableCell className="font-medium">
+                          <TableCell className="font-medium cursor-pointer hover:opacity-80 transition-opacity">
                             {index + 1}
                           </TableCell>
-                          <TableCell>
+                          <TableCell className="cursor-pointer hover:opacity-80 transition-opacity">
                             {profile.full_name}
                             {profile.id === currentProfile?.id && (
                               <span className="ml-2 text-xs text-primary">
@@ -161,7 +161,7 @@ export default function Leader() {
                               </span>
                             )}
                           </TableCell>
-                          <TableCell className="text-right font-semibold">
+                          <TableCell className="text-right font-semibold cursor-pointer hover:opacity-80 transition-opacity">
                             {profile.points}
                           </TableCell>
                         </TableRow>

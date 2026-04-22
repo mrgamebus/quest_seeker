@@ -188,6 +188,8 @@ approveCreatorLambda.addEnvironment(
   profileTable.tableName,
 )
 
+approveCreatorLambda.addToRolePolicy(sesPolicy)
+
 // Grant Cognito permissions
 approveCreatorLambda.addToRolePolicy(cognitoPolicy)
 

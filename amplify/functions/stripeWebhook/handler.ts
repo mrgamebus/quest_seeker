@@ -9,7 +9,7 @@ import {
   GetCommand,
 } from '@aws-sdk/lib-dynamodb'
 import { randomUUID } from 'crypto'
-import { sendJoinEmails, sendPublishedEmail } from '../joinQuest/sendEmails'
+import { sendJoinEmails, sendPublishedEmail } from '../shared/sendEmail'
 
 const stripe = new Stripe(env.STRIPE_SECRET_KEY!)
 const client = new DynamoDBClient({})

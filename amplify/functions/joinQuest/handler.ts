@@ -7,7 +7,7 @@ import {
   UpdateCommand,
 } from '@aws-sdk/lib-dynamodb'
 import { randomUUID } from 'crypto'
-import { sendJoinEmails } from './sendEmails'
+import { sendJoinEmails } from '../shared/sendEmail'
 
 const ddbClient = new DynamoDBClient({})
 const ddb = DynamoDBDocumentClient.from(ddbClient, {
