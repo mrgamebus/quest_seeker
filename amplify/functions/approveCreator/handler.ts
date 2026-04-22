@@ -1,3 +1,4 @@
+// approveCreator/handler.ts
 import type { AppSyncResolverEvent } from 'aws-lambda'
 import type { Schema } from '../../data/resource'
 import { Amplify } from 'aws-amplify'
@@ -7,9 +8,11 @@ import { env } from '$amplify/env/approveCreator'
 import {
   CognitoIdentityProviderClient,
   AdminAddUserToGroupCommand,
+  AdminGetUserCommand,
   UserNotFoundException,
   CognitoIdentityProviderServiceException,
 } from '@aws-sdk/client-cognito-identity-provider'
+import { sendCreatorApprovalEmail } from '../shared/sendEmail'
 
 const cognitoClient = new CognitoIdentityProviderClient({})
 
@@ -23,6 +26,28 @@ async function initializeAmplify() {
   dataClient = generateClient<Schema>({ authMode: 'iam' })
 }
 
+// Helper to get email from Cognito
+const getEmailFromCognito = async (
+  userId: string,
+  userPoolId: string,
+): Promise<string | undefined> => {
+  try {
+    const result = await cognitoClient.send(
+      new AdminGetUserCommand({
+        UserPoolId: userPoolId,
+        Username: userId,
+      }),
+    )
+    const emailAttr = result.UserAttributes?.find(
+      (attr) => attr.Name === 'email',
+    )
+    return emailAttr?.Value
+  } catch (err) {
+    console.error('Failed to fetch email from Cognito for user:', userId, err)
+    return undefined
+  }
+}
+
 type Args = {
   profileId: string
 }
@@ -34,7 +59,6 @@ export const handler = async (event: AppSyncResolverEvent<Args>) => {
   await initializeAmplify()
 
   const userPoolId = process.env.AMPLIFY_USER_POOL_ID
-
   if (!userPoolId) {
     throw new Error('Missing User Pool ID')
   }
@@ -83,7 +107,7 @@ export const handler = async (event: AppSyncResolverEvent<Args>) => {
     await cognitoClient.send(
       new AdminAddUserToGroupCommand({
         UserPoolId: userPoolId,
-        Username: profileId, // The profile ID is the Cognito user sub
+        Username: profileId,
         GroupName: 'creator',
       }),
     )
@@ -101,6 +125,23 @@ export const handler = async (event: AppSyncResolverEvent<Args>) => {
     } else {
       throw err
     }
+  }
+
+  // Send approval email to the newly approved creator
+  console.log('Sending approval email...')
+  const userEmail = await getEmailFromCognito(profileId, userPoolId)
+  const userName = profile.full_name ?? 'Creator'
+
+  if (userEmail) {
+    try {
+      await sendCreatorApprovalEmail(profileId, userName, userEmail)
+      console.log('Approval email sent successfully')
+    } catch (emailError) {
+      console.error('Failed to send approval email:', emailError)
+      // Don't throw - approval already succeeded, email is just a notification
+    }
+  } else {
+    console.warn('Could not send approval email - user email not found')
   }
 
   console.log('=== Approval complete ===')

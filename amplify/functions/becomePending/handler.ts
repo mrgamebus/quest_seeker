@@ -1,6 +1,11 @@
 import type { Schema } from '../../data/resource'
+import {
+  getEmailFromCognito,
+  sendBankUpdateEmail,
+  sendCreatorApplicationEmail,
+  sendSeekerConfirmationEmail,
+} from '../shared/sendEmail'
 import { updateUserRole } from './updateRole'
-import { sendCreatorApplicationEmail, sendBankUpdateEmail } from './sendEmail'
 
 type Role = 'seeker' | 'creator' | 'pending'
 
@@ -30,9 +35,6 @@ type Profile = {
 export const handler: Schema['becomePending']['functionHandler'] = async (
   event,
 ) => {
-  console.log('=== becomePending Lambda triggered ===')
-  console.log('Event arguments:', JSON.stringify(event.arguments, null, 2))
-
   const { type, userId, accountName, bankAccount, profileData } =
     event.arguments
 
@@ -40,45 +42,32 @@ export const handler: Schema['becomePending']['functionHandler'] = async (
   const parsedProfileData =
     typeof profileData === 'string' ? JSON.parse(profileData) : profileData
 
-  console.log(
-    'Parsed profile data:',
-    JSON.stringify(parsedProfileData, null, 2),
-  )
-  console.log('Type:', type)
-  console.log('User ID:', userId)
-
   const isProfile = (data: unknown): data is Profile => {
     return data !== null && typeof data === 'object' && 'role' in data
   }
 
-  console.log('Is profile valid?', isProfile(parsedProfileData))
-
   try {
     if (type === 'CREATOR_APPLICATION' && isProfile(parsedProfileData)) {
-      console.log('Processing CREATOR_APPLICATION')
-      console.log('Profile role:', parsedProfileData.role)
-
       if (parsedProfileData.role === 'seeker') {
-        console.log('Updating user role to pending...')
         await updateUserRole(userId, 'pending', process.env.PROFILE_TABLE_NAME!)
-        console.log('Role update complete')
-      } else {
-        console.log(
-          'Role is not seeker, skipping role update. Current role:',
-          parsedProfileData.role,
-        )
       }
+      // Get user email for confirmation
+      const userEmail = await getEmailFromCognito(userId)
+      const userName = parsedProfileData.full_name ?? 'User'
 
-      console.log('Sending creator application email...')
-      await sendCreatorApplicationEmail(
-        userId,
-        accountName,
-        bankAccount,
-        parsedProfileData,
-      )
-      console.log('Email sent successfully')
+      // Replace the sequential await calls with:
+      await Promise.all([
+        sendCreatorApplicationEmail(
+          userId,
+          accountName,
+          bankAccount,
+          parsedProfileData,
+        ),
+        userEmail
+          ? sendSeekerConfirmationEmail(userId, userName, userEmail)
+          : Promise.resolve(),
+      ])
     } else if (type === 'BANK_ACCOUNT_UPDATE') {
-      console.log('Processing BANK_ACCOUNT_UPDATE')
       await sendBankUpdateEmail(
         userId,
         accountName,
@@ -94,7 +83,6 @@ export const handler: Schema['becomePending']['functionHandler'] = async (
       )
     }
 
-    console.log('=== Lambda completed successfully ===')
     return { success: true, message: 'Application submitted successfully' }
   } catch (error) {
     console.error('=== Error in becomePending ===', error)
