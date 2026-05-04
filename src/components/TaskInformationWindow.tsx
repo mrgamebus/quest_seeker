@@ -19,6 +19,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from '@radix-ui/react-tooltip'
+import { useToast } from '@/hooks/use-toast'
 
 interface TaskInformationWindowProps {
   questId: string
@@ -37,6 +38,7 @@ export default function TaskInformationWindow({
 }: TaskInformationWindowProps) {
   const { data: currentUserProfile } = useCurrentUserProfile()
   const { mutate: updateProfile } = useUpdateProfile()
+  const { toast } = useToast()
   const [selectedTask, setSelectedTask] = useState<Task | null>(null)
   const [editableTasks, setEditableTasks] = useState<Task[]>([])
   const [caption, setCaption] = useState('')
@@ -45,10 +47,13 @@ export default function TaskInformationWindow({
   const [previewUrl, setPreviewUrl] = useState<string | null>(null)
   const [saving, setSaving] = useState(false)
 
-  // console.log('Tasks in TaskInformationWindow: ', tasks)
   const getCurrentCoords = () => {
     if (!navigator.geolocation) {
-      alert('Geolocation not supported on this device.')
+      toast({
+        variant: 'destructive',
+        title: 'Geolocation not supported',
+        description: 'Your device does not support geolocation.',
+      })
       return
     }
 
@@ -62,7 +67,11 @@ export default function TaskInformationWindow({
         }
       },
       (err) => {
-        alert('Failed to get location: ' + err.message)
+        toast({
+          variant: 'destructive',
+          title: 'Failed to get location',
+          description: err.message,
+        })
       },
       { enableHighAccuracy: true },
     )
@@ -186,7 +195,6 @@ export default function TaskInformationWindow({
       const pointsDelta = shouldAwardPoints ? 1 : 0
 
       if (pointsDelta > 0 && currentUserProfile) {
-        // console.log('1 is true')
         await updateProfile({
           input: {
             id: currentUserProfile.id,
@@ -202,7 +210,7 @@ export default function TaskInformationWindow({
               ...t,
               caption,
               answer: selectedTask.isImage
-                ? uploadedPath || t.answer // ✅ keep existing if no new upload
+                ? uploadedPath || t.answer
                 : t.answer,
               location,
               completed: taskIsCompleted,
@@ -213,7 +221,6 @@ export default function TaskInformationWindow({
       // 🔥 3. Compute quest-wide `completed` state AFTER updating this task
       const allCompleted = updatedTasksForUser.every((t) => t.completed)
 
-      // 🔥 4. Save everything to the profile
       // 🔥 4. Save progress to UserQuest
       await updateQuestProgressInProfile(
         questId,
@@ -221,7 +228,10 @@ export default function TaskInformationWindow({
         allCompleted,
       )
 
-      alert('✅ Answer saved successfully!')
+      toast({
+        title: 'Answer saved! ✅',
+        description: 'Your task answer has been saved successfully.',
+      })
 
       // 🔥 5. Optimistic UI update
       setEditableTasks((prev) =>
@@ -235,14 +245,17 @@ export default function TaskInformationWindow({
       setSelectedTask(null)
     } catch (err) {
       console.error('❌ Failed to save answer:', err)
-      alert('❌ Failed to save answer.')
+      toast({
+        variant: 'destructive',
+        title: 'Failed to save',
+        description: 'There was an error saving your answer. Please try again.',
+      })
     } finally {
       setSaving(false)
       setImageFile(null)
     }
   }
 
-  // console.log('PreviewUrl: ', previewUrl)
   return (
     <div className="border rounded-lg p-4 bg-gray-50 shadow-inner max-h-64 overflow-y-auto">
       <h2 className="text-lg font-semibold mb-2 text-gray-800">

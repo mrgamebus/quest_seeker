@@ -1,7 +1,7 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { Routes, Route, Navigate, useNavigate } from 'react-router-dom'
 import { Authenticator, useAuthenticator } from '@aws-amplify/ui-react'
-
+import { Toaster } from '@/components/ui/toaster'
 import IndexPage from './app/main'
 import UserPage from './user/index'
 import RegionPage from './user/region'
@@ -23,6 +23,7 @@ function UserRoutes() {
   return (
     <QueryClientProvider client={queryClient}>
       <UserRoutesInner />
+      <Toaster />
     </QueryClientProvider>
   )
 }
@@ -45,30 +46,6 @@ function UserRoutesInner() {
     }
   }, [currentProfile])
 
-  //   const navigate = useNavigate()
-  // const { data: currentProfile } = useCurrentUserProfile()
-
-  // useEffect(() => {
-  //   if (!currentProfile) return
-
-  //   const isEmailAsName =
-  //     currentProfile.full_name?.includes('@') ||
-  //     !currentProfile.full_name?.trim()
-
-  //   const isAdmin = currentProfile.role === 'Admin'
-
-  //   if (isAdmin) {
-  //     navigate('/user/account', {
-  //       state: { defaultTab: 'status', forceNameUpdate: true },
-  //     })
-  //   }
-
-  //   if (isEmailAsName) {
-  //     navigate('/user/account', {
-  //       state: { defaultTab: 'account', forceNameUpdate: true },
-  //     })
-  //   }
-  // }, [currentProfile])
   return (
     <Routes>
       <Route path="" element={<UserPage />} />

@@ -4,7 +4,10 @@ import { Amplify } from 'aws-amplify'
 import { generateClient } from 'aws-amplify/data'
 import { getAmplifyDataClientConfig } from '@aws-amplify/backend/function/runtime'
 import { env } from '$amplify/env/expiredQuests'
-import { sendQuestExpiredEmail } from '../shared/sendEmail'
+import {
+  sendQuestExpiredEmail,
+  sendSeekerQuestExpiredEmail,
+} from '../shared/sendEmail'
 
 const { resourceConfig, libraryOptions } = await getAmplifyDataClientConfig(env)
 Amplify.configure(resourceConfig, libraryOptions)
@@ -37,10 +40,41 @@ export const handler: Handler = async () => {
         )
       } catch (err) {
         console.error(
-          `Failed to send expired email for quest ${quest.id}:`,
+          `Failed to send expired email to creator for quest ${quest.id}:`,
           err,
         )
       }
+    }
+
+    // ✅ Notify all participants (seekers) that the quest has expired
+    try {
+      const { data: userQuests } = await client.models.UserQuest.list({
+        filter: {
+          questId: { eq: quest.id },
+        },
+      })
+
+      if (userQuests && userQuests.length > 0) {
+        // Send emails to all participants
+        await Promise.allSettled(
+          userQuests.map((userQuest) =>
+            sendSeekerQuestExpiredEmail(
+              userQuest.profileId,
+              quest.quest_name ?? 'a quest',
+              quest.id,
+            ),
+          ),
+        )
+
+        console.log(
+          `Sent ${userQuests.length} seeker notification(s) for quest ${quest.id}`,
+        )
+      }
+    } catch (err) {
+      console.error(
+        `Failed to send seeker notifications for quest ${quest.id}:`,
+        err,
+      )
     }
   }
 
