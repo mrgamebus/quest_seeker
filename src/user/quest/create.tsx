@@ -35,12 +35,14 @@ import { toZonedTime } from 'date-fns-tz'
 import { ensureArray } from '@/tools/ensureArray'
 import { generateClient } from 'aws-amplify/api'
 import { Schema } from 'amplify/data/resource'
+import { useToast } from '@/hooks/use-toast'
 
 const client = generateClient<Schema>()
 
 export default function CreateQuestPage() {
   const navigate = useNavigate()
   const params = useParams()
+  const { toast } = useToast()
   const questId = params.id
   const isUpdating = !!questId
   const { data: profile, isLoading: isProfileLoading } = useCurrentUserProfile()
@@ -230,12 +232,20 @@ export default function CreateQuestPage() {
       const questId = await saveQuest(QuestStatus.published)
 
       if (!questId) {
-        alert('Save failed - check your validation or image upload.')
+        toast({
+          variant: 'destructive',
+          title: 'Save Failed',
+          description: 'Please check your validation or image upload.',
+        })
         return
       }
 
       if (!profile?.id) {
-        alert('Error: Profile ID is missing. Are you logged in?')
+        toast({
+          variant: 'destructive',
+          title: 'Error',
+          description: 'Profile ID is missing. Are you logged in?',
+        })
         return
       }
 
@@ -249,11 +259,19 @@ export default function CreateQuestPage() {
         window.location.href = response.data
       } else if (response.errors) {
         console.error('GraphQL Errors:', response.errors)
-        alert(`Mutation Error: ${response.errors[0].message}`)
+        toast({
+          variant: 'destructive',
+          title: 'Mutation Error',
+          description: response.errors[0].message,
+        })
       }
     } catch (err: any) {
       console.error('CRITICAL ERROR:', err)
-      alert(`Caught Error: ${err.message}`)
+      toast({
+        variant: 'destructive',
+        title: 'Error',
+        description: err.message || 'An unexpected error occurred',
+      })
     }
   }
 

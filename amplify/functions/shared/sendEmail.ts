@@ -437,3 +437,37 @@ export const sendQuestExpiredEmail = async (
     }),
   )
 }
+
+export const sendSeekerQuestExpiredEmail = async (
+  seekerId: string,
+  questName: string,
+  questId: string,
+) => {
+  const seekerEmail = await getEmailFromCognito(seekerId)
+
+  if (!seekerEmail) {
+    console.warn(
+      'sendSeekerQuestExpiredEmail: seeker email not found for',
+      seekerId,
+    )
+    return
+  }
+
+  const questUrl = `https://questseeker.co.nz/user/quest/${questId}`
+  const footer = `\n\n---\nThis is an automated transactional message. You are receiving this because you joined a quest on questseeker.co.nz.`
+
+  await safeSend(
+    new SendEmailCommand({
+      Source: FROM_ADDRESS,
+      Destination: { ToAddresses: [seekerEmail] },
+      Message: {
+        Subject: { Data: `Quest "${questName}" has ended` },
+        Body: {
+          Text: {
+            Data: `Kia ora!\n\nThe quest "${questName}" you were participating in has now ended.\n\nYou can view your completed tasks and see if you won any prizes by visiting:\n\n${questUrl}\n\nThank you for participating!\n\nNgā mihi,\nThe QuestSeeker Team${footer}`,
+          },
+        },
+      },
+    }),
+  )
+}

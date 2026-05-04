@@ -44,9 +44,11 @@ import { format, toZonedTime } from 'date-fns-tz'
 import { getUrl } from 'aws-amplify/storage'
 import { ensureArray } from '@/tools/ensureArray'
 import { joinQuest, createQuestEntrySession } from '@/graphql/mutations'
+import { useToast } from '@/hooks/use-toast'
 
 export default function QuestDetailPage() {
   const { id } = useParams<{ id: string }>()
+  const { toast } = useToast()
   const [joining, setJoining] = useState(false)
   const [winners, setWinners] = useState<any[]>([])
 
@@ -244,13 +246,16 @@ export default function QuestDetailPage() {
 
   // Random winner selection for a specific prize
   const pickWinnerForPrize = (prizeId: string, place: number) => {
-    // Filter out participants who already won
     const availableParticipants = completedParticipants.filter(
       (p) => !winners.some((w) => w.user_id === p.id),
     )
 
     if (availableParticipants.length === 0) {
-      alert('No more participants available!')
+      toast({
+        variant: 'destructive',
+        title: 'No participants available',
+        description: 'All eligible participants have already won a prize.',
+      })
       return
     }
 
@@ -260,14 +265,11 @@ export default function QuestDetailPage() {
     selectWinnerForPrize(prizeId, place, selected)
   }
 
-  // Manual winner selection for a specific prize
-  // Manual winner selection for a specific prize
   const selectWinnerForPrize = (
     prizeId: string,
     place: number,
     profile: Profile,
   ) => {
-    // Remove any existing winner for this prize
     const filteredWinners = winners.filter((w) => w.prize_id !== prizeId)
 
     const newWinner = {
@@ -283,7 +285,6 @@ export default function QuestDetailPage() {
       (a, b) => a.place - b.place,
     )
 
-    // Save to database
     updateQuestMutation(
       {
         action: MutateQuestAction.UPDATE_COMPLETED,
@@ -293,11 +294,19 @@ export default function QuestDetailPage() {
       {
         onSuccess: () => {
           setWinners(updatedWinners)
-          alert(`🎉 ${profile.full_name} selected as winner!`)
+          toast({
+            title: 'Winner Selected! 🎉',
+            description: `${profile.full_name} has been selected as the winner!`,
+          })
         },
         onError: (err) => {
           console.error('Failed to save winner:', err)
-          alert('Failed to save winner to database')
+          toast({
+            variant: 'destructive',
+            title: 'Failed to save winner',
+            description:
+              'There was an error saving the winner to the database.',
+          })
         },
       },
     )
@@ -310,7 +319,6 @@ export default function QuestDetailPage() {
       const entryFee = quest.quest_entry ?? 0
 
       if (entryFee > 0) {
-        // 💳 Paid quest — create Stripe checkout session
         const returnUrl = `${window.location.origin}/user/quest/${quest.id}`
 
         const result = await client.graphql({
@@ -327,10 +335,8 @@ export default function QuestDetailPage() {
         const sessionUrl = result.data?.createQuestEntrySession
         if (!sessionUrl) throw new Error('No session URL returned')
 
-        // Redirect to Stripe — joining happens via webhook on success
         window.location.href = sessionUrl
       } else {
-        // 🆓 Free quest — join directly
         await client.graphql({
           query: joinQuest,
           variables: {
@@ -338,14 +344,23 @@ export default function QuestDetailPage() {
             profileId: currentUserProfile.id,
           },
         })
-        alert('✅ Quest added to your profile!')
+
+        toast({
+          title: 'Quest Joined! ✅',
+          description: 'The quest has been added to your profile.',
+        })
+
         await refetch()
         await refetchProfile()
         await refetchUserQuests()
       }
     } catch (err) {
       console.error('❌ Failed to join quest:', err)
-      alert('Failed to join quest.')
+      toast({
+        variant: 'destructive',
+        title: 'Failed to join quest',
+        description: 'There was an error joining the quest. Please try again.',
+      })
     } finally {
       setJoining(false)
     }
@@ -769,6 +784,168 @@ export default function QuestDetailPage() {
                       </Dialog>
                     )}
                   </div>
+                  {/* 🏆 PRIZE SELECTION SECTION - Only visible to owner */}
+                  {isOwner && (
+                    <div className="lg:w-[450px] w-full bg-white/70 p-4 rounded-xl shadow">
+                      <h4 className="text-md font-bold mb-3">
+                        Select Winners by Prize
+                      </h4>
+                      {prizes.length > 0 && (
+                        <div className="mt-6 border-t pt-4">
+                          <div className="flex flex-col gap-3">
+                            {prizes.map((prize, index) => {
+                              const prizeWinner = winners.find(
+                                (w: any) => w.prize_id === prize.id,
+                              )
+
+                              return (
+                                <Dialog key={prize.id}>
+                                  <DialogTrigger asChild>
+                                    <button
+                                      className={`flex items-center gap-3 p-3 rounded-lg border-2 transition-all ${
+                                        prizeWinner
+                                          ? 'bg-green-50 border-green-400 hover:bg-green-100'
+                                          : 'bg-white border-gray-300 hover:border-yellow-400 hover:bg-yellow-50'
+                                      }`}
+                                    >
+                                      <RemoteImage
+                                        path={prize.image || placeHold}
+                                        fallback={placeHold}
+                                        className="w-12 h-12 object-contain rounded shrink-0"
+                                      />
+                                      <div className="flex-1 text-left">
+                                        <p className="font-semibold text-sm">
+                                          {prize.name}
+                                        </p>
+                                        {prizeWinner ? (
+                                          <p className="text-xs text-green-700 font-medium">
+                                            🎉 Winner: {prizeWinner.username}
+                                          </p>
+                                        ) : (
+                                          <p className="text-xs text-gray-500">
+                                            Click to select winner
+                                          </p>
+                                        )}
+                                      </div>
+                                      <span className="text-2xl">
+                                        {index === 0
+                                          ? '🥇'
+                                          : index === 1
+                                            ? '🥈'
+                                            : '🥉'}
+                                      </span>
+                                    </button>
+                                  </DialogTrigger>
+
+                                  <DialogOverlay className="fixed inset-0 bg-black/30 z-40" />
+                                  <DialogContent className="fixed top-1/2 left-1/2 z-50 max-h-[80vh] w-full max-w-md bg-white rounded-xl p-6 shadow-lg -translate-x-1/2 -translate-y-1/2 overflow-y-auto">
+                                    <DialogTitle className="text-lg font-bold mb-4">
+                                      Select Winner for {prize.name}
+                                    </DialogTitle>
+
+                                    {/* Prize Details */}
+                                    <div className="flex items-center gap-3 mb-4 p-3 bg-gray-50 rounded-lg">
+                                      <RemoteImage
+                                        path={prize.image || placeHold}
+                                        fallback={placeHold}
+                                        className="w-16 h-16 object-contain rounded"
+                                      />
+                                      <div>
+                                        <p className="font-semibold">
+                                          {prize.name}
+                                        </p>
+                                        {/* {prize.description && (
+                                            <p className="text-xs text-gray-600">
+                                              {prize.description}
+                                            </p>
+                                          )} */}
+                                      </div>
+                                    </div>
+
+                                    {/* Random Selection Button */}
+                                    <button
+                                      onClick={() =>
+                                        pickWinnerForPrize(prize.id, index + 1)
+                                      }
+                                      disabled={isUpdatingQuest}
+                                      className="w-full bg-yellow-500 hover:bg-yellow-600 text-white font-semibold py-3 rounded-lg shadow mb-4 disabled:opacity-50"
+                                    >
+                                      {isUpdatingQuest
+                                        ? 'Selecting...'
+                                        : '🎲 Pick Random Winner'}
+                                    </button>
+
+                                    {/* Manual Selection List */}
+                                    <div className="border-t pt-4">
+                                      <p className="text-sm font-semibold mb-2">
+                                        Or select manually:
+                                      </p>
+                                      <div className="flex flex-col gap-2 max-h-60 overflow-y-auto">
+                                        {completedParticipants.map(
+                                          (profile) => {
+                                            const alreadyWon = winners.some(
+                                              (w: any) =>
+                                                w.user_id === profile.id,
+                                            )
+
+                                            return (
+                                              <button
+                                                key={profile.id}
+                                                onClick={() =>
+                                                  selectWinnerForPrize(
+                                                    prize.id,
+                                                    index + 1,
+                                                    profile,
+                                                  )
+                                                }
+                                                disabled={
+                                                  alreadyWon || isUpdatingQuest
+                                                }
+                                                className={`flex items-center gap-3 p-2 rounded-lg text-left transition-all ${
+                                                  alreadyWon
+                                                    ? 'bg-gray-100 opacity-50 cursor-not-allowed'
+                                                    : 'bg-white hover:bg-yellow-50 border border-gray-200 hover:border-yellow-400'
+                                                }`}
+                                              >
+                                                <RemoteImage
+                                                  path={
+                                                    profile.image_thumbnail ||
+                                                    placeHold
+                                                  }
+                                                  fallback={placeHold}
+                                                  className="w-10 h-10 rounded-full object-cover shrink-0"
+                                                />
+                                                <div className="flex-1">
+                                                  <p className="font-medium text-sm">
+                                                    {profile.full_name}
+                                                  </p>
+                                                  {alreadyWon && (
+                                                    <p className="text-xs text-gray-500">
+                                                      Already won a prize
+                                                    </p>
+                                                  )}
+                                                </div>
+                                              </button>
+                                            )
+                                          },
+                                        )}
+                                      </div>
+                                    </div>
+
+                                    <DialogClose asChild>
+                                      <button className="mt-4 w-full bg-gray-200 hover:bg-gray-300 px-4 py-2 rounded">
+                                        Close
+                                      </button>
+                                    </DialogClose>
+                                  </DialogContent>
+                                </Dialog>
+                              )
+                            })}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  )}
                 </>
               ) : (
                 /* ---------- NORMAL VERSION (NOT EXPIRED) ---------- */
@@ -980,170 +1157,6 @@ export default function QuestDetailPage() {
                             )
                           })}
                         </div>
-
-                        {/* 🏆 PRIZE SELECTION SECTION */}
-                        {prizes.length > 0 && (
-                          <div className="mt-6 border-t pt-4">
-                            <h4 className="text-md font-bold mb-3">
-                              Select Winners by Prize
-                            </h4>
-                            <div className="flex flex-col gap-3">
-                              {prizes.map((prize, index) => {
-                                const prizeWinner = winners.find(
-                                  (w: any) => w.prize_id === prize.id,
-                                )
-
-                                return (
-                                  <Dialog key={prize.id}>
-                                    <DialogTrigger asChild>
-                                      <button
-                                        className={`flex items-center gap-3 p-3 rounded-lg border-2 transition-all ${
-                                          prizeWinner
-                                            ? 'bg-green-50 border-green-400 hover:bg-green-100'
-                                            : 'bg-white border-gray-300 hover:border-yellow-400 hover:bg-yellow-50'
-                                        }`}
-                                      >
-                                        <RemoteImage
-                                          path={prize.image || placeHold}
-                                          fallback={placeHold}
-                                          className="w-12 h-12 object-contain rounded shrink-0"
-                                        />
-                                        <div className="flex-1 text-left">
-                                          <p className="font-semibold text-sm">
-                                            {prize.name}
-                                          </p>
-                                          {prizeWinner ? (
-                                            <p className="text-xs text-green-700 font-medium">
-                                              🎉 Winner: {prizeWinner.username}
-                                            </p>
-                                          ) : (
-                                            <p className="text-xs text-gray-500">
-                                              Click to select winner
-                                            </p>
-                                          )}
-                                        </div>
-                                        <span className="text-2xl">
-                                          {index === 0
-                                            ? '🥇'
-                                            : index === 1
-                                              ? '🥈'
-                                              : '🥉'}
-                                        </span>
-                                      </button>
-                                    </DialogTrigger>
-
-                                    <DialogOverlay className="fixed inset-0 bg-black/30 z-40" />
-                                    <DialogContent className="fixed top-1/2 left-1/2 z-50 max-h-[80vh] w-full max-w-md bg-white rounded-xl p-6 shadow-lg -translate-x-1/2 -translate-y-1/2 overflow-y-auto">
-                                      <DialogTitle className="text-lg font-bold mb-4">
-                                        Select Winner for {prize.name}
-                                      </DialogTitle>
-
-                                      {/* Prize Details */}
-                                      <div className="flex items-center gap-3 mb-4 p-3 bg-gray-50 rounded-lg">
-                                        <RemoteImage
-                                          path={prize.image || placeHold}
-                                          fallback={placeHold}
-                                          className="w-16 h-16 object-contain rounded"
-                                        />
-                                        <div>
-                                          <p className="font-semibold">
-                                            {prize.name}
-                                          </p>
-                                          {/* {prize.description && (
-                                            <p className="text-xs text-gray-600">
-                                              {prize.description}
-                                            </p>
-                                          )} */}
-                                        </div>
-                                      </div>
-
-                                      {/* Random Selection Button */}
-                                      <button
-                                        onClick={() =>
-                                          pickWinnerForPrize(
-                                            prize.id,
-                                            index + 1,
-                                          )
-                                        }
-                                        disabled={isUpdatingQuest}
-                                        className="w-full bg-yellow-500 hover:bg-yellow-600 text-white font-semibold py-3 rounded-lg shadow mb-4 disabled:opacity-50"
-                                      >
-                                        {isUpdatingQuest
-                                          ? 'Selecting...'
-                                          : '🎲 Pick Random Winner'}
-                                      </button>
-
-                                      {/* Manual Selection List */}
-                                      <div className="border-t pt-4">
-                                        <p className="text-sm font-semibold mb-2">
-                                          Or select manually:
-                                        </p>
-                                        <div className="flex flex-col gap-2 max-h-60 overflow-y-auto">
-                                          {completedParticipants.map(
-                                            (profile) => {
-                                              const alreadyWon = winners.some(
-                                                (w: any) =>
-                                                  w.user_id === profile.id,
-                                              )
-
-                                              return (
-                                                <button
-                                                  key={profile.id}
-                                                  onClick={() =>
-                                                    selectWinnerForPrize(
-                                                      prize.id,
-                                                      index + 1,
-                                                      profile,
-                                                    )
-                                                  }
-                                                  disabled={
-                                                    alreadyWon ||
-                                                    isUpdatingQuest
-                                                  }
-                                                  className={`flex items-center gap-3 p-2 rounded-lg text-left transition-all ${
-                                                    alreadyWon
-                                                      ? 'bg-gray-100 opacity-50 cursor-not-allowed'
-                                                      : 'bg-white hover:bg-yellow-50 border border-gray-200 hover:border-yellow-400'
-                                                  }`}
-                                                >
-                                                  <RemoteImage
-                                                    path={
-                                                      profile.image_thumbnail ||
-                                                      placeHold
-                                                    }
-                                                    fallback={placeHold}
-                                                    className="w-10 h-10 rounded-full object-cover shrink-0"
-                                                  />
-                                                  <div className="flex-1">
-                                                    <p className="font-medium text-sm">
-                                                      {profile.full_name}
-                                                    </p>
-                                                    {alreadyWon && (
-                                                      <p className="text-xs text-gray-500">
-                                                        Already won a prize
-                                                      </p>
-                                                    )}
-                                                  </div>
-                                                </button>
-                                              )
-                                            },
-                                          )}
-                                        </div>
-                                      </div>
-
-                                      <DialogClose asChild>
-                                        <button className="mt-4 w-full bg-gray-200 hover:bg-gray-300 px-4 py-2 rounded">
-                                          Close
-                                        </button>
-                                      </DialogClose>
-                                    </DialogContent>
-                                  </Dialog>
-                                )
-                              })}
-                            </div>
-                          </div>
-                        )}
-
                         {/* 🧩 Task Window */}
                         <TaskInformationWindow
                           questId={quest.id}

@@ -22,12 +22,14 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog'
 import AdminPage from '@/components/AdminPage'
+import { useToast } from '@/hooks/use-toast'
 
 export default function AccountPage() {
   const { data: currentProfile, isLoading, refetch } = useCurrentUserProfile()
   const updateProfile = useUpdateProfile()
   const location = useLocation()
   const navigate = useNavigate()
+  const { toast } = useToast()
 
   const [modalOpen, setModalOpen] = useState(false)
   const [loading, setLoading] = useState(false)
@@ -53,19 +55,31 @@ export default function AccountPage() {
   const isComplete = isProfileComplete(currentProfile)
 
   const handleUpdate = async (updates: Partial<Profile>) => {
-    // Only send the id plus whatever fields are in updates
     const input: any = {
       id: currentProfile.id,
       ...updates,
     }
 
-    // Handle role conversion if role is being updated
     if ('role' in updates && updates.role) {
       input.role = toProfileRole(updates.role)
     }
 
-    await updateProfile.mutateAsync({ input })
-    await refetch()
+    try {
+      await updateProfile.mutateAsync({ input })
+      await refetch()
+
+      toast({
+        title: 'Profile Updated',
+        description: 'Your profile has been successfully updated.',
+      })
+    } catch (err) {
+      console.error('Failed to update profile:', err)
+      toast({
+        variant: 'destructive',
+        title: 'Update Failed',
+        description: 'Failed to update your profile. Please try again.',
+      })
+    }
   }
 
   const handleClick = () => {
@@ -80,7 +94,11 @@ export default function AccountPage() {
       navigate('/user/account', { state: { defaultTab: 'status' } })
     } catch (err) {
       console.error('Failed to become creator:', err)
-      alert('Something went wrong — please try again.')
+      toast({
+        variant: 'destructive',
+        title: 'Something went wrong',
+        description: 'Failed to update your account. Please try again.',
+      })
     } finally {
       setLoading(false)
     }
