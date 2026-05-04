@@ -1,6 +1,5 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-// import { useBecomePending } from '@/hooks/useBecomePending'
 import { Button } from '@/components/ui/button'
 import {
   Tooltip,
@@ -38,7 +37,7 @@ export default function AddQuestButton({ to }: AddQuestButtonProps) {
   const handleClick = () => {
     if (!currentProfile) return
 
-    if (role === ProfileRole.creator) {
+    if (role === ProfileRole.creator || role === ProfileRole.Admin) {
       navigate(to)
     } else {
       setModalOpen(true)

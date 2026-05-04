@@ -45,6 +45,30 @@ function UserRoutesInner() {
     }
   }, [currentProfile])
 
+  //   const navigate = useNavigate()
+  // const { data: currentProfile } = useCurrentUserProfile()
+
+  // useEffect(() => {
+  //   if (!currentProfile) return
+
+  //   const isEmailAsName =
+  //     currentProfile.full_name?.includes('@') ||
+  //     !currentProfile.full_name?.trim()
+
+  //   const isAdmin = currentProfile.role === 'Admin'
+
+  //   if (isAdmin) {
+  //     navigate('/user/account', {
+  //       state: { defaultTab: 'status', forceNameUpdate: true },
+  //     })
+  //   }
+
+  //   if (isEmailAsName) {
+  //     navigate('/user/account', {
+  //       state: { defaultTab: 'account', forceNameUpdate: true },
+  //     })
+  //   }
+  // }, [currentProfile])
   return (
     <Routes>
       <Route path="" element={<UserPage />} />

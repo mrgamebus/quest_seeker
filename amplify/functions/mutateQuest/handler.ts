@@ -28,6 +28,7 @@ type QuestAction =
   | 'UPDATE_DRAFT'
   | 'PUBLISH'
   | 'UPDATE_PUBLISHED'
+  | 'UPDATE_COMPLETED'
 
 interface QuestTask {
   id: string
@@ -61,6 +62,7 @@ interface AppSyncEvent {
     prizes?: unknown
     sponsors?: unknown
     tasks?: unknown
+    quest_winners?: string // ✅ Add this for winner updates
   }
   identity: {
     sub: string
@@ -138,6 +140,7 @@ export const handler = async (event: AppSyncEvent) => {
           quest_prize_info: normalizeAwsJson(input.prizes),
           quest_sponsor: normalizeAwsJson(input.sponsors),
           quest_tasks: normalizedTasks,
+          quest_winners: '[]', // ✅ Initialize empty winners array
           createdAt: now,
           updatedAt: now,
         },
@@ -173,6 +176,32 @@ export const handler = async (event: AppSyncEvent) => {
   // Ownership enforcement
   if (quest.creator_id !== userId && !isAdmin) {
     throw new Error('Not allowed to modify this quest')
+  }
+
+  // ✅ UPDATE_COMPLETED: Allow creators to update winners on expired/completed quests
+  if (input.action === 'UPDATE_COMPLETED') {
+    if (quest.status !== 'expired') {
+      throw new Error('Can only update completed quests that have expired')
+    }
+
+    // Only update quest_winners field
+    await ddb.send(
+      new UpdateCommand({
+        TableName: QUEST_TABLE,
+        Key: { id: input.questId },
+        UpdateExpression:
+          'SET quest_winners = :winners, updatedAt = :updatedAt',
+        ExpressionAttributeValues: {
+          ':winners': input.quest_winners ?? '[]',
+          ':updatedAt': now,
+        },
+      }),
+    )
+
+    return {
+      questId: input.questId,
+      status: 'expired',
+    }
   }
 
   // Published quests are immutable (except admin or UPDATE_PUBLISHED)

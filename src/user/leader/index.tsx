@@ -92,7 +92,7 @@ export default function Leader() {
               </Button>
 
               <Button variant="yellow" onClick={() => navigate('/user/help')}>
-                About Quest Seeker
+                About QS
               </Button>
               <SignOutButton />
             </Toolbar>

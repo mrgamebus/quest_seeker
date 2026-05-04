@@ -22,6 +22,7 @@ type LeaderboardListResult = {
 /**
  * Fetch ALL profiles ordered by points DESC
  * Used only to compute the current user's rank
+ * Filters out admin users
  */
 async function fetchAllProfilesByPoints(): Promise<LeaderboardProfile[]> {
   const all: LeaderboardProfile[] = []
@@ -31,10 +32,13 @@ async function fetchAllProfilesByPoints(): Promise<LeaderboardProfile[]> {
     const res: LeaderboardListResult =
       await client.models.Profile.listLeaderboard(
         { leaderboard: 'GLOBAL' },
-        { sortDirection: 'DESC', nextToken }
+        { sortDirection: 'DESC', nextToken },
       )
-
-    all.push(...(res.data ?? []))
+    // Filter out admin users
+    const nonAdminProfiles = (res.data ?? []).filter(
+      (profile) => profile.role !== 'Admin',
+    )
+    all.push(...nonAdminProfiles)
     nextToken = res.nextToken
   } while (nextToken)
 
@@ -42,7 +46,7 @@ async function fetchAllProfilesByPoints(): Promise<LeaderboardProfile[]> {
 }
 
 export function useLeaderboardProfiles(
-  currentUserId?: string
+  currentUserId?: string,
 ): UseLeaderboardResult {
   const [topTen, setTopTen] = useState<LeaderboardProfile[]>([])
   const [userRank, setUserRank] = useState<number | null>(null)
@@ -60,22 +64,27 @@ export function useLeaderboardProfiles(
       setError(null)
 
       try {
-        // 1) Global Top 10
+        // 1) Global Top 10 (excluding admins)
         const topRes: LeaderboardListResult =
           await client.models.Profile.listLeaderboard(
             { leaderboard: 'GLOBAL' },
-            { sortDirection: 'DESC', limit: 10 }
+            { sortDirection: 'DESC', limit: 20 }, // Fetch more to ensure we get 10 non-admins
           )
 
         if (cancelled) return
-        setTopTen(topRes.data ?? [])
 
-        // 2) Compute global rank
+        // Filter out admins and take top 10
+        const nonAdminTop = (topRes.data ?? [])
+          .filter((profile) => profile.role !== 'Admin')
+          .slice(0, 10)
+
+        setTopTen(nonAdminTop)
+
+        // 2) Compute global rank (excluding admins)
         const allProfiles = await fetchAllProfilesByPoints()
-
         if (cancelled) return
-        const rankIndex = allProfiles.findIndex((p) => p.id === safeUserId)
 
+        const rankIndex = allProfiles.findIndex((p) => p.id === safeUserId)
         setUserRank(rankIndex >= 0 ? rankIndex + 1 : null)
       } catch (err) {
         console.error(err)
