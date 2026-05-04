@@ -8,15 +8,27 @@ type GeneratedMutation<InputType, OutputType> = string & {
   __generatedMutationOutput: OutputType;
 };
 
-export const becomeCreator = /* GraphQL */ `mutation BecomeCreator($profileId: String!) {
-  becomeCreator(profileId: $profileId)
+export const approveCreator = /* GraphQL */ `mutation ApproveCreator($profileId: String!) {
+  approveCreator(profileId: $profileId)
 }
 ` as GeneratedMutation<
-  APITypes.BecomeCreatorMutationVariables,
-  APITypes.BecomeCreatorMutation
+  APITypes.ApproveCreatorMutationVariables,
+  APITypes.ApproveCreatorMutation
 >;
-export const becomePending = /* GraphQL */ `mutation BecomePending($profileId: String!) {
-  becomePending(profileId: $profileId)
+export const becomePending = /* GraphQL */ `mutation BecomePending(
+  $accountName: String!
+  $bankAccount: String!
+  $profileData: String!
+  $type: String!
+  $userId: String!
+) {
+  becomePending(
+    accountName: $accountName
+    bankAccount: $bankAccount
+    profileData: $profileData
+    type: $type
+    userId: $userId
+  )
 }
 ` as GeneratedMutation<
   APITypes.BecomePendingMutationVariables,
@@ -77,6 +89,7 @@ export const createQuest = /* GraphQL */ `mutation CreateQuest(
     quest_sponsor
     quest_start_at
     quest_tasks
+    quest_winners
     region
     status
     updatedAt
@@ -198,6 +211,7 @@ export const deleteQuest = /* GraphQL */ `mutation DeleteQuest(
     quest_sponsor
     quest_start_at
     quest_tasks
+    quest_winners
     region
     status
     updatedAt
@@ -247,6 +261,7 @@ export const mutateQuest = /* GraphQL */ `mutation MutateQuest(
   $name: String
   $prizes: AWSJSON
   $questId: String
+  $quest_winners: String
   $region: String
   $sponsors: AWSJSON
   $startAt: AWSDateTime
@@ -262,6 +277,7 @@ export const mutateQuest = /* GraphQL */ `mutation MutateQuest(
     name: $name
     prizes: $prizes
     questId: $questId
+    quest_winners: $quest_winners
     region: $region
     sponsors: $sponsors
     startAt: $startAt
@@ -331,6 +347,7 @@ export const updateQuest = /* GraphQL */ `mutation UpdateQuest(
     quest_sponsor
     quest_start_at
     quest_tasks
+    quest_winners
     region
     status
     updatedAt

@@ -128,7 +128,7 @@ export default function AccountPage() {
               </Button>
 
               <Button variant="yellow" onClick={() => navigate('/user/help')}>
-                About Quest Seeker
+                About QS
               </Button>
               <SignOutButton />
             </Toolbar>

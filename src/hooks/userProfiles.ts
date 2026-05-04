@@ -171,3 +171,16 @@ export const useUpdateSeeker = () => {
     },
   })
 }
+
+export const useAllUsers = () => {
+  return useQuery({
+    queryKey: ['profiles', 'all'],
+    queryFn: async () => {
+      const result = await client.graphql({
+        query: listProfiles,
+        authMode: 'userPool',
+      })
+      return result.data.listProfiles.items
+    },
+  })
+}

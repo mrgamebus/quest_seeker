@@ -197,7 +197,7 @@ export default function QuestPage() {
               </Button>
 
               <Button variant="yellow" onClick={() => navigate('/user/help')}>
-                About Quest Seeker
+                About QS
               </Button>
 
               <SignOutButton />
@@ -228,7 +228,6 @@ export default function QuestPage() {
                 <option value="expiry-soonest">Expiry — Soonest First</option>
                 <option value="expiry-furthest">Expiry — Furthest First</option>
               </select>
-
               <AddQuestButton to="/user/quest/create" />
             </div>
 
@@ -248,7 +247,7 @@ export default function QuestPage() {
               }
               scrollThreshold={0.9} // triggers at 90% scroll
             >
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 py-10">
                 {visibleQuests.map((quest: Quest) => (
                   <QuestListItem
                     key={quest.id}

@@ -690,16 +690,28 @@ export default function CreateQuestPage() {
                     if (!date || !startDateTime) return
 
                     const minEndNz = getMinEndNzDate(startDateTime)
+                    const newEndNz = new Date(date)
 
-                    // Default to max(17:00, start + 1 hour)
-                    const endNz = new Date(date)
-                    endNz.setHours(17, 0, 0, 0)
-
-                    if (endNz < minEndNz) {
-                      endNz.setTime(minEndNz.getTime())
+                    if (endDateTime) {
+                      // 1. Get the CURRENTLY set hours/minutes from state
+                      const currentEnd = utcIsoToNzDate(endDateTime)
+                      newEndNz.setHours(
+                        currentEnd.getHours(),
+                        currentEnd.getMinutes(),
+                        0,
+                        0,
+                      )
+                    } else {
+                      // 2. Fallback for the very first selection only
+                      newEndNz.setHours(17, 0, 0, 0)
                     }
 
-                    setEndDateTime(nzToUtcIso(endNz))
+                    // 3. Safety check: Ensure the new date+time isn't before the minimum
+                    if (newEndNz < minEndNz) {
+                      newEndNz.setTime(minEndNz.getTime())
+                    }
+
+                    setEndDateTime(nzToUtcIso(newEndNz))
                   }}
                 />
 
@@ -707,17 +719,20 @@ export default function CreateQuestPage() {
                   type="time"
                   value={endDateTime ? utcIsoToNzTime(endDateTime) : '17:00'}
                   onChange={(e) => {
-                    if (!startDateTime || !endDateTime) return
+                    if (!startDateTime) return // Only need to check startDateTime exists
 
                     const [h, m] = e.target.value.split(':').map(Number)
 
-                    const endNz = utcIsoToNzDate(endDateTime)
+                    // If no endDateTime yet, create one based on start date
+                    const endNz = endDateTime
+                      ? utcIsoToNzDate(endDateTime)
+                      : utcIsoToNzDate(startDateTime) // ← Use start date as base
+
                     endNz.setHours(h, m, 0, 0)
 
                     const minEndNz = getMinEndNzDate(startDateTime)
 
                     if (endNz < minEndNz) {
-                      // snap to minimum allowed
                       setEndDateTime(nzToUtcIso(minEndNz))
                       return
                     }

@@ -58,6 +58,7 @@ export const schema = a
       'UPDATE_DRAFT',
       'PUBLISH',
       'UPDATE_PUBLISHED',
+      'UPDATE_COMPLETED',
     ]),
 
     // Return type for mutateQuest
@@ -83,9 +84,10 @@ export const schema = a
         prizes: a.json(),
         sponsors: a.json(),
         tasks: a.json(),
+        quest_winners: a.string(),
       })
       .returns(a.ref('MutateQuestResponse')) // Reference the customType here
-      .authorization((allow) => [allow.groups(['creator'])])
+      .authorization((allow) => [allow.groups(['creator', 'Admin'])])
       .handler(a.handler.function(mutateQuest)),
 
     createStripeSession: a
@@ -129,6 +131,7 @@ export const schema = a
         quest_tasks: a.json(),
         creator_id: a.string(),
         status: a.ref('QuestStatus'),
+        quest_winners: a.string(),
       })
       .authorization((allow) => [
         allow.groups(['creator']).to(['create', 'update', 'delete', 'read']),

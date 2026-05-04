@@ -31,6 +31,7 @@ export type Profile = {
 };
 
 export enum ProfileRole {
+  Admin = "Admin",
   creator = "creator",
   pending = "pending",
   seeker = "seeker",
@@ -53,6 +54,7 @@ export type Quest = {
   quest_sponsor?: string | null,
   quest_start_at?: string | null,
   quest_tasks?: string | null,
+  quest_winners?: string | null,
   region?: string | null,
   status?: QuestStatus | null,
   updatedAt: string,
@@ -232,6 +234,7 @@ export type ModelQuestFilterInput = {
   quest_sponsor?: ModelStringInput | null,
   quest_start_at?: ModelStringInput | null,
   quest_tasks?: ModelStringInput | null,
+  quest_winners?: ModelStringInput | null,
   region?: ModelStringInput | null,
   status?: ModelQuestStatusInput | null,
   updatedAt?: ModelStringInput | null,
@@ -362,6 +365,7 @@ export type ModelQuestConditionInput = {
   quest_sponsor?: ModelStringInput | null,
   quest_start_at?: ModelStringInput | null,
   quest_tasks?: ModelStringInput | null,
+  quest_winners?: ModelStringInput | null,
   region?: ModelStringInput | null,
   status?: ModelQuestStatusInput | null,
   updatedAt?: ModelStringInput | null,
@@ -381,6 +385,7 @@ export type CreateQuestInput = {
   quest_sponsor?: string | null,
   quest_start_at?: string | null,
   quest_tasks?: string | null,
+  quest_winners?: string | null,
   region?: string | null,
   status?: QuestStatus | null,
 };
@@ -425,6 +430,7 @@ export type DeleteUserQuestInput = {
 export enum MutateQuestAction {
   CREATE_DRAFT = "CREATE_DRAFT",
   PUBLISH = "PUBLISH",
+  UPDATE_COMPLETED = "UPDATE_COMPLETED",
   UPDATE_DRAFT = "UPDATE_DRAFT",
   UPDATE_PUBLISHED = "UPDATE_PUBLISHED",
 }
@@ -474,6 +480,7 @@ export type UpdateQuestInput = {
   quest_sponsor?: string | null,
   quest_start_at?: string | null,
   quest_tasks?: string | null,
+  quest_winners?: string | null,
   region?: string | null,
   status?: QuestStatus | null,
 };
@@ -576,6 +583,7 @@ export type ModelSubscriptionQuestFilterInput = {
   quest_sponsor?: ModelSubscriptionStringInput | null,
   quest_start_at?: ModelSubscriptionStringInput | null,
   quest_tasks?: ModelSubscriptionStringInput | null,
+  quest_winners?: ModelSubscriptionStringInput | null,
   region?: ModelSubscriptionStringInput | null,
   status?: ModelSubscriptionStringInput | null,
   updatedAt?: ModelSubscriptionStringInput | null,
@@ -656,6 +664,7 @@ export type GetQuestQuery = {
     quest_sponsor?: string | null,
     quest_start_at?: string | null,
     quest_tasks?: string | null,
+    quest_winners?: string | null,
     region?: string | null,
     status?: QuestStatus | null,
     updatedAt: string,
@@ -790,6 +799,7 @@ export type ListQuestsQuery = {
       quest_sponsor?: string | null,
       quest_start_at?: string | null,
       quest_tasks?: string | null,
+      quest_winners?: string | null,
       region?: string | null,
       status?: QuestStatus | null,
       updatedAt: string,
@@ -881,16 +891,20 @@ export type ListUsersByQuestAndStatusQuery = {
   } | null,
 };
 
-export type BecomeCreatorMutationVariables = {
+export type ApproveCreatorMutationVariables = {
   profileId: string,
 };
 
-export type BecomeCreatorMutation = {
-  becomeCreator?: string | null,
+export type ApproveCreatorMutation = {
+  approveCreator?: string | null,
 };
 
 export type BecomePendingMutationVariables = {
-  profileId: string,
+  accountName: string,
+  bankAccount: string,
+  profileData: string,
+  type: string,
+  userId: string,
 };
 
 export type BecomePendingMutation = {
@@ -954,6 +968,7 @@ export type CreateQuestMutation = {
     quest_sponsor?: string | null,
     quest_start_at?: string | null,
     quest_tasks?: string | null,
+    quest_winners?: string | null,
     region?: string | null,
     status?: QuestStatus | null,
     updatedAt: string,
@@ -1060,6 +1075,7 @@ export type DeleteQuestMutation = {
     quest_sponsor?: string | null,
     quest_start_at?: string | null,
     quest_tasks?: string | null,
+    quest_winners?: string | null,
     region?: string | null,
     status?: QuestStatus | null,
     updatedAt: string,
@@ -1106,6 +1122,7 @@ export type MutateQuestMutationVariables = {
   name?: string | null,
   prizes?: string | null,
   questId?: string | null,
+  quest_winners?: string | null,
   region?: string | null,
   sponsors?: string | null,
   startAt?: string | null,
@@ -1177,6 +1194,7 @@ export type UpdateQuestMutation = {
     quest_sponsor?: string | null,
     quest_start_at?: string | null,
     quest_tasks?: string | null,
+    quest_winners?: string | null,
     region?: string | null,
     status?: QuestStatus | null,
     updatedAt: string,
@@ -1260,6 +1278,7 @@ export type OnCreateQuestSubscription = {
     quest_sponsor?: string | null,
     quest_start_at?: string | null,
     quest_tasks?: string | null,
+    quest_winners?: string | null,
     region?: string | null,
     status?: QuestStatus | null,
     updatedAt: string,
@@ -1343,6 +1362,7 @@ export type OnDeleteQuestSubscription = {
     quest_sponsor?: string | null,
     quest_start_at?: string | null,
     quest_tasks?: string | null,
+    quest_winners?: string | null,
     region?: string | null,
     status?: QuestStatus | null,
     updatedAt: string,
@@ -1426,6 +1446,7 @@ export type OnUpdateQuestSubscription = {
     quest_sponsor?: string | null,
     quest_start_at?: string | null,
     quest_tasks?: string | null,
+    quest_winners?: string | null,
     region?: string | null,
     status?: QuestStatus | null,
     updatedAt: string,
