@@ -10,6 +10,9 @@ import {
   DialogContent,
   DialogTrigger,
   DialogClose,
+  DialogHeader,
+  DialogDescription,
+  DialogFooter,
 } from '@/components/ui/dialog'
 import { Calendar } from '@/components/ui/calendar'
 import TaskCreatorButton from '@/components/TaskCreatorButton'
@@ -18,7 +21,7 @@ import PrizeCreatorButton from '@/components/PrizeCreatorButton'
 import RemoteImage from '@/components/RemoteImage'
 import PickRegion from '@/components/PickRegion'
 import placeHold from '@/assets/images/placeholder_view_vector.svg'
-import bg from '@/assets/images/background_main.png'
+import bg from '@/assets/images/background_main.jpeg'
 import {
   useMutateQuest,
   useQuest,
@@ -75,7 +78,8 @@ export default function CreateQuestPage() {
   const [openStart, setOpenStart] = useState(false)
   const [openEnd, setOpenEnd] = useState(false)
   const [step, setStep] = useState(0)
-  const [loading, setLoading] = useState(isUpdating) // Loading only for edit
+  const [loading, setLoading] = useState(isUpdating)
+  const [modalOpen, setModalOpen] = useState(false)
 
   const next = () => setStep((s) => s + 1)
   const prev = () => setStep((s) => Math.max(0, s - 1))
@@ -275,6 +279,9 @@ export default function CreateQuestPage() {
     }
   }
 
+  const handleClick = () => {
+    setModalOpen(true)
+  }
   const saveQuest = async (status: QuestStatus) => {
     // 1. Validation
     if (status === QuestStatus.published && !validateInput()) return null
@@ -382,19 +389,8 @@ export default function CreateQuestPage() {
           <>
             <div className="flex justify-between mt-4">
               <h2 className="text-xl font-bold mb-4">Name of the quest</h2>
-              <Button
-                variant="yellow"
-                onClick={() => {
-                  const confirmLeave = window.confirm(
-                    'Are you sure you want to leave this page? Any unsaved changes will be lost.',
-                  )
-
-                  if (confirmLeave) {
-                    navigate(-1)
-                  }
-                }}
-              >
-                Back to Quests
+              <Button variant="yellow" onClick={handleClick}>
+                <span>Back to Quests</span>
               </Button>
             </div>
             <Input value={name} onChange={(e) => setName(e.target.value)} />
@@ -418,19 +414,8 @@ export default function CreateQuestPage() {
           <>
             <div className="flex justify-between mt-4">
               <h2 className="text-xl font-bold mb-4">Quest Image</h2>
-              <Button
-                variant="yellow"
-                onClick={() => {
-                  const confirmLeave = window.confirm(
-                    'Are you sure you want to leave this page? Any unsaved changes will be lost.',
-                  )
-
-                  if (confirmLeave) {
-                    navigate(-1)
-                  }
-                }}
-              >
-                Back to Quests
+              <Button variant="yellow" onClick={handleClick}>
+                <span>Back to Quests</span>
               </Button>
             </div>
 
@@ -469,19 +454,8 @@ export default function CreateQuestPage() {
           <>
             <div className="flex justify-between mt-4">
               <h2 className="text-xl font-bold mb-4">Select Region</h2>
-              <Button
-                variant="yellow"
-                onClick={() => {
-                  const confirmLeave = window.confirm(
-                    'Are you sure you want to leave this page? Any unsaved changes will be lost.',
-                  )
-
-                  if (confirmLeave) {
-                    navigate(-1)
-                  }
-                }}
-              >
-                Back to Quests
+              <Button variant="yellow" onClick={handleClick}>
+                <span>Back to Quests</span>
               </Button>
             </div>
             <PickRegion value={selectedRegion} onChange={setSelectedRegion} />
@@ -506,19 +480,8 @@ export default function CreateQuestPage() {
           <>
             <div className="flex justify-between mt-4">
               <h2 className="text-xl font-bold mb-4">Quest Details</h2>
-              <Button
-                variant="yellow"
-                onClick={() => {
-                  const confirmLeave = window.confirm(
-                    'Are you sure you want to leave this page? Any unsaved changes will be lost.',
-                  )
-
-                  if (confirmLeave) {
-                    navigate(-1)
-                  }
-                }}
-              >
-                Back to Quests
+              <Button variant="yellow" onClick={handleClick}>
+                <span>Back to Quests</span>
               </Button>
             </div>
             <Textarea
@@ -547,19 +510,8 @@ export default function CreateQuestPage() {
           <>
             <div className="flex justify-between mt-4">
               <h2 className="text-xl font-bold mb-4">Entry Fee</h2>
-              <Button
-                variant="yellow"
-                onClick={() => {
-                  const confirmLeave = window.confirm(
-                    'Are you sure you want to leave this page? Any unsaved changes will be lost.',
-                  )
-
-                  if (confirmLeave) {
-                    navigate(-1)
-                  }
-                }}
-              >
-                Back to Quests
+              <Button variant="yellow" onClick={handleClick}>
+                <span>Back to Quests</span>
               </Button>
             </div>
             <Input
@@ -595,19 +547,8 @@ export default function CreateQuestPage() {
           <>
             <div className="flex justify-between mt-4">
               <h2 className="text-xl font-bold mb-4">Quest Dates</h2>
-              <Button
-                variant="yellow"
-                onClick={() => {
-                  const confirmLeave = window.confirm(
-                    'Are you sure you want to leave this page? Any unsaved changes will be lost.',
-                  )
-
-                  if (confirmLeave) {
-                    navigate(-1)
-                  }
-                }}
-              >
-                Back to Quests
+              <Button variant="yellow" onClick={handleClick}>
+                <span>Back to Quests</span>
               </Button>
             </div>
             {/* --- Start Date Picker --- */}
@@ -786,19 +727,8 @@ export default function CreateQuestPage() {
           <>
             <div className="flex justify-between mt-4">
               <h2 className="text-xl font-bold">Any Sponsors?</h2>
-              <Button
-                variant="yellow"
-                onClick={() => {
-                  const confirmLeave = window.confirm(
-                    'Are you sure you want to leave this page? Any unsaved changes will be lost.',
-                  )
-
-                  if (confirmLeave) {
-                    navigate(-1)
-                  }
-                }}
-              >
-                Back to Quests
+              <Button variant="yellow" onClick={handleClick}>
+                <span>Back to Quests</span>
               </Button>
             </div>
 
@@ -864,19 +794,8 @@ export default function CreateQuestPage() {
           <>
             <div className="flex justify-between mt-4">
               <h2 className="text-xl font-bold">Any Prizes?</h2>
-              <Button
-                variant="yellow"
-                onClick={() => {
-                  const confirmLeave = window.confirm(
-                    'Are you sure you want to leave this page? Any unsaved changes will be lost.',
-                  )
-
-                  if (confirmLeave) {
-                    navigate(-1)
-                  }
-                }}
-              >
-                Back to Quests
+              <Button variant="yellow" onClick={handleClick}>
+                <span>Back to Quests</span>
               </Button>
             </div>
 
@@ -1000,6 +919,29 @@ export default function CreateQuestPage() {
 
         {errors && <p className="text-red-600 mt-2">{errors}</p>}
       </div>
+      <Dialog open={modalOpen} onOpenChange={setModalOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Back to Quests</DialogTitle>
+            <DialogDescription>
+              Are you sure you want to leave this page? Any unsaved changes will
+              be lost
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter className="flex gap-2 justify-end">
+            <Button variant="outline" onClick={() => setModalOpen(false)}>
+              Cancel
+            </Button>
+            <Button
+              onClick={() => {
+                navigate(-1)
+              }}
+            >
+              {loading ? 'Updating...' : 'Back'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

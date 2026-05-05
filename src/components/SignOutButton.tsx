@@ -14,12 +14,7 @@ export default function SignOutButton() {
 
   return (
     <>
-      <Button
-        size="icon"
-        variant="yellow"
-        onClick={handleSignOut}
-        aria-label="Sign out"
-      >
+      <Button variant="yellow" onClick={handleSignOut} aria-label="Sign out">
         <LogOut />
       </Button>
     </>

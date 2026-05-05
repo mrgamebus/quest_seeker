@@ -136,6 +136,7 @@ export default function UpdateAccount({
       return { fullPath: '', thumbPath: '' }
     }
   }
+  console.log('isProfileComplete: ', isProfileComplete)
   return (
     <div className="flex flex-col gap-4 w-full max-w-md mx-auto mb-2">
       {forceNameUpdate && (

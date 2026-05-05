@@ -4,25 +4,28 @@ import { useNavigate } from 'react-router-dom'
 import placeHold from '@/assets/images/placeholder_view_vector.svg'
 import RemoteImage from './RemoteImage'
 import { Schema } from 'amplify/data/resource'
+// import { useQuestParticipants } from '@/hooks/userQuests'
 
 type UserQuest = Schema['UserQuest']['type'] & { tasks: Task[] }
 
 interface QuestListItemProps {
   quest: Quest
   userQuests?: UserQuest[]
+  participantCount?: number
 }
 
 const QuestListItem = React.memo(function QuestListItem({
   quest,
   userQuests,
+  participantCount = 0,
 }: QuestListItemProps) {
   const navigate = useNavigate()
   const [loaded, setLoaded] = useState(false)
   const now = new Date()
   const startDate = new Date(quest.quest_start_at ?? '')
   const endDate = new Date(quest.quest_end_at ?? '')
+  const fundraise = quest.quest_entry ? quest.quest_entry * participantCount : 0
 
-  // ✅ Replace my_quests parsing with UserQuest lookup
   const hasJoined = userQuests?.some((uq) => uq.questId === quest.id) ?? false
 
   const currentQuest = endDate < now
@@ -76,6 +79,19 @@ const QuestListItem = React.memo(function QuestListItem({
         <p className="text-xs text-gray-500">
           Ends: {quest.quest_end_at ? quest.quest_end_at.split('T')[0] : 'N/A'}
         </p>
+
+        {fundraise > 0 && (
+          <div className="mt-2 pt-2 border-t border-gray-200">
+            <p className="text-sm font-semibold text-green-600">
+              ${fundraise.toLocaleString()} raised
+            </p>
+            <p className="text-xs text-gray-500">
+              {participantCount}{' '}
+              {participantCount === 1 ? 'participant' : 'participants'}
+            </p>
+          </div>
+        )}
+
         {hasJoined && (
           <span className="absolute top-2 right-2 text-green-500 text-lg">
             ✅

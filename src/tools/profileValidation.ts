@@ -7,7 +7,7 @@ export function isProfileComplete(profile: Profile) {
   if (!profile.phone?.trim()) return false
 
   // Specific requirements for Creators OR Seekers applying to be Creators
-  if (profile.role === 'creator' || profile.role === 'seeker') {
+  if (profile.role === 'creator' || profile.role === 'pending') {
     if (!profile.organization_name?.trim()) return false
     if (!profile.business_type?.trim()) return false
     if (!profile.organization_description?.trim()) return false

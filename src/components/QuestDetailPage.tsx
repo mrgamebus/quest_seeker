@@ -1010,6 +1010,18 @@ export default function QuestDetailPage() {
                     Entry: <strong>${quest.quest_entry}</strong>
                   </p>
 
+                  {/* Add fundraised amount here */}
+                  {quest.quest_entry &&
+                    quest.quest_entry > 0 &&
+                    participantIds.length > 0 && (
+                      <p className="text-sm text-green-600 font-semibold">
+                        Funds Raised: $
+                        {(
+                          quest.quest_entry * participantIds.length
+                        ).toLocaleString()}
+                      </p>
+                    )}
+
                   {/* Participant count block remains */}
                   <div className="text-sm text-gray-500">
                     People joined:

@@ -13,7 +13,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog'
-import bg from '@/assets/images/background_main.png'
+import bg from '@/assets/images/background_main.jpeg'
 import { useCurrentUserProfile } from '@/hooks/userProfiles'
 import { useLeaderboardProfiles } from '@/hooks/useLeaderboardProfiles'
 import { Button } from '@/components/ui/button'
@@ -60,7 +60,6 @@ export default function Leader() {
               <Button
                 variant="yellow"
                 onClick={() => navigate('/user/region')}
-                size="icon"
                 aria-label="Home"
               >
                 <Home />

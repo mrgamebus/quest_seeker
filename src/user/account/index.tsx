@@ -1,4 +1,4 @@
-import bg from '@/assets/images/background_main.png'
+import bg from '@/assets/images/background_main.jpeg'
 import UpdateAccount from '@/components/UpdateAccount'
 import { useCurrentUserProfile, useUpdateProfile } from '@/hooks/userProfiles'
 import { useLocation, useNavigate } from 'react-router-dom'
@@ -118,11 +118,7 @@ export default function AccountPage() {
         <CardContent className="flex flex-col gap-4 flex-1 min-h-0 p-0">
           <div className="sticky top-0 z-50 bg-black/90 backdrop-blur-md p-4 shadow-sm border-b">
             <Toolbar>
-              <Button
-                variant="yellow"
-                onClick={() => navigate('/user/region')}
-                size="icon"
-              >
+              <Button variant="yellow" onClick={() => navigate('/user/region')}>
                 <Home />
               </Button>
 
