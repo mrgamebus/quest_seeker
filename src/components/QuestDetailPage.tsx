@@ -7,6 +7,16 @@ import {
   useQuestParticipants,
   useUserQuests,
 } from '@/hooks/userQuests'
+import {
+  FacebookShareButton,
+  // TwitterShareButton,
+  // LinkedinShareButton,
+  // WhatsappShareButton,
+  FacebookIcon,
+  // TwitterIcon,
+  // LinkedinIcon,
+  // WhatsappIcon,
+} from 'react-share'
 import { useProfile, useCurrentUserProfile } from '@/hooks/userProfiles'
 import bg from '@/assets/images/background_main.jpeg'
 import { Button } from './ui/button'
@@ -531,8 +541,20 @@ export default function QuestDetailPage() {
               <h1 className="text-3xl md:text-4xl font-bold text-white drop-shadow-lg">
                 {quest.quest_name}
               </h1>
-            </div>
+              {/* Social Share Buttons */}
+              <div className="flex items-center gap-2 mt-4">
+                <span className="text-sm font-semibold text-gray-700 mr-2">
+                  Share this quest:
+                </span>
 
+                <FacebookShareButton
+                  url={window.location.href}
+                  hashtag={`#${quest.quest_name?.replace(/\s+/g, '')}`}
+                >
+                  <FacebookIcon size={32} round />
+                </FacebookShareButton>
+              </div>
+            </div>
             {/* Sponsors card */}
             {displayedSponsors.length > 0 && (
               <Dialog>
