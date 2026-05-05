@@ -156,3 +156,15 @@ export const useQuestParticipants = (questId?: string) => {
     enabled: !!questId,
   })
 }
+
+export const useAllUserQuests = () => {
+  return useQuery({
+    queryKey: ['allUserQuests'],
+    queryFn: async () => {
+      const { data, errors } = await dataClient.models.UserQuest.list()
+      if (errors?.length) throw new Error(errors[0].message)
+      return data ?? []
+    },
+    staleTime: 1000 * 60 * 2,
+  })
+}

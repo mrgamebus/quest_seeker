@@ -1,5 +1,5 @@
 import { Card, CardContent } from '@/components/ui/card'
-import bg from '@/assets/images/background_main.png'
+import bg from '@/assets/images/background_main.jpeg'
 import logo from '@/assets/images/no_ordinary.png'
 import { helpSections } from '@/assets/helpSections'
 import { useEffect, useState } from 'react'
@@ -70,7 +70,6 @@ export default function Help() {
                 <Button
                   variant="yellow"
                   onClick={() => navigate('/user/region')}
-                  size="icon"
                   aria-label="Home"
                 >
                   <Home />

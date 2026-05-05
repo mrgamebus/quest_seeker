@@ -1,9 +1,13 @@
 import { useLocation, useNavigate } from 'react-router-dom'
 import QuestListItem from '@/components/QuestListItem'
-import { useQuestList, useUserQuests } from '@/hooks/userQuests'
+import {
+  useAllUserQuests,
+  useQuestList,
+  useUserQuests,
+} from '@/hooks/userQuests'
 import { useMemo, useState } from 'react'
 import { Card, CardContent } from '@/components/ui/card'
-import bg from '@/assets/images/background_main.png'
+import bg from '@/assets/images/background_main.jpeg'
 import type { Profile, Quest } from '@/types'
 import AddQuestButton from '@/components/AddQuestButton'
 import { useCurrentUserProfile, useProfileList } from '@/hooks/userProfiles'
@@ -23,6 +27,7 @@ export default function QuestPage() {
   const { data: profiles } = useProfileList()
   const { data: currentProfile } = useCurrentUserProfile()
   const { data: userQuests } = useUserQuests(currentProfile?.id)
+  const { data: allUserQuests = [] } = useAllUserQuests()
 
   const navigate = useNavigate()
 
@@ -156,6 +161,18 @@ export default function QuestPage() {
     }, 500) // simulates load time
   }
 
+  const participantCounts = useMemo(() => {
+    return allUserQuests.reduce(
+      (acc, uq) => {
+        if (uq.questId) {
+          acc[uq.questId] = (acc[uq.questId] || 0) + 1
+        }
+        return acc
+      },
+      {} as Record<string, number>,
+    )
+  }, [allUserQuests])
+
   return (
     <div
       className="relative h-screen flex items-center justify-center bg-cover bg-center p-4"
@@ -168,7 +185,6 @@ export default function QuestPage() {
               <Button
                 variant="yellow"
                 onClick={() => navigate('/user/region')}
-                size="icon"
                 aria-label="Home"
               >
                 <Home />
@@ -260,6 +276,7 @@ export default function QuestPage() {
                       region: quest.region ?? 'Unknown',
                     }}
                     userQuests={userQuests}
+                    participantCount={participantCounts[quest.id] || 0}
                   />
                 ))}
               </div>
