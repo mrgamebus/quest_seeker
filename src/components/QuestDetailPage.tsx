@@ -8,7 +8,7 @@ import {
   useUserQuests,
 } from '@/hooks/userQuests'
 import { useProfile, useCurrentUserProfile } from '@/hooks/userProfiles'
-import bg from '@/assets/images/background_main.png'
+import bg from '@/assets/images/background_main.jpeg'
 import { Button } from './ui/button'
 import { Card, CardContent } from './ui/card'
 import { useEffect, useState } from 'react'
