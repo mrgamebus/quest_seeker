@@ -14,6 +14,7 @@ import { mutateQuest } from './functions/mutateQuest/resource'
 import { createQuestEntrySession } from './functions/createQuestEntrySession/resource'
 import { createStripeSession } from './functions/createStripeSession/resource'
 import { stripeWebhook } from './functions/stripeWebhook/resource'
+import { support } from './functions/support/resource'
 
 const backend = defineBackend({
   auth,
@@ -28,6 +29,7 @@ const backend = defineBackend({
   createQuestEntrySession,
   createStripeSession,
   stripeWebhook,
+  support,
 })
 
 // -----------------------------
@@ -54,6 +56,7 @@ const stripeSessionLambda = backend.createStripeSession.resources
 const joinQuestLambda = backend.joinQuest.resources.lambda as lambda.Function
 const expiredQuestsLambda = backend.expiredQuests.resources
   .lambda as lambda.Function
+const supportLambda = backend.support.resources.lambda as lambda.Function
 
 // 1. Unified Function URL Configuration
 stripeWebhookLambda.addFunctionUrl({
@@ -127,6 +130,7 @@ const sesPolicy = new iam.PolicyStatement({
 joinQuestLambda.addToRolePolicy(sesPolicy)
 stripeWebhookLambda.addToRolePolicy(sesPolicy)
 expiredQuestsLambda.addToRolePolicy(sesPolicy)
+supportLambda.addToRolePolicy(sesPolicy)
 
 const cognitoPolicy = new iam.PolicyStatement({
   actions: [
@@ -149,6 +153,11 @@ joinQuestLambda.addEnvironment(
 )
 
 expiredQuestsLambda.addEnvironment(
+  'AMPLIFY_USER_POOL_ID',
+  backend.auth.resources.userPool.userPoolId,
+)
+
+supportLambda.addEnvironment(
   'AMPLIFY_USER_POOL_ID',
   backend.auth.resources.userPool.userPoolId,
 )
@@ -198,3 +207,19 @@ approveCreatorLambda.addEnvironment(
   'AMPLIFY_USER_POOL_ID',
   backend.auth.resources.userPool.userPoolId,
 )
+
+// --- Support Function URL Setup ---
+supportLambda.addFunctionUrl({
+  authType: lambda.FunctionUrlAuthType.NONE,
+  cors: {
+    allowedOrigins: ['*'],
+    allowedMethods: [lambda.HttpMethod.POST],
+    allowedHeaders: ['*'],
+  },
+})
+
+supportLambda.addPermission('SupportPublicInvoke', {
+  principal: new iam.AnyPrincipal(),
+  action: 'lambda:InvokeFunctionUrl',
+  functionUrlAuthType: lambda.FunctionUrlAuthType.NONE,
+})
