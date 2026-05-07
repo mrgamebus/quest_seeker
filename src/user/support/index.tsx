@@ -2,6 +2,18 @@ import { Card, CardContent } from '@/components/ui/card'
 import { useState } from 'react'
 import bg from '@/assets/images/background_main.jpeg'
 
+// Try to import amplify_outputs, fall back to empty object if it doesn't exist
+// let amplifyOutputs: any = {}
+// try {
+//   amplifyOutputs = await import('../../amplify_outputs.json')
+// } catch {
+//   console.log('amplify_outputs.json not found, using env variable')
+// }
+
+const SUPPORT_FUNCTION_URL =
+  import.meta.env.production.VITE_PRODUCTION_FUNCTION_URL ||
+  import.meta.env.development.VITE_SUPPORT_FUNCTION_URL
+
 export default function Support() {
   const [formData, setFormData] = useState({
     name: '',
@@ -20,17 +32,15 @@ export default function Support() {
     setErrorMessage('')
 
     try {
-      const functionUrl = import.meta.env.VITE_SUPPORT_FUNCTION_URL
+      const functionUrl = SUPPORT_FUNCTION_URL
 
       if (!functionUrl) {
-        throw new Error('Support function URL not configured')
+        throw new Error(
+          'Support function URL not configured. Add VITE_SUPPORT_FUNCTION_URL to .env',
+        )
       }
 
-      console.log('=== SENDING REQUEST ===')
-      console.log('URL:', functionUrl)
-      console.log('Method: POST')
-      console.log('Body:', JSON.stringify(formData, null, 2))
-      console.log('======================')
+      console.log('Sending to:', functionUrl)
 
       const response = await fetch(functionUrl, {
         method: 'POST',
@@ -40,18 +50,9 @@ export default function Support() {
         body: JSON.stringify(formData),
       })
 
-      console.log('Response status:', response.status)
-      console.log('Response headers:', response.headers)
-
       const data = await response.json()
-      console.log('Response data:', data)
 
       if (!response.ok) {
-        console.error('Support form error:', {
-          status: response.status,
-          statusText: response.statusText,
-          data,
-        })
         throw new Error(data.error || `Server error: ${response.status}`)
       }
 
