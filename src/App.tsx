@@ -16,6 +16,7 @@ import logo from '@/assets/images/no_ordinary.png'
 import { useEffect } from 'react'
 import Legal from './user/legal'
 import { useCurrentUserProfile } from './hooks/userProfiles'
+import Support from './user/support'
 
 const queryClient = new QueryClient()
 
@@ -69,6 +70,7 @@ export default function App() {
       <Route path="/" element={<IndexPage />} />
       <Route path="/help" element={<Help />} />
       <Route path="legal" element={<Legal />} />
+      <Route path="/support" element={<Support />} />
       {/* Protected area */}
       <Route
         path="/user/*"
@@ -127,7 +129,7 @@ const components = {
           <a href="/legal?tab=privacy" className="hover:text-gray-600">
             Privacy policy
           </a>
-          <a href="#" className="hover:text-gray-600">
+          <a href="/support" className="hover:text-gray-600">
             Support
           </a>
         </div>

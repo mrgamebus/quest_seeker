@@ -471,3 +471,82 @@ export const sendSeekerQuestExpiredEmail = async (
     }),
   )
 }
+
+// ============================================================================
+// SUPPORT FORM EMAIL
+// ============================================================================
+
+export const sendSupportEmail = async (
+  name: string,
+  email: string,
+  subject: string,
+  message: string,
+) => {
+  const footer = `\n\n---\nThis is an automated message from the Quest Seeker support form.`
+
+  const emailBody = `
+New Support Request
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+FROM
+Name: ${name}
+Email: ${email}
+
+SUBJECT
+${subject}
+
+MESSAGE
+${message}
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Reply to: ${email}
+${footer}
+  `.trim()
+
+  await safeSend(
+    new SendEmailCommand({
+      Source: FROM_ADDRESS,
+      Destination: { ToAddresses: [ADMIN_EMAIL] },
+      ReplyToAddresses: [email], // Allows direct reply to the user
+      Message: {
+        Subject: { Data: `Support Request: ${subject}` },
+        Body: {
+          Text: { Data: emailBody },
+        },
+      },
+    }),
+  )
+
+  // Optional: Send confirmation to user
+  const confirmationBody = `
+Hi ${name},
+
+Thank you for contacting Quest Seeker support. We've received your message and will get back to you as soon as possible.
+
+Your message:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Subject: ${subject}
+
+${message}
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Best regards,
+The Quest Seeker Team
+${footer}
+  `.trim()
+
+  await safeSend(
+    new SendEmailCommand({
+      Source: FROM_ADDRESS,
+      Destination: { ToAddresses: [email] },
+      Message: {
+        Subject: { Data: 'We received your support request' },
+        Body: {
+          Text: { Data: confirmationBody },
+        },
+      },
+    }),
+  )
+}
