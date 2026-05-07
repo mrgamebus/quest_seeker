@@ -2,17 +2,7 @@ import { Card, CardContent } from '@/components/ui/card'
 import { useState } from 'react'
 import bg from '@/assets/images/background_main.jpeg'
 
-// Try to import amplify_outputs, fall back to empty object if it doesn't exist
-// let amplifyOutputs: any = {}
-// try {
-//   amplifyOutputs = await import('../../amplify_outputs.json')
-// } catch {
-//   console.log('amplify_outputs.json not found, using env variable')
-// }
-
-const SUPPORT_FUNCTION_URL =
-  import.meta.env.production.VITE_PRODUCTION_FUNCTION_URL ||
-  import.meta.env.development.VITE_SUPPORT_FUNCTION_URL
+const SUPPORT_FUNCTION_URL = import.meta.env.VITE_SUPPORT_FUNCTION_URL
 
 export default function Support() {
   const [formData, setFormData] = useState({
