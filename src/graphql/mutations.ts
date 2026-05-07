@@ -77,6 +77,7 @@ export const createQuest = /* GraphQL */ `mutation CreateQuest(
   createQuest(condition: $condition, input: $input) {
     createdAt
     creator_id
+    creator_message
     id
     quest_details
     quest_end_at
@@ -199,6 +200,7 @@ export const deleteQuest = /* GraphQL */ `mutation DeleteQuest(
   deleteQuest(condition: $condition, input: $input) {
     createdAt
     creator_id
+    creator_message
     id
     quest_details
     quest_end_at
@@ -253,6 +255,7 @@ export const joinQuest = /* GraphQL */ `mutation JoinQuest($profileId: String!, 
 >;
 export const mutateQuest = /* GraphQL */ `mutation MutateQuest(
   $action: MutateQuestAction!
+  $creator_message: String
   $details: String
   $endAt: AWSDateTime
   $entryFee: Int
@@ -265,10 +268,12 @@ export const mutateQuest = /* GraphQL */ `mutation MutateQuest(
   $region: String
   $sponsors: AWSJSON
   $startAt: AWSDateTime
+  $status: String
   $tasks: AWSJSON
 ) {
   mutateQuest(
     action: $action
+    creator_message: $creator_message
     details: $details
     endAt: $endAt
     entryFee: $entryFee
@@ -281,6 +286,7 @@ export const mutateQuest = /* GraphQL */ `mutation MutateQuest(
     region: $region
     sponsors: $sponsors
     startAt: $startAt
+    status: $status
     tasks: $tasks
   ) {
     questId
@@ -335,6 +341,7 @@ export const updateQuest = /* GraphQL */ `mutation UpdateQuest(
   updateQuest(condition: $condition, input: $input) {
     createdAt
     creator_id
+    creator_message
     id
     quest_details
     quest_end_at

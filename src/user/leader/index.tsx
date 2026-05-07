@@ -36,6 +36,8 @@ export default function Leader() {
     location.state?.defaultTab || 'leader',
   )
 
+  const [showPointsExplanation, setShowPointsExplanation] = useState(false)
+
   useEffect(() => {
     if (location.state?.defaultTab) {
       setActiveTab(location.state.defaultTab)
@@ -108,17 +110,13 @@ export default function Leader() {
           </div>
 
           {/* Points Key */}
-          <div className="flex justify-center gap-6 text-sm text-muted-foreground bg-white/50 rounded-xl px-4 py-3">
-            <div className="flex items-center gap-2">
-              <span className="text-yellow-500 font-bold text-base">
-                Join a Quest = 10 Points
-              </span>
-            </div>
-            <div className="flex items-center gap-2">
-              <span className="text-yellow-500 font-bold text-base">
-                Complete a Quest Task = 1 Point
-              </span>
-            </div>
+          <div className="flex justify-center text-sm text-muted-foreground bg-white/50 rounded-xl px-4 py-3">
+            <button
+              onClick={() => setShowPointsExplanation(true)}
+              className="text-yellow-600 hover:text-yellow-700 font-semibold underline decoration-2 underline-offset-4 transition-colors"
+            >
+              How do points work?
+            </button>
           </div>
 
           <div className="flex-1 overflow-y-auto p-6 scroll-smooth">
@@ -182,6 +180,7 @@ export default function Leader() {
           </div>
         </CardContent>
       </Card>
+
       {/* Profile Detail Modal */}
       <Dialog
         open={!!selectedProfile}
@@ -219,6 +218,42 @@ export default function Leader() {
               </div>
             </div>
           )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Points Explanation Modal */}
+      <Dialog
+        open={showPointsExplanation}
+        onOpenChange={setShowPointsExplanation}
+      >
+        <DialogContent className="sm:max-w-[425px] bg-white">
+          <DialogHeader>
+            <DialogTitle>How Points Work</DialogTitle>
+          </DialogHeader>
+
+          <div className="py-4 space-y-4">
+            <div className="flex items-start gap-3 p-3 bg-yellow-50 rounded-lg border border-yellow-200">
+              <span className="text-2xl font-bold text-yellow-600">10</span>
+              <div>
+                <h3 className="font-semibold text-foreground">Join a Quest</h3>
+                <p className="text-sm text-muted-foreground">
+                  Earn 10 points when you join any quest
+                </p>
+              </div>
+            </div>
+
+            <div className="flex items-start gap-3 p-3 bg-yellow-50 rounded-lg border border-yellow-200">
+              <span className="text-2xl font-bold text-yellow-600">1</span>
+              <div>
+                <h3 className="font-semibold text-foreground">
+                  Complete a Quest Task
+                </h3>
+                <p className="text-sm text-muted-foreground">
+                  Earn 1 point for each task you complete
+                </p>
+              </div>
+            </div>
+          </div>
         </DialogContent>
       </Dialog>
     </div>

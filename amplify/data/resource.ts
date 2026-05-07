@@ -64,7 +64,7 @@ export const schema = a
     // Return type for mutateQuest
     MutateQuestResponse: a.customType({
       questId: a.string().required(),
-      status: a.ref('QuestStatus').required(), // Use ref here
+      status: a.ref('QuestStatus').required(),
     }),
     /* --- 2. CUSTOM MUTATIONS --- */
 
@@ -85,6 +85,8 @@ export const schema = a
         sponsors: a.json(),
         tasks: a.json(),
         quest_winners: a.string(),
+        status: a.string(),
+        creator_message: a.string(),
       })
       .returns(a.ref('MutateQuestResponse')) // Reference the customType here
       .authorization((allow) => [allow.groups(['creator', 'Admin'])])
@@ -132,6 +134,7 @@ export const schema = a
         creator_id: a.string(),
         status: a.ref('QuestStatus'),
         quest_winners: a.string(),
+        creator_message: a.string(),
       })
       .authorization((allow) => [
         allow.groups(['creator']).to(['create', 'update', 'delete', 'read']),
