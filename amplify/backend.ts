@@ -209,7 +209,7 @@ approveCreatorLambda.addEnvironment(
 )
 
 // --- Support Function URL Setup ---
-supportLambda.addFunctionUrl({
+const supportFunctionUrl = supportLambda.addFunctionUrl({
   authType: lambda.FunctionUrlAuthType.NONE,
   cors: {
     allowedOrigins: ['*'],
@@ -222,4 +222,11 @@ supportLambda.addPermission('SupportPublicInvoke', {
   principal: new iam.AnyPrincipal(),
   action: 'lambda:InvokeFunctionUrl',
   functionUrlAuthType: lambda.FunctionUrlAuthType.NONE,
+})
+
+// Export the Function URL
+backend.addOutput({
+  custom: {
+    supportFunctionUrl: supportFunctionUrl.url,
+  },
 })

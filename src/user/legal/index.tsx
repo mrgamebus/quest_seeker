@@ -349,7 +349,7 @@ const termsSections: Section[] = [
           href="mailto:support@questseeker.com"
           className="text-yellow-600 underline"
         >
-          support@questseeker.com
+          support@questseeker.co.nz
         </a>
         <br />
         <br />
