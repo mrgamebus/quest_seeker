@@ -104,11 +104,12 @@ export default function AccountPage() {
     }
   }
 
-  let buttonText = ''
-  if (currentProfile.role == 'creator') buttonText = 'Creator'
-  if (currentProfile.role == 'seeker') buttonText = 'Become a Quest Creator'
-  if (currentProfile.role == 'pending') buttonText = 'Creator Status'
-  if (currentProfile.role == 'Admin') buttonText = 'Admin'
+  let labelText = ''
+  if (currentProfile.role == 'creator') labelText = 'Quest Creator'
+  if (currentProfile.role == 'seeker') labelText = 'Quest Seeker'
+  if (currentProfile.role == 'pending') labelText = 'Quest Seeker - Pending'
+  if (currentProfile.role == 'Admin') labelText = 'Admin'
+
   return (
     <div
       className="relative h-screen flex items-center justify-center bg-cover bg-center p-4"
@@ -149,10 +150,13 @@ export default function AccountPage() {
           </div>
           <div className="flex-1 overflow-y-auto p-6 scroll-smooth">
             <div className="w-full max-w-3xl mx-auto">
-              {/* Button aligned to the right */}
-              <div className="flex justify-end mb-6">
-                <Button
-                  variant={activeTab === 'status' ? 'default' : 'yellow'}
+              {/* Label and hyperlink aligned to the right */}
+              <div className="flex flex-col items-end mb-6 gap-1">
+                <span className="px-3 py-1 text-sm font-bold text-gray-800 bg-yellow-100 border-2 border-yellow-400 rounded-lg shadow-lg">
+                  {labelText}
+                </span>
+                <button
+                  className="text-sm text-blue-600 hover:text-blue-800 underline hover:no-underline transition-colors"
                   onClick={() => {
                     if (currentProfile.role === 'seeker') {
                       handleClick()
@@ -161,8 +165,8 @@ export default function AccountPage() {
                     }
                   }}
                 >
-                  {buttonText}
-                </Button>
+                  Account Status
+                </button>
               </div>
 
               {/* Tab content */}

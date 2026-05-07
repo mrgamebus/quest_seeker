@@ -7,16 +7,7 @@ import {
   useQuestParticipants,
   useUserQuests,
 } from '@/hooks/userQuests'
-import {
-  FacebookShareButton,
-  // TwitterShareButton,
-  // LinkedinShareButton,
-  // WhatsappShareButton,
-  FacebookIcon,
-  // TwitterIcon,
-  // LinkedinIcon,
-  // WhatsappIcon,
-} from 'react-share'
+import { FacebookShareButton, FacebookIcon } from 'react-share'
 import { useProfile, useCurrentUserProfile } from '@/hooks/userProfiles'
 import bg from '@/assets/images/background_main.jpeg'
 import { Button } from './ui/button'
@@ -61,6 +52,7 @@ export default function QuestDetailPage() {
   const { toast } = useToast()
   const [joining, setJoining] = useState(false)
   const [winners, setWinners] = useState<any[]>([])
+  const [creatorMessage, setCreatorMessage] = useState('')
 
   const { mutate: updateQuestMutation, isPending: isUpdatingQuest } =
     useMutateQuest() // ✅ Add this
@@ -137,6 +129,12 @@ export default function QuestDetailPage() {
       setWinners(parsedWinners)
     } catch {
       setWinners([])
+    }
+  }, [quest])
+
+  useEffect(() => {
+    if (quest?.creator_message) {
+      setCreatorMessage(quest.creator_message)
     }
   }, [quest])
 
@@ -376,6 +374,65 @@ export default function QuestDetailPage() {
     }
   }
 
+  const handleRestartQuest = async () => {
+    if (!quest?.id) return
+
+    const confirmed = window.confirm(
+      'Are you sure you want to restart this quest? This will:\n\n' +
+        '• Change the status back to Published\n' +
+        '• Extend the end date by 7 days from today\n' +
+        '• Allow new participants to join\n\n' +
+        'Existing participant data will be preserved.',
+    )
+
+    if (!confirmed) return
+
+    try {
+      // Calculate new end date (7 days from now in NZ time)
+      const NZ_TZ = 'Pacific/Auckland'
+      const nowNz = toZonedTime(new Date(), NZ_TZ)
+      const newEndDate = new Date(nowNz)
+      newEndDate.setDate(newEndDate.getDate() + 7)
+      newEndDate.setHours(17, 0, 0, 0) // 5 PM NZT
+
+      const newEndIso = newEndDate.toISOString()
+
+      await updateQuestMutation(
+        {
+          action: MutateQuestAction.UPDATE_COMPLETED,
+          questId: quest.id,
+          status: QuestStatus.published,
+          endAt: newEndIso,
+        },
+        {
+          onSuccess: () => {
+            toast({
+              title: 'Quest Restarted! 🔄',
+              description: `The quest is now active again until ${formatNzDateTime(newEndIso)}.`,
+            })
+            refetch()
+          },
+          onError: (err) => {
+            console.error('Failed to restart quest:', err)
+            toast({
+              variant: 'destructive',
+              title: 'Failed to restart quest',
+              description:
+                'There was an error restarting the quest. Please try again.',
+            })
+          },
+        },
+      )
+    } catch (err) {
+      console.error('Error restarting quest:', err)
+      toast({
+        variant: 'destructive',
+        title: 'Error',
+        description: 'An unexpected error occurred.',
+      })
+    }
+  }
+
   const isOwner =
     currentUserProfile?.id === quest.creator_id &&
     (currentUserProfile?.role === 'creator' ||
@@ -467,6 +524,45 @@ export default function QuestDetailPage() {
     }
   }
 
+  const handleSaveMessage = async () => {
+    if (!quest?.id) return
+
+    try {
+      await updateQuestMutation(
+        {
+          action: MutateQuestAction.UPDATE_COMPLETED,
+          questId: quest.id,
+          creator_message: creatorMessage,
+        },
+        {
+          onSuccess: () => {
+            toast({
+              title: 'Message Saved! 💬',
+              description: 'Your message has been sent to all participants.',
+            })
+            refetch() // Refresh quest data
+          },
+          onError: (err) => {
+            console.error('Failed to save message:', err)
+            toast({
+              variant: 'destructive',
+              title: 'Failed to save message',
+              description:
+                'There was an error saving your message. Please try again.',
+            })
+          },
+        },
+      )
+    } catch (err) {
+      console.error('Error saving message:', err)
+      toast({
+        variant: 'destructive',
+        title: 'Error',
+        description: 'An unexpected error occurred.',
+      })
+    }
+  }
+
   const canEdit =
     quest.status === QuestStatus.draft ||
     (quest.status === QuestStatus.published && participantIds.length === 0)
@@ -524,7 +620,7 @@ export default function QuestDetailPage() {
             </Toolbar>
           </div>
 
-          {/* Banner Image with overlayed quest title + floating sponsors card */}
+          {/* Banner Image with overlayed quest title */}
           <div className="relative w-full mb-4 md:mb-20">
             {/* Banner Image */}
             <RemoteImage
@@ -541,12 +637,14 @@ export default function QuestDetailPage() {
               <h1 className="text-3xl md:text-4xl font-bold text-white drop-shadow-lg">
                 {quest.quest_name}
               </h1>
-              {/* Social Share Buttons */}
-              <div className="flex items-center gap-2 mt-4">
-                <span className="text-sm font-semibold text-gray-700 mr-2">
+            </div>
+
+            {/* Social Share Button Card - positioned like sponsors */}
+            <div className="absolute top-2 left-2 z-20 md:top-auto md:left-10 md:bottom-[-60px] md:bg-white md:rounded-2xl md:shadow-xl md:border md:border-gray-200 md:p-5">
+              <div className="flex items-center gap-2">
+                <span className="hidden md:inline text-sm font-semibold text-gray-700">
                   Share this quest:
                 </span>
-
                 <FacebookShareButton
                   url={window.location.href}
                   hashtag={`#${quest.quest_name?.replace(/\s+/g, '')}`}
@@ -555,6 +653,7 @@ export default function QuestDetailPage() {
                 </FacebookShareButton>
               </div>
             </div>
+
             {/* Sponsors card */}
             {displayedSponsors.length > 0 && (
               <Dialog>
@@ -812,7 +911,7 @@ export default function QuestDetailPage() {
                       <h4 className="text-md font-bold mb-3">
                         Select Winners by Prize
                       </h4>
-                      {prizes.length > 0 && (
+                      {prizes.length > 0 ? (
                         <div className="mt-6 border-t pt-4">
                           <div className="flex flex-col gap-3">
                             {prizes.map((prize, index) => {
@@ -876,11 +975,6 @@ export default function QuestDetailPage() {
                                         <p className="font-semibold">
                                           {prize.name}
                                         </p>
-                                        {/* {prize.description && (
-                                            <p className="text-xs text-gray-600">
-                                              {prize.description}
-                                            </p>
-                                          )} */}
                                       </div>
                                     </div>
 
@@ -965,6 +1059,10 @@ export default function QuestDetailPage() {
                             })}
                           </div>
                         </div>
+                      ) : (
+                        <p className="text-gray-500">
+                          No prizes chosen for this quest.
+                        </p>
                       )}
                     </div>
                   )}
@@ -1122,11 +1220,15 @@ export default function QuestDetailPage() {
                       Participants Who Completed This Quest
                     </h3>
 
-                    {!participantsLoaded ? (
+                    {!participantsLoaded && participantIds.length === 0 ? (
+                      <p className="text-gray-500">
+                        No participants joined this quest.
+                      </p>
+                    ) : !participantsLoaded ? (
                       <p className="text-gray-500">Loading participants...</p>
                     ) : completedParticipants.length === 0 ? (
                       <p className="text-gray-500">
-                        No participants have completed all tasks for this quest.
+                        No participants completed all tasks for this quest.
                       </p>
                     ) : (
                       <>
@@ -1223,41 +1325,56 @@ export default function QuestDetailPage() {
 
                     {currentUserProfile && (
                       <div className="flex flex-col gap-3">
-                        {seekerPreparedTasks &&
-                        seekerPreparedTasks.length > 0 ? (
-                          <PDFDownloadLink
-                            document={
-                              <SeekerTaskPdfButton
-                                quest={quest}
-                                seekerTasks={seekerPreparedTasks}
-                                user={currentUserProfile}
-                              />
-                            }
-                            fileName={`${quest.quest_name}-your-answers.pdf`}
-                          >
-                            {({ loading }) => (
-                              <button className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg w-full">
-                                {loading
-                                  ? 'Generating PDF...'
-                                  : '⬇ Download My Quest PDF'}
-                              </button>
-                            )}
-                          </PDFDownloadLink>
+                        {/* ✅ Add completion check here */}
+                        {completedTasks === totalTasks && totalTasks > 0 ? (
+                          // Show PDF options only if ALL tasks are completed
+                          seekerPreparedTasks &&
+                          seekerPreparedTasks.length > 0 ? (
+                            <PDFDownloadLink
+                              document={
+                                <SeekerTaskPdfButton
+                                  quest={quest}
+                                  seekerTasks={seekerPreparedTasks}
+                                  user={currentUserProfile}
+                                />
+                              }
+                              fileName={`${quest.quest_name}-your-answers.pdf`}
+                            >
+                              {({ loading }) => (
+                                <button className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg w-full">
+                                  {loading
+                                    ? 'Generating PDF...'
+                                    : '⬇ Download My Quest PDF'}
+                                </button>
+                              )}
+                            </PDFDownloadLink>
+                          ) : (
+                            <button
+                              onClick={() => preparePdfTasks()}
+                              disabled={seekerLoading}
+                              className="bg-gray-200 hover:bg-gray-300 px-4 py-2 rounded-lg w-full transition-colors"
+                            >
+                              {seekerLoading ? (
+                                <span className="flex items-center justify-center gap-2">
+                                  <span className="w-4 h-4 border-2 border-gray-400 border-t-transparent rounded-full animate-spin" />
+                                  Preparing Tasks...
+                                </span>
+                              ) : (
+                                'Prepare PDF'
+                              )}
+                            </button>
+                          )
                         ) : (
-                          <button
-                            onClick={() => preparePdfTasks()}
-                            disabled={seekerLoading}
-                            className="bg-gray-200 hover:bg-gray-300 px-4 py-2 rounded-lg w-full transition-colors"
-                          >
-                            {seekerLoading ? (
-                              <span className="flex items-center justify-center gap-2">
-                                <span className="w-4 h-4 border-2 border-gray-400 border-t-transparent rounded-full animate-spin" />
-                                Preparing Tasks...
-                              </span>
-                            ) : (
-                              'Prepare PDF'
-                            )}
-                          </button>
+                          // Show message if quest is incomplete
+                          <div className="bg-yellow-50 border border-yellow-300 rounded-lg p-4">
+                            <p className="text-sm font-semibold text-yellow-800 mb-1">
+                              ⚠️ Quest Incomplete
+                            </p>
+                            <p className="text-sm text-yellow-700">
+                              You completed {completedTasks} out of {totalTasks}{' '}
+                              tasks.
+                            </p>
+                          </div>
                         )}
                       </div>
                     )}
@@ -1327,9 +1444,22 @@ export default function QuestDetailPage() {
 
             {/* Bottom action row: Delete/Join (left) + Back + Prize Info (right) */}
             <div className="mt-4 flex items-center justify-between w-full gap-4">
-              {/* Left: Delete / Join */}
+              {/* Left: Delete / Restart / Join */}
               <div className="flex items-center gap-2">
-                {isOwner && participantIds.length < 1 && (
+                {isOwner &&
+                  isExpired &&
+                  completedParticipants.length === 0 &&
+                  participantIds.length > 0 && (
+                    <Button
+                      onClick={handleRestartQuest}
+                      className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded"
+                      disabled={isUpdatingQuest}
+                    >
+                      {isUpdatingQuest ? 'Restarting...' : '🔄 Restart Quest'}
+                    </Button>
+                  )}
+
+                {isOwner && completedParticipants.length < 1 && !isExpired && (
                   <Button
                     onClick={() => deleteQuest(quest)}
                     className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded"
@@ -1359,6 +1489,46 @@ export default function QuestDetailPage() {
                           : 'Join the quest!'}
                     </button>
                   ))}
+
+                {/* Creator Message Section - Only for owners on expired quests */}
+                {isOwner && isExpired && (
+                  <div className="mt-4 bg-blue-50 border border-blue-200 rounded-lg p-4">
+                    <h4 className="font-semibold text-sm mb-2">
+                      📢 Message to Participants
+                    </h4>
+                    <textarea
+                      value={creatorMessage}
+                      onChange={(e) => setCreatorMessage(e.target.value)}
+                      placeholder="Write a message to all participants (e.g., thank you, winner announcements, next steps)..."
+                      className="w-full p-3 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      rows={4}
+                    />
+                    <Button
+                      onClick={handleSaveMessage}
+                      disabled={isUpdatingQuest}
+                      className="mt-2 bg-blue-500 hover:bg-blue-600 text-white"
+                    >
+                      {isUpdatingQuest ? 'Saving...' : 'Save & Send Message'}
+                    </Button>
+                  </div>
+                )}
+
+                {/* Display creator message for ALL users (both owner and participants) */}
+                {quest.creator_message && (
+                  <div className="mt-4 bg-yellow-50 border-l-4 border-yellow-400 rounded-lg p-4">
+                    <div className="flex items-start gap-2">
+                      <span className="text-xl">📢</span>
+                      <div className="flex-1">
+                        <p className="text-sm font-semibold text-gray-800 mb-1">
+                          Message from Quest Creator
+                        </p>
+                        <p className="text-sm text-gray-700 whitespace-pre-wrap">
+                          {quest.creator_message}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                )}
               </div>
 
               {/* Right: Back + Prize Info */}

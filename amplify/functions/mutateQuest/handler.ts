@@ -62,7 +62,9 @@ interface AppSyncEvent {
     prizes?: unknown
     sponsors?: unknown
     tasks?: unknown
-    quest_winners?: string // ✅ Add this for winner updates
+    quest_winners?: string
+    status?: string
+    creator_message?: string // ✅ Add this line
   }
   identity: {
     sub: string
@@ -178,29 +180,61 @@ export const handler = async (event: AppSyncEvent) => {
     throw new Error('Not allowed to modify this quest')
   }
 
-  // ✅ UPDATE_COMPLETED: Allow creators to update winners on expired/completed quests
+  // ✅ UPDATE_COMPLETED: Allow creators to update winners AND restart expired quests
   if (input.action === 'UPDATE_COMPLETED') {
     if (quest.status !== 'expired') {
       throw new Error('Can only update completed quests that have expired')
     }
 
-    // Only update quest_winners field
-    await ddb.send(
-      new UpdateCommand({
-        TableName: QUEST_TABLE,
-        Key: { id: input.questId },
-        UpdateExpression:
-          'SET quest_winners = :winners, updatedAt = :updatedAt',
-        ExpressionAttributeValues: {
-          ':winners': input.quest_winners ?? '[]',
-          ':updatedAt': now,
-        },
+    // Build dynamic update based on what's provided
+    const updateParts: string[] = []
+    const attributeNames: Record<string, string> = {}
+    const attributeValues: Record<string, unknown> = {
+      ':updatedAt': now,
+    }
+
+    // Always allow winner updates
+    if (input.quest_winners !== undefined) {
+      updateParts.push('quest_winners = :winners')
+      attributeValues[':winners'] = input.quest_winners
+    }
+
+    // ✅ Allow creator message updates
+    if (input.creator_message !== undefined) {
+      updateParts.push('creator_message = :creatorMessage')
+      attributeValues[':creatorMessage'] = input.creator_message
+    }
+
+    // ✅ Allow status change (for restart)
+    if (input.status !== undefined) {
+      updateParts.push('#status = :status')
+      attributeNames['#status'] = 'status'
+      attributeValues[':status'] = input.status
+    }
+
+    // ✅ Allow end date extension (for restart)
+    if (input.endAt !== undefined) {
+      updateParts.push('quest_end_at = :endAt')
+      attributeValues[':endAt'] = input.endAt
+    }
+
+    updateParts.push('updatedAt = :updatedAt')
+
+    const updateCommand = new UpdateCommand({
+      TableName: QUEST_TABLE,
+      Key: { id: input.questId },
+      UpdateExpression: `SET ${updateParts.join(', ')}`,
+      ExpressionAttributeValues: attributeValues,
+      ...(Object.keys(attributeNames).length > 0 && {
+        ExpressionAttributeNames: attributeNames,
       }),
-    )
+    })
+
+    await ddb.send(updateCommand)
 
     return {
       questId: input.questId,
-      status: 'expired',
+      status: input.status ?? 'expired',
     }
   }
 
