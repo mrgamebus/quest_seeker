@@ -193,10 +193,10 @@ export default function Support() {
             <p className="mt-2">
               <strong>Email:</strong>{' '}
               <a
-                href="mailto:webdev@maorilandinfo.co.nz"
+                href="mailto:questseekernz@gmail.com"
                 className="text-yellow-600 hover:underline"
               >
-                webdev@maorilandinfo.co.nz
+                questseekernz@gmail.com
               </a>
             </p>
           </div>

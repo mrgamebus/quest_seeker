@@ -57,7 +57,7 @@ export default function CurrentUserStatus({
       bankDetails,
       isProfileComplete,
       onUpdate,
-      async () => void (await refetch()), // ✅ Explicitly return void
+      async () => void (await refetch()),
     )
 
     if (result.success) {

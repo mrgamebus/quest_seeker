@@ -27,10 +27,6 @@ export default function CreatorApplicationForm() {
     setLoading(true)
 
     try {
-      // Submit the application to your backend
-      // This should create a record with status: 'pending'
-      // await submitCreatorApplication(formData)
-
       // Show success message and redirect
       navigate('/application-submitted')
     } catch (err) {
