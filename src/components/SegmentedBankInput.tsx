@@ -9,7 +9,7 @@ interface BankDetails {
 
 interface BankInputProps {
   onComplete: (details: BankDetails) => void
-  initialValue?: string // Format: "Name|00-0000-0000000-00"
+  initialValue?: string
 }
 
 export const SegmentedBankInput = ({

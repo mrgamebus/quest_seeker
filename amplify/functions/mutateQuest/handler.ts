@@ -205,15 +205,17 @@ export const handler = async (event: AppSyncEvent) => {
       attributeValues[':creatorMessage'] = input.creator_message
     }
 
-    // ✅ Allow status change (for restart)
-    if (input.status !== undefined) {
+    // ✅ Allow status change (for restart) - ONLY IF PROVIDED
+    if (input.status !== undefined && input.status !== null) {
+      // ← ADD THIS CHECK
       updateParts.push('#status = :status')
       attributeNames['#status'] = 'status'
       attributeValues[':status'] = input.status
     }
 
-    // ✅ Allow end date extension (for restart)
-    if (input.endAt !== undefined) {
+    // ✅ Allow end date extension (for restart) - ONLY IF PROVIDED
+    if (input.endAt !== undefined && input.endAt !== null) {
+      // ← ADD THIS CHECK
       updateParts.push('quest_end_at = :endAt')
       attributeValues[':endAt'] = input.endAt
     }
@@ -234,7 +236,7 @@ export const handler = async (event: AppSyncEvent) => {
 
     return {
       questId: input.questId,
-      status: input.status ?? 'expired',
+      status: input.status ?? quest.status, // ← Return existing status if not updating
     }
   }
 

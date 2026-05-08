@@ -1459,7 +1459,7 @@ export default function QuestDetailPage() {
                     </Button>
                   )}
 
-                {isOwner && completedParticipants.length < 1 && !isExpired && (
+                {isOwner && participantIds.length < 1 && !isExpired && (
                   <Button
                     onClick={() => deleteQuest(quest)}
                     className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded"

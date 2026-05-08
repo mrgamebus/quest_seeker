@@ -185,7 +185,6 @@ export default function UpdateAccount({
         label="About me"
         value={profile.about_me || ''}
         onSave={(newValue) => {
-          // console.log('ABOUT ME SAVING:', newValue)
           onUpdate({ about_me: newValue })
         }}
         required
