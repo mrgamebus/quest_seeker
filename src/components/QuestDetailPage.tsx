@@ -298,6 +298,7 @@ export default function QuestDetailPage() {
         action: MutateQuestAction.UPDATE_COMPLETED,
         questId: quest.id,
         quest_winners: JSON.stringify(updatedWinners),
+        creator_message: quest.creator_message,
       },
       {
         onSuccess: () => {
@@ -533,6 +534,7 @@ export default function QuestDetailPage() {
           action: MutateQuestAction.UPDATE_COMPLETED,
           questId: quest.id,
           creator_message: creatorMessage,
+          quest_winners: quest.quest_winners,
         },
         {
           onSuccess: () => {
@@ -642,9 +644,9 @@ export default function QuestDetailPage() {
             {/* Social Share Button Card - positioned like sponsors */}
             <div className="absolute top-2 left-2 z-20 md:top-auto md:left-10 md:bottom-[-60px] md:bg-white md:rounded-2xl md:shadow-xl md:border md:border-gray-200 md:p-5">
               <div className="flex items-center gap-2">
-                <span className="hidden md:inline text-sm font-semibold text-gray-700">
-                  Share this quest:
-                </span>
+                {/* <span className="hidden md:inline text-sm font-semibold text-gray-700">
+                  
+                </span> */}
                 <FacebookShareButton
                   url={window.location.href}
                   hashtag={`#${quest.quest_name?.replace(/\s+/g, '')}`}
@@ -905,6 +907,62 @@ export default function QuestDetailPage() {
                       </Dialog>
                     )}
                   </div>
+                  {/* 🏆 WINNERS DISPLAY - For Seekers */}
+                  {!isOwner && winners.length > 0 && (
+                    <div className="mt-4 bg-gradient-to-r from-yellow-50 to-amber-50 border-l-4 border-yellow-400 rounded-lg p-4">
+                      <h4 className="font-bold text-sm mb-3 flex items-center gap-2">
+                        <span className="text-xl">🏆</span>
+                        Quest Winners
+                      </h4>
+                      <div className="flex flex-col gap-2">
+                        {winners
+                          .sort((a: any, b: any) => a.place - b.place)
+                          .map((winner: any, index: number) => {
+                            const prize = prizes.find(
+                              (p) => p.id === winner.prize_id,
+                            )
+                            const medal =
+                              index === 0 ? '🥇' : index === 1 ? '🥈' : '🥉'
+
+                            return (
+                              <div
+                                key={winner.prize_id}
+                                className="flex items-center gap-3 bg-white p-3 rounded-lg shadow-sm"
+                              >
+                                <span className="text-2xl">{medal}</span>
+                                <div className="flex-1">
+                                  <p className="font-semibold text-sm text-gray-800">
+                                    {winner.username}
+                                  </p>
+                                  {prize && (
+                                    <p className="text-xs text-gray-600">
+                                      Prize: {prize.name}
+                                    </p>
+                                  )}
+                                </div>
+                              </div>
+                            )
+                          })}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* 📢 CREATOR MESSAGE - For Seekers */}
+                  {!isOwner && quest.creator_message && (
+                    <div className="mt-4 bg-blue-50 border-l-4 border-blue-400 rounded-lg p-4">
+                      <div className="flex items-start gap-2">
+                        <span className="text-xl">📢</span>
+                        <div className="flex-1">
+                          <p className="text-sm font-semibold text-gray-800 mb-1">
+                            Message from Quest Creator
+                          </p>
+                          <p className="text-sm text-gray-700 whitespace-pre-wrap">
+                            {quest.creator_message}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  )}
                   {/* 🏆 PRIZE SELECTION SECTION - Only visible to owner */}
                   {isOwner && (
                     <div className="lg:w-[450px] w-full bg-white/70 p-4 rounded-xl shadow">
