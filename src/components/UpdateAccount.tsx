@@ -26,9 +26,10 @@ export default function UpdateAccount({
   onUpdate,
   isProfileComplete,
 }: ProfileProps) {
-  const location = useLocation()
-  const forceNameUpdate = (location.state as { forceNameUpdate?: boolean })
-    ?.forceNameUpdate
+  // const location = useLocation()
+  // const forceNameUpdate = (location.state as { forceNameUpdate?: boolean })
+  //   ?.forceNameUpdate
+  const forceNameUpdate = profile.full_name === profile.email
 
   const [previewImage, setPreviewImage] = useState(profile.image || '')
   const [oldImagePath, setOldImagePath] = useState(profile.image || '')
@@ -136,7 +137,7 @@ export default function UpdateAccount({
       return { fullPath: '', thumbPath: '' }
     }
   }
-  console.log('isProfileComplete: ', isProfileComplete)
+
   return (
     <div className="flex flex-col gap-4 w-full max-w-md mx-auto mb-2">
       {forceNameUpdate && (
