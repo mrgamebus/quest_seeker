@@ -194,6 +194,7 @@ export default function QuestDetailPage() {
           ...task,
           caption: existingAnswer?.caption || '',
           answer: existingAnswer?.answer || '',
+          location: existingAnswer?.location || '',
         }
       })
     } else {
