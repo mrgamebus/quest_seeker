@@ -12,6 +12,13 @@ import { useAllUsers } from '@/hooks/userProfiles'
 import { Button } from './ui/button'
 import { useApproveCreator } from '@/hooks/useApproveCreator'
 import { Input } from './ui/input'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from './ui/dialog'
 
 export default function AdminPage() {
   const [view, setView] = useState<'pending' | 'seekers' | 'creators'>(
@@ -19,6 +26,7 @@ export default function AdminPage() {
   )
   const [displayCount, setDisplayCount] = useState(10)
   const [searchTerm, setSearchTerm] = useState('')
+  const [selectedUser, setSelectedUser] = useState<any>(null) // Store selected user for modal
 
   const {
     data: pendingUsers,
@@ -68,7 +76,7 @@ export default function AdminPage() {
   const filteredUsers =
     view === 'pending'
       ? pendingUsers
-      : allUsers?.filter((user) => user.role === view.slice(0, -1)) // 'seekers' -> 'seeker', 'creators' -> 'creator'
+      : allUsers?.filter((user) => user.role === view.slice(0, -1))
 
   // Apply search filter
   const filteredAndSearchedUsers = filteredUsers?.filter((user) => {
@@ -110,7 +118,7 @@ export default function AdminPage() {
               Clear
             </Button>
           )}
-          <div className="h-4 w-px bg-border mx-1" /> {/* Visual separator */}
+          <div className="h-4 w-px bg-border mx-1" />
           <Button
             onClick={() => {
               setView('pending')
@@ -174,7 +182,11 @@ export default function AdminPage() {
             </TableHeader>
             <TableBody>
               {users.map((user) => (
-                <TableRow key={user.id}>
+                <TableRow
+                  key={user.id}
+                  className="cursor-pointer hover:bg-muted/50"
+                  onClick={() => setSelectedUser(user)}
+                >
                   <TableCell className="font-medium">
                     {user.full_name}
                   </TableCell>
@@ -195,9 +207,10 @@ export default function AdminPage() {
                           size="sm"
                           variant="default"
                           disabled={approveCreator.isPending}
-                          onClick={() =>
+                          onClick={(e) => {
+                            e.stopPropagation() // Prevent row click
                             handleApprove(user.id, user.full_name || 'User')
-                          }
+                          }}
                         >
                           {approveCreator.isPending
                             ? 'Approving...'
@@ -206,8 +219,8 @@ export default function AdminPage() {
                         <Button
                           size="sm"
                           variant="destructive"
-                          onClick={() => {
-                            // TODO: Reject user - change role back to 'seeker'
+                          onClick={(e) => {
+                            e.stopPropagation() // Prevent row click
                             console.log('Reject', user.id)
                           }}
                         >
@@ -219,7 +232,10 @@ export default function AdminPage() {
                       <Button
                         size="sm"
                         variant="outline"
-                        onClick={() => console.log('View details', user.id)}
+                        onClick={(e) => {
+                          e.stopPropagation() // Prevent row click
+                          setSelectedUser(user)
+                        }}
                       >
                         View Details
                       </Button>
@@ -239,6 +255,179 @@ export default function AdminPage() {
             )}
         </div>
       )}
+
+      {/* User Details Modal */}
+      <Dialog open={!!selectedUser} onOpenChange={() => setSelectedUser(null)}>
+        <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>User Profile Details</DialogTitle>
+            <DialogDescription>
+              Complete profile information for {selectedUser?.full_name}
+            </DialogDescription>
+          </DialogHeader>
+          {selectedUser && (
+            <div className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <h3 className="font-semibold text-sm text-muted-foreground">
+                    Full Name
+                  </h3>
+                  <p>{selectedUser.full_name || 'N/A'}</p>
+                </div>
+                <div>
+                  <h3 className="font-semibold text-sm text-muted-foreground">
+                    Email
+                  </h3>
+                  <p>{selectedUser.email || 'N/A'}</p>
+                </div>
+                <div>
+                  <h3 className="font-semibold text-sm text-muted-foreground">
+                    Phone
+                  </h3>
+                  <p className="capitalize">{selectedUser.phone || 'N/A'}</p>
+                </div>
+              </div>
+
+              {/* Creator-specific fields */}
+              {(selectedUser.role === 'creator' ||
+                selectedUser.role === 'pending') && (
+                <>
+                  <div className="border-t pt-4">
+                    <h3 className="font-semibold mb-2">Organization Details</h3>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <h4 className="font-semibold text-sm text-muted-foreground">
+                          Organization Name
+                        </h4>
+                        <p>{selectedUser.organization_name || 'N/A'}</p>
+                      </div>
+                      <div>
+                        <h4 className="font-semibold text-sm text-muted-foreground">
+                          Business Type
+                        </h4>
+                        <p>{selectedUser.business_type || 'N/A'}</p>
+                      </div>
+                      <div>
+                        <h3 className="font-semibold text-sm text-muted-foreground">
+                          Registration Number
+                        </h3>
+                        <p className="text-xs font-mono">
+                          {selectedUser.registration_number || 'N/A'}
+                        </p>
+                      </div>
+                      <div>
+                        <h3 className="font-semibold text-sm text-muted-foreground">
+                          Charity Number
+                        </h3>
+                        <p className="text-xs font-mono">
+                          {selectedUser.charity_number || 'N/A'}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="border-t pt-4">
+                    <h3 className="font-semibold mb-2">
+                      Additional Information
+                    </h3>
+
+                    {/* Organization Description - Full Width */}
+                    <div className="mb-4">
+                      <h4 className="font-semibold text-sm text-muted-foreground">
+                        Organisation Description
+                      </h4>
+                      <p className="text-sm">
+                        {selectedUser.organization_description || 'N/A'}
+                      </p>
+                    </div>
+
+                    {/* Two Column Layout for Contact Info */}
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <h4 className="font-semibold text-sm text-muted-foreground">
+                          Primary Contact
+                        </h4>
+                        <p className="text-sm">
+                          {selectedUser.primary_contact_name || 'N/A'}
+                        </p>
+                      </div>
+                      <div>
+                        <h4 className="font-semibold text-sm text-muted-foreground">
+                          Secondary Contact Name
+                        </h4>
+                        <p className="text-sm">
+                          {selectedUser.secondary_contact_name || 'N/A'}
+                        </p>
+                      </div>
+
+                      <div>
+                        <h4 className="font-semibold text-sm text-muted-foreground">
+                          Primary Contact Phone
+                        </h4>
+                        <p className="text-sm">
+                          {selectedUser.primary_contact_phone || 'N/A'}
+                        </p>
+                      </div>
+                      <div>
+                        <h4 className="font-semibold text-sm text-muted-foreground">
+                          Secondary Contact Phone
+                        </h4>
+                        <p className="text-sm">
+                          {selectedUser.secondary_contact_phone || 'N/A'}
+                        </p>
+                      </div>
+
+                      <div>
+                        <h4 className="font-semibold text-sm text-muted-foreground">
+                          Primary Contact Position
+                        </h4>
+                        <p className="text-sm">
+                          {selectedUser.primary_contact_position || 'N/A'}
+                        </p>
+                      </div>
+                      <div>
+                        <h4 className="font-semibold text-sm text-muted-foreground">
+                          Secondary Contact Position
+                        </h4>
+                        <p className="text-sm">
+                          {selectedUser.secondary_contact_position || 'N/A'}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </>
+              )}
+
+              {/* Action buttons in modal */}
+              {view === 'pending' && (
+                <div className="border-t pt-4 flex gap-2 justify-end">
+                  <Button
+                    variant="default"
+                    disabled={approveCreator.isPending}
+                    onClick={() => {
+                      handleApprove(
+                        selectedUser.id,
+                        selectedUser.full_name || 'User',
+                      )
+                      setSelectedUser(null)
+                    }}
+                  >
+                    {approveCreator.isPending ? 'Approving...' : 'Approve'}
+                  </Button>
+                  <Button
+                    variant="destructive"
+                    onClick={() => {
+                      console.log('Reject', selectedUser.id)
+                      setSelectedUser(null)
+                    }}
+                  >
+                    Reject
+                  </Button>
+                </div>
+              )}
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

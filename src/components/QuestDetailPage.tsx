@@ -52,6 +52,9 @@ export default function QuestDetailPage() {
   const { toast } = useToast()
   const [joining, setJoining] = useState(false)
   const [winners, setWinners] = useState<any[]>([])
+  const [winnerProfiles, setWinnerProfiles] = useState<Record<string, Profile>>(
+    {},
+  )
   const [creatorMessage, setCreatorMessage] = useState('')
 
   const { mutate: updateQuestMutation, isPending: isUpdatingQuest } =
@@ -93,9 +96,21 @@ export default function QuestDetailPage() {
   const isExpired = quest?.status === QuestStatus.expired
   const NZ_TZ = 'Pacific/Auckland'
   // Update edit fields when quest data is fetched
+
+  // Parse winners when quest loads
   useEffect(() => {
     if (!quest) return
     setTasks(ensureArray<Task>(quest.quest_tasks))
+
+    // ✅ Parse existing winners
+    try {
+      const parsedWinners = quest.quest_winners
+        ? JSON.parse(quest.quest_winners)
+        : []
+      setWinners(parsedWinners)
+    } catch {
+      setWinners([])
+    }
   }, [quest])
 
   useEffect(() => {
@@ -137,6 +152,43 @@ export default function QuestDetailPage() {
       setCreatorMessage(quest.creator_message)
     }
   }, [quest])
+
+  useEffect(() => {
+    const fetchWinnerProfiles = async () => {
+      if (winners.length === 0) return
+
+      const winnerIds = winners.map((w: any) => w.user_id)
+      const uniqueIds = [...new Set(winnerIds)] // Remove duplicates
+
+      try {
+        const profiles = await Promise.all(
+          uniqueIds.map(async (id) => {
+            const res = await client.graphql<GraphQLResult<GetProfileQuery>>({
+              query: getProfile,
+              variables: { id },
+              authMode: 'userPool',
+            })
+            return 'data' in res ? res.data?.getProfile : null
+          }),
+        )
+
+        // Create a map of user_id -> profile
+        const profileMap: Record<string, Profile> = {}
+        profiles.forEach((profile) => {
+          if (profile) {
+            profileMap[profile.id] = profile as Profile
+          }
+        })
+
+        console.log('✅ Fetched winner profiles:', profileMap)
+        setWinnerProfiles(profileMap)
+      } catch (err) {
+        console.error('Failed to fetch winner profiles:', err)
+      }
+    }
+
+    fetchWinnerProfiles()
+  }, [winners]) // Re-fetch whenever winners change
 
   const client = generateClient()
 
@@ -279,6 +331,9 @@ export default function QuestDetailPage() {
     place: number,
     profile: Profile,
   ) => {
+    console.log('🔍 Profile received:', profile)
+    console.log('📱 Profile phone:', profile.phone)
+
     const filteredWinners = winners.filter((w) => w.prize_id !== prizeId)
 
     const newWinner = {
@@ -287,12 +342,19 @@ export default function QuestDetailPage() {
       user_id: profile.id,
       username: profile.full_name || 'Unknown',
       email: profile.email || '',
+      phone: profile.phone || '', // ← Check if this is empty string
       selected_at: new Date().toISOString(),
     }
+
+    console.log('✅ New winner object BEFORE saving:', newWinner)
+    console.log('📱 Phone in newWinner:', newWinner.phone)
 
     const updatedWinners = [...filteredWinners, newWinner].sort(
       (a, b) => a.place - b.place,
     )
+
+    console.log('💾 Updated winners array BEFORE mutation:', updatedWinners)
+    console.log('📄 Stringified JSON:', JSON.stringify(updatedWinners))
 
     updateQuestMutation(
       {
@@ -303,11 +365,16 @@ export default function QuestDetailPage() {
       },
       {
         onSuccess: () => {
+          console.log(
+            '✅ Save successful, winners set locally:',
+            updatedWinners,
+          )
           setWinners(updatedWinners)
           toast({
             title: 'Winner Selected! 🎉',
             description: `${profile.full_name} has been selected as the winner!`,
           })
+          refetch() // ← Make sure this is here
         },
         onError: (err) => {
           console.error('Failed to save winner:', err)
@@ -499,7 +566,6 @@ export default function QuestDetailPage() {
 
     try {
       const { signInDetails } = await getCurrentUser()
-
       const currentEmail = signInDetails?.loginId ?? ''
 
       const profiles = await Promise.all(
@@ -518,8 +584,11 @@ export default function QuestDetailPage() {
           return profile
         }),
       )
-      setParticipantProfiles(profiles.filter(Boolean) as Profile[])
 
+      // ✅ Log to check if phone is present
+      console.log('Loaded participant profiles:', profiles)
+
+      setParticipantProfiles(profiles.filter(Boolean) as Profile[])
       setParticipantsLoaded(true)
     } catch (err) {
       console.error('Failed to fetch participant profiles:', err)
@@ -978,6 +1047,11 @@ export default function QuestDetailPage() {
                                 (w: any) => w.prize_id === prize.id,
                               )
 
+                              // ✅ Get the full profile for this winner
+                              const winnerProfile = prizeWinner
+                                ? winnerProfiles[prizeWinner.user_id]
+                                : null
+
                               return (
                                 <Dialog key={prize.id}>
                                   <DialogTrigger asChild>
@@ -998,9 +1072,28 @@ export default function QuestDetailPage() {
                                           {prize.name}
                                         </p>
                                         {prizeWinner ? (
-                                          <p className="text-xs text-green-700 font-medium">
-                                            🎉 Winner: {prizeWinner.username}
-                                          </p>
+                                          <div>
+                                            <p className="text-xs text-green-700 font-medium">
+                                              🎉 Winner: {prizeWinner.username}
+                                            </p>
+                                            {/* ✅ Use winnerProfile for contact info */}
+                                            {winnerProfile?.email && (
+                                              <p className="text-xs text-gray-600 mt-1">
+                                                📧 {winnerProfile.email}
+                                              </p>
+                                            )}
+                                            {winnerProfile?.phone && (
+                                              <p className="text-xs text-gray-600">
+                                                📱 {winnerProfile.phone}
+                                              </p>
+                                            )}
+                                            {/* ✅ Show loading state if profile not yet fetched */}
+                                            {!winnerProfile && (
+                                              <p className="text-xs text-gray-500 mt-1">
+                                                Loading contact info...
+                                              </p>
+                                            )}
+                                          </div>
                                         ) : (
                                           <p className="text-xs text-gray-500">
                                             Click to select winner
