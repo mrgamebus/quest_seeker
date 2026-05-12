@@ -53,7 +53,7 @@ export default function AccountPage() {
 
   const admin = currentProfile?.role === 'Admin'
   const isComplete = isProfileComplete(currentProfile)
-
+  const forceNameUpdate = currentProfile?.full_name === currentProfile?.email
   const handleUpdate = async (updates: Partial<Profile>) => {
     const input: any = {
       id: currentProfile.id,
@@ -119,44 +119,53 @@ export default function AccountPage() {
         <CardContent className="flex flex-col gap-4 flex-1 min-h-0 p-0">
           <div className="sticky top-0 z-50 bg-black/90 backdrop-blur-md p-4 shadow-sm border-b">
             <Toolbar>
-              <Button variant="yellow" onClick={() => navigate('/user/region')}>
+              <Button
+                variant="yellow"
+                onClick={() => navigate('/user/region')}
+                disabled={forceNameUpdate} // Disable
+              >
                 <Home />
               </Button>
-
-              {/* 3. Update onClick to set the state and add visual feedback */}
               <Button
                 variant={activeTab === 'account' ? 'default' : 'yellow'}
                 onClick={() => setActiveTab('account')}
+                disabled={forceNameUpdate} // Disable
               >
                 My Account
               </Button>
-
               <Button
                 variant={activeTab === 'my-quests' ? 'default' : 'yellow'}
                 onClick={() => setActiveTab('my-quests')}
+                disabled={forceNameUpdate} // Disable
               >
                 My Quests
               </Button>
-
-              <Button variant="yellow" onClick={() => navigate('/user/leader')}>
+              <Button
+                variant="yellow"
+                onClick={() => navigate('/user/leader')}
+                disabled={forceNameUpdate} // Disable
+              >
                 Leader Board
               </Button>
-
-              <Button variant="yellow" onClick={() => navigate('/user/help')}>
+              <Button
+                variant="yellow"
+                onClick={() => navigate('/user/help')}
+                disabled={forceNameUpdate} // Disable
+              >
                 About QS
               </Button>
-              <SignOutButton />
+              <SignOutButton /> {/* NOT disabled - this one stays active */}
             </Toolbar>
           </div>
+
           <div className="flex-1 overflow-y-auto p-6 scroll-smooth">
             <div className="w-full max-w-3xl mx-auto">
-              {/* Label and hyperlink aligned to the right */}
               <div className="flex flex-col items-end mb-6 gap-1">
                 <span className="px-3 py-1 text-sm font-bold text-gray-800 bg-yellow-100 border-2 border-yellow-400 rounded-lg shadow-lg">
                   {labelText}
                 </span>
                 <button
-                  className="text-sm text-blue-600 hover:text-blue-800 underline hover:no-underline transition-colors"
+                  className="text-sm text-blue-600 hover:text-blue-800 underline hover:no-underline transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                   onClick={() => {
                     if (currentProfile.role === 'seeker') {
                       handleClick()
@@ -164,12 +173,12 @@ export default function AccountPage() {
                       setActiveTab('status')
                     }
                   }}
+                  disabled={forceNameUpdate} // Disable account status link
                 >
                   Account Status
                 </button>
               </div>
 
-              {/* Tab content */}
               {activeTab === 'status' && !admin && (
                 <CurrentUserStatus
                   profile={currentProfile}
@@ -183,6 +192,7 @@ export default function AccountPage() {
                   profile={currentProfile}
                   onUpdate={handleUpdate}
                   isProfileComplete={isComplete}
+                  forceNameUpdate={forceNameUpdate} // Pass the prop
                 />
               )}
               {activeTab === 'my-quests' && (
