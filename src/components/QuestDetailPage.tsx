@@ -949,7 +949,7 @@ export default function QuestDetailPage() {
                   )}
 
                   {/* 📢 CREATOR MESSAGE - For Seekers */}
-                  {!isOwner && quest.creator_message && (
+                  {/* {!isOwner && quest.creator_message && (
                     <div className="mt-4 bg-blue-50 border-l-4 border-blue-400 rounded-lg p-4">
                       <div className="flex items-start gap-2">
                         <span className="text-xl">📢</span>
@@ -963,7 +963,7 @@ export default function QuestDetailPage() {
                         </div>
                       </div>
                     </div>
-                  )}
+                  )} */}
                   {/* 🏆 PRIZE SELECTION SECTION - Only visible to owner */}
                   {isOwner && (
                     <div className="lg:w-[450px] w-full bg-white/70 p-4 rounded-xl shadow">

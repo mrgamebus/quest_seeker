@@ -614,11 +614,16 @@ export default function CreateQuestPage() {
                 <Button>
                   {`End Date: ${
                     endDateTime
-                      ? new Date(endDateTime).toLocaleDateString('en-NZ', {
-                          day: 'numeric',
-                          month: 'long',
-                          year: 'numeric',
-                        })
+                      ? (() => {
+                          const endNz = utcIsoToNzDate(endDateTime)
+                          // Add 1 second to roll over to next hour for display
+                          const displayDate = new Date(endNz.getTime() + 1000)
+                          return displayDate.toLocaleDateString('en-NZ', {
+                            day: 'numeric',
+                            month: 'long',
+                            year: 'numeric',
+                          })
+                        })()
                       : 'Not set'
                   }`}
                 </Button>
@@ -636,71 +641,57 @@ export default function CreateQuestPage() {
                     if (!startDateTime) {
                       return date < getTodayInNZ()
                     }
-
                     const minEndNz = getMinEndNzDate(startDateTime)
-
-                    // Disable any date before start + 1 hour
                     const minEndDay = new Date(minEndNz)
                     minEndDay.setHours(0, 0, 0, 0)
-
                     return date < minEndDay
                   }}
                   onSelect={(date) => {
                     if (!date || !startDateTime) return
-
                     const minEndNz = getMinEndNzDate(startDateTime)
                     const newEndNz = new Date(date)
-
                     if (endDateTime) {
-                      // 1. Get the CURRENTLY set hours/minutes from state
                       const currentEnd = utcIsoToNzDate(endDateTime)
-                      newEndNz.setHours(
-                        currentEnd.getHours(),
-                        currentEnd.getMinutes(),
-                        0,
-                        0,
-                      )
+                      newEndNz.setHours(currentEnd.getHours(), 59, 59, 0)
                     } else {
-                      // 2. Fallback for the very first selection only
-                      newEndNz.setHours(17, 0, 0, 0)
+                      newEndNz.setHours(17, 59, 59, 0)
                     }
-
-                    // 3. Safety check: Ensure the new date+time isn't before the minimum
                     if (newEndNz < minEndNz) {
                       newEndNz.setTime(minEndNz.getTime())
                     }
-
                     setEndDateTime(nzToUtcIso(newEndNz))
                   }}
                 />
-
                 <input
                   type="time"
-                  value={endDateTime ? utcIsoToNzTime(endDateTime) : '17:00'}
+                  value={
+                    endDateTime
+                      ? (() => {
+                          const endNz = utcIsoToNzDate(endDateTime)
+                          // Display next hour (add 1 second to roll over)
+                          const displayTime = new Date(endNz.getTime() + 1000)
+                          return `${String(displayTime.getHours()).padStart(2, '0')}:00`
+                        })()
+                      : '18:00'
+                  }
                   onChange={(e) => {
-                    if (!startDateTime) return // Only need to check startDateTime exists
-
-                    const [h, m] = e.target.value.split(':').map(Number)
-
-                    // If no endDateTime yet, create one based on start date
+                    if (!startDateTime) return
+                    const [h] = e.target.value.split(':').map(Number)
                     const endNz = endDateTime
                       ? utcIsoToNzDate(endDateTime)
-                      : utcIsoToNzDate(startDateTime) // ← Use start date as base
-
-                    endNz.setHours(h, m, 0, 0)
-
+                      : utcIsoToNzDate(startDateTime)
+                    // Set to previous hour at 59:59
+                    const actualHour = h === 0 ? 23 : h - 1
+                    endNz.setHours(actualHour, 59, 59, 0)
                     const minEndNz = getMinEndNzDate(startDateTime)
-
                     if (endNz < minEndNz) {
                       setEndDateTime(nzToUtcIso(minEndNz))
                       return
                     }
-
                     setEndDateTime(nzToUtcIso(endNz))
                   }}
                   className="mt-2"
                 />
-
                 <DialogClose asChild>
                   <Button>Confirm</Button>
                 </DialogClose>
