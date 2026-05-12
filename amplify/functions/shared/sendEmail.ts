@@ -50,8 +50,8 @@ const cognito = new CognitoIdentityProviderClient({ region: 'ap-southeast-2' })
 // ============================================================================
 
 const USER_POOL_ID = process.env.AMPLIFY_USER_POOL_ID!
-const FROM_ADDRESS = 'questseekernz@gmail.com'
-const ADMIN_EMAIL = process.env.ADMIN_EMAIL || 'questseekernz@gmail.com'
+const FROM_ADDRESS = 'webdev@maorilandinfo.co.nz'
+const ADMIN_EMAIL = process.env.ADMIN_EMAIL || 'webdev@maorilandinfo.co.nz'
 
 // ============================================================================
 // UTILITY FUNCTIONS
