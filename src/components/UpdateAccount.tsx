@@ -19,17 +19,17 @@ type ProfileProps = {
   profile: Profile
   onUpdate: (updates: Partial<Profile>) => void
   isProfileComplete: boolean
+  forceNameUpdate?: boolean // Add this prop
 }
 
 export default function UpdateAccount({
   profile,
   onUpdate,
   isProfileComplete,
+  forceNameUpdate: forceNameUpdateProp, // Rename to avoid conflict
 }: ProfileProps) {
-  // const location = useLocation()
-  // const forceNameUpdate = (location.state as { forceNameUpdate?: boolean })
-  //   ?.forceNameUpdate
-  const forceNameUpdate = profile.full_name === profile.email
+  const forceNameUpdate =
+    forceNameUpdateProp ?? profile.full_name === profile.email
 
   const [previewImage, setPreviewImage] = useState(profile.image || '')
   const [oldImagePath, setOldImagePath] = useState(profile.image || '')
@@ -165,6 +165,7 @@ export default function UpdateAccount({
           accept="image/*"
           onChange={handleImageChange}
           className="mt-2"
+          disabled={forceNameUpdate} // Disable image upload
         />
       </div>
 
