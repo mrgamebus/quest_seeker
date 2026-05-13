@@ -8,6 +8,7 @@ import { mutateQuest } from '../functions/mutateQuest/resource'
 import { createQuestEntrySession } from '../functions/createQuestEntrySession/resource'
 import { createStripeSession } from '../functions/createStripeSession/resource'
 import { stripeWebhook } from '../functions/stripeWebhook/resource'
+import { rejectCreator } from '../functions/rejectCreator/resource'
 
 export const schema = a
   .schema({
@@ -29,6 +30,14 @@ export const schema = a
       .returns(a.json())
       .authorization((allow) => [allow.group('Admin')])
       .handler(a.handler.function(approveCreator)),
+    rejectCreator: a
+      .mutation()
+      .arguments({
+        profileId: a.string().required(),
+      })
+      .returns(a.json())
+      .authorization((allow) => [allow.group('Admin')])
+      .handler(a.handler.function(rejectCreator)),
     becomePending: a
       .mutation()
       .arguments({
@@ -210,6 +219,7 @@ export const schema = a
     allow.resource(expiredQuests).to(['query', 'mutate']),
     allow.resource(postRegistration).to(['mutate']),
     allow.resource(approveCreator).to(['query', 'mutate']),
+    allow.resource(rejectCreator).to(['query', 'mutate']),
     allow.resource(becomePending).to(['query', 'mutate']),
     allow.resource(mutateQuest).to(['mutate', 'query']),
     allow.resource(createStripeSession).to(['query']),

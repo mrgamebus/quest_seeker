@@ -15,6 +15,7 @@ import { createQuestEntrySession } from './functions/createQuestEntrySession/res
 import { createStripeSession } from './functions/createStripeSession/resource'
 import { stripeWebhook } from './functions/stripeWebhook/resource'
 import { support } from './functions/support/resource'
+import { rejectCreator } from './functions/rejectCreator/resource'
 
 const backend = defineBackend({
   auth,
@@ -24,6 +25,7 @@ const backend = defineBackend({
   postRegistration,
   joinQuest,
   approveCreator,
+  rejectCreator,
   becomePending,
   mutateQuest,
   createQuestEntrySession,
@@ -204,6 +206,27 @@ approveCreatorLambda.addToRolePolicy(cognitoPolicy)
 
 // ✅ Add User Pool ID environment variable
 approveCreatorLambda.addEnvironment(
+  'AMPLIFY_USER_POOL_ID',
+  backend.auth.resources.userPool.userPoolId,
+)
+
+// -----------------------------
+// rejectCreator permissions
+// -----------------------------
+const rejectCreatorLambda = backend.rejectCreator.resources
+  .lambda as lambda.Function
+
+// Grant DynamoDB permissions
+profileTable.grantReadWriteData(rejectCreatorLambda)
+rejectCreatorLambda.addEnvironment('PROFILE_TABLE_NAME', profileTable.tableName)
+
+rejectCreatorLambda.addToRolePolicy(sesPolicy)
+
+// Grant Cognito permissions
+rejectCreatorLambda.addToRolePolicy(cognitoPolicy)
+
+// ✅ Add User Pool ID environment variable
+rejectCreatorLambda.addEnvironment(
   'AMPLIFY_USER_POOL_ID',
   backend.auth.resources.userPool.userPoolId,
 )

@@ -298,6 +298,13 @@ export const mutateQuest = /* GraphQL */ `mutation MutateQuest(
   APITypes.MutateQuestMutationVariables,
   APITypes.MutateQuestMutation
 >;
+export const rejectCreator = /* GraphQL */ `mutation RejectCreator($profileId: String!) {
+  rejectCreator(profileId: $profileId)
+}
+` as GeneratedMutation<
+  APITypes.RejectCreatorMutationVariables,
+  APITypes.RejectCreatorMutation
+>;
 export const updateProfile = /* GraphQL */ `mutation UpdateProfile(
   $condition: ModelProfileConditionInput
   $input: UpdateProfileInput!

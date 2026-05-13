@@ -105,10 +105,23 @@ export default function AccountPage() {
   }
 
   let labelText = ''
-  if (currentProfile.role == 'creator') labelText = 'Quest Creator'
-  if (currentProfile.role == 'seeker') labelText = 'Quest Seeker'
-  if (currentProfile.role == 'pending') labelText = 'Quest Seeker - Pending'
-  if (currentProfile.role == 'Admin') labelText = 'Admin'
+  let accountStatus = ''
+  if (currentProfile.role == 'creator') {
+    labelText = 'Quest Creator'
+    accountStatus = 'Update Account Details'
+  }
+  if (currentProfile.role == 'seeker') {
+    labelText = 'Quest Seeker'
+    accountStatus = 'Become a Creator'
+  }
+  if (currentProfile.role == 'pending') {
+    labelText = 'Quest Seeker - Pending'
+    accountStatus = 'Account Status'
+  }
+  if (currentProfile.role == 'Admin') {
+    labelText = 'Admin'
+    accountStatus = 'View Seeker Accounts'
+  }
 
   return (
     <div
@@ -175,7 +188,7 @@ export default function AccountPage() {
                   }}
                   disabled={forceNameUpdate} // Disable account status link
                 >
-                  Account Status
+                  {accountStatus}
                 </button>
               </div>
 

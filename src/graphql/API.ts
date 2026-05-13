@@ -1149,6 +1149,14 @@ export type MutateQuestMutation = {
   } | null,
 };
 
+export type RejectCreatorMutationVariables = {
+  profileId: string,
+};
+
+export type RejectCreatorMutation = {
+  rejectCreator?: string | null,
+};
+
 export type UpdateProfileMutationVariables = {
   condition?: ModelProfileConditionInput | null,
   input: UpdateProfileInput,

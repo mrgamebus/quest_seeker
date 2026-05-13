@@ -253,6 +253,17 @@ export default function Leader() {
                 </p>
               </div>
             </div>
+            <div className="flex items-start gap-3 p-3 bg-yellow-50 rounded-lg border border-yellow-200">
+              <span className="text-2xl font-bold text-yellow-600">20</span>
+              <div>
+                <h3 className="font-semibold text-foreground">
+                  Complete a Quest
+                </h3>
+                <p className="text-sm text-muted-foreground">
+                  Earn 20 points for completing all tasks in a Quest
+                </p>
+              </div>
+            </div>
           </div>
         </DialogContent>
       </Dialog>

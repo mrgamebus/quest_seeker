@@ -241,6 +241,42 @@ ${footer}
   )
 }
 
+export const sendCreatorRejectionEmail = async (
+  userId: string,
+  userName: string,
+  userEmail: string,
+) => {
+  const footer = `\n\n---\nThis is an automated message from Quest Seeker.`
+
+  const emailBody = `
+Hi ${userName},
+
+Unfortunately, we have not been able to apporve your request to become a Quest Creator at this time! 🎉
+
+This may be due to insufficient information or possible errors with your form submission.
+
+Please resubmit if you can see any issues yourself, or contact us at questseekernz@gmail.com if you would like
+to query this decision.
+
+Best regards,
+The Quest Seeker Team
+${footer}
+  `.trim()
+
+  await safeSend(
+    new SendEmailCommand({
+      Source: FROM_ADDRESS,
+      Destination: { ToAddresses: [userEmail] },
+      Message: {
+        Subject: { Data: 'Quest Creator Application' },
+        Body: {
+          Text: { Data: emailBody },
+        },
+      },
+    }),
+  )
+}
+
 // ============================================================================
 // BANK UPDATE EMAILS
 // ============================================================================
