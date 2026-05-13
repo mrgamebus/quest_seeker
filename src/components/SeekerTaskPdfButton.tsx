@@ -8,7 +8,7 @@ import {
 } from '@react-pdf/renderer'
 import { Task, PdfUser } from '@/types'
 import { Quest } from '@/graphql/API'
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useMemo } from 'react'
 
 const styles = StyleSheet.create({
   page: { padding: 24, fontSize: 12, fontFamily: 'Helvetica' },
@@ -36,20 +36,39 @@ type TaskWithNormalizedImage = Task & {
   normalizedMapImage?: string | null
 }
 
-async function normalizeImage(url: string): Promise<string> {
-  const img = new window.Image()
-  img.crossOrigin = 'anonymous'
-  img.src = url
-  await img.decode()
+// ✅ ADD TIMEOUT AND BETTER ERROR HANDLING
+async function normalizeImage(url: string): Promise<string | null> {
+  try {
+    const img = new window.Image()
+    img.crossOrigin = 'anonymous'
 
-  const canvas = document.createElement('canvas')
-  canvas.width = img.naturalWidth
-  canvas.height = img.naturalHeight
+    // Add timeout protection
+    const loadPromise = new Promise<void>((resolve, reject) => {
+      img.onload = () => resolve()
+      img.onerror = () => reject(new Error('Image load failed'))
+      img.src = url
+    })
 
-  const ctx = canvas.getContext('2d')!
-  ctx.drawImage(img, 0, 0)
+    const timeoutPromise = new Promise<never>((_, reject) =>
+      setTimeout(() => reject(new Error('Image load timeout')), 10000),
+    )
 
-  return canvas.toDataURL('image/jpeg', 0.92)
+    await Promise.race([loadPromise, timeoutPromise])
+
+    const canvas = document.createElement('canvas')
+    canvas.width = img.naturalWidth
+    canvas.height = img.naturalHeight
+
+    const ctx = canvas.getContext('2d')
+    if (!ctx) throw new Error('Canvas context failed')
+
+    ctx.drawImage(img, 0, 0)
+
+    return canvas.toDataURL('image/jpeg', 0.92)
+  } catch (error) {
+    console.error('❌ Image normalization failed:', url, error)
+    return null // Return null instead of throwing
+  }
 }
 
 // Create a visual map placeholder with coordinates
@@ -136,6 +155,7 @@ function createMapPlaceholder(lat: number, lng: number): string {
   return canvas.toDataURL('image/png')
 }
 
+// ✅ ADD TIMEOUT TO MAP GENERATION
 async function generateMapImage(location: string): Promise<string | null> {
   try {
     console.log('🗺️ Generating map for location:', location)
@@ -167,8 +187,6 @@ async function generateMapImage(location: string): Promise<string | null> {
       console.error('❌ Invalid coordinates:', { lat, lng, original: location })
       return null
     }
-
-    console.log('✅ Parsed coordinates:', { lat, lng })
 
     // Try fetching an OSM tile via fetch (to avoid CORS on img element)
     try {
@@ -219,70 +237,112 @@ export default function SeekerTaskPdfButton({
 }: SeekerPdfProps) {
   const [tasks, setTasks] = useState<TaskWithNormalizedImage[]>([])
   const [isReady, setIsReady] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+
+  // ✅ Create a stable identifier for this set of tasks
+  const tasksKey = useMemo(() => {
+    return seekerTasks.map((t) => t.id).join('-')
+  }, [seekerTasks])
 
   useEffect(() => {
     let mounted = true
     setIsReady(false)
+    setError(null)
 
     console.log('📋 Starting to process tasks:', seekerTasks)
-    ;(async () => {
-      const normalized = await Promise.all(
-        seekerTasks.map(
-          async (task, index): Promise<TaskWithNormalizedImage> => {
-            console.log(`\n🔍 Processing task ${index + 1}:`, {
-              id: task.id,
-              description: task.description,
-              isImage: task.isImage,
-              isLocation: task.isLocation,
-              location: task.location,
-              answer: task.answer,
-            })
 
-            const result: TaskWithNormalizedImage = { ...task }
-
-            // Normalize image tasks
-            if (task.isImage && task.answer) {
-              console.log(`  📸 Normalizing image for task ${index + 1}`)
-              result.normalizedAnswer = await normalizeImage(task.answer)
-              console.log(`  ✅ Image normalized for task ${index + 1}`)
-            }
-
-            // Generate map image for location tasks
-            if (task.isLocation && task.location) {
-              console.log(`  🗺️ Generating map for task ${index + 1}`)
-              result.normalizedMapImage = await generateMapImage(task.location)
-              console.log(
-                `  ${result.normalizedMapImage ? '✅' : '❌'} Map generation ${result.normalizedMapImage ? 'succeeded' : 'failed'} for task ${index + 1}`,
-              )
-            }
-
-            return result
-          },
-        ),
-      )
-
-      console.log('\n✅ All tasks processed:', normalized)
-
+    const processTimeout = setTimeout(() => {
       if (mounted) {
-        setTasks(normalized)
+        console.error('⏱️ Processing timeout - forcing ready state')
+        setError('Some images failed to load')
         setIsReady(true)
+      }
+    }, 30000) // 30 second overall timeout
+
+    ;(async () => {
+      try {
+        const normalized = await Promise.all(
+          seekerTasks.map(
+            async (task, index): Promise<TaskWithNormalizedImage> => {
+              console.log(`\n🔍 Processing task ${index + 1}:`, {
+                id: task.id,
+                description: task.description,
+                isImage: task.isImage,
+                isLocation: task.isLocation,
+                location: task.location,
+                answer: task.answer,
+              })
+
+              const result: TaskWithNormalizedImage = { ...task }
+
+              // Normalize image tasks
+              if (task.isImage && task.answer) {
+                console.log(`  📸 Normalizing image for task ${index + 1}`)
+                result.normalizedAnswer = await normalizeImage(task.answer)
+                console.log(
+                  `  ${result.normalizedAnswer ? '✅' : '⚠️'} Image ${result.normalizedAnswer ? 'normalized' : 'failed'} for task ${index + 1}`,
+                )
+              }
+
+              // Generate map image for location tasks
+              if (task.isLocation && task.location) {
+                console.log(`  🗺️ Generating map for task ${index + 1}`)
+                result.normalizedMapImage = await generateMapImage(
+                  task.location,
+                )
+                console.log(
+                  `  ${result.normalizedMapImage ? '✅' : '❌'} Map generation ${result.normalizedMapImage ? 'succeeded' : 'failed'} for task ${index + 1}`,
+                )
+              }
+
+              return result
+            },
+          ),
+        )
+
+        console.log('\n✅ All tasks processed:', normalized)
+
+        if (mounted) {
+          setTasks(normalized)
+          setIsReady(true)
+          clearTimeout(processTimeout)
+        }
+      } catch (err) {
+        console.error('❌ Error processing tasks:', err)
+        if (mounted) {
+          setError(err instanceof Error ? err.message : 'Unknown error')
+          setIsReady(true) // Still set ready to show partial results
+          clearTimeout(processTimeout)
+        }
       }
     })()
 
     return () => {
       mounted = false
+      clearTimeout(processTimeout)
     }
-  }, [seekerTasks])
+  }, [tasksKey]) // ✅ Only re-run when the tasks actually change
 
   console.log('Seeker tasks: ', tasks)
   console.log('Is ready: ', isReady)
+  console.log('Error: ', error)
 
-  // ✅ Wait for normalization to complete before rendering
-  if (!isReady || !tasks.length) {
+  // ✅ Show loading or error state
+  if (!isReady) {
     return (
       <Document>
         <Page style={styles.page}>
-          <Text>Loading tasks...</Text>
+          <Text>Preparing PDF...</Text>
+        </Page>
+      </Document>
+    )
+  }
+
+  if (error && tasks.length === 0) {
+    return (
+      <Document>
+        <Page style={styles.page}>
+          <Text>Error loading tasks: {error}</Text>
         </Page>
       </Document>
     )
@@ -315,7 +375,7 @@ export default function SeekerTaskPdfButton({
             {task.isImage && (
               <>
                 <Text style={styles.answerLabel}>Image:</Text>
-                {task.normalizedAnswer && (
+                {task.normalizedAnswer ? (
                   <Image
                     src={task.normalizedAnswer}
                     style={{
@@ -325,6 +385,8 @@ export default function SeekerTaskPdfButton({
                       marginTop: 6,
                     }}
                   />
+                ) : (
+                  <Text style={styles.answerText}>(Image failed to load)</Text>
                 )}
               </>
             )}
@@ -349,6 +411,12 @@ export default function SeekerTaskPdfButton({
             )}
           </View>
         ))}
+
+        {error && (
+          <Text style={{ marginTop: 12, fontSize: 10, color: '#666' }}>
+            Note: Some images may not have loaded properly
+          </Text>
+        )}
       </Page>
     </Document>
   )

@@ -205,15 +205,6 @@ export default function TaskInformationWindow({
       const shouldAwardPoints = !wasCompletedBefore && taskIsCompleted
       const pointsDelta = shouldAwardPoints ? 1 : 0
 
-      if (pointsDelta > 0 && currentUserProfile) {
-        await updateProfile({
-          input: {
-            id: currentUserProfile.id,
-            points: (currentUserProfile.points ?? 0) + pointsDelta,
-          },
-        })
-      }
-
       // 🔥 2. Build updated task entry for DB
       const updatedTasksForUser = editableTasks.map((t) =>
         t.id === selectedTask.id
@@ -232,6 +223,23 @@ export default function TaskInformationWindow({
       // 🔥 3. Compute quest-wide `completed` state AFTER updating this task
       const allCompleted = updatedTasksForUser.every((t) => t.completed)
 
+      // 🔥 NEW: Check if quest was just completed (wasn't complete before, but is now)
+      const wasQuestCompletedBefore = editableTasks.every((t) => t.completed)
+      const questJustCompleted = !wasQuestCompletedBefore && allCompleted
+      const questCompletionBonus = questJustCompleted ? 20 : 0
+
+      // 🔥 NEW: Total points to award (task completion + optional quest completion bonus)
+      const totalPointsDelta = pointsDelta + questCompletionBonus
+
+      if (totalPointsDelta > 0 && currentUserProfile) {
+        await updateProfile({
+          input: {
+            id: currentUserProfile.id,
+            points: (currentUserProfile.points ?? 0) + totalPointsDelta,
+          },
+        })
+      }
+
       // 🔥 4. Save progress to UserQuest
       await updateQuestProgressInProfile(
         questId,
@@ -239,9 +247,12 @@ export default function TaskInformationWindow({
         allCompleted,
       )
 
+      // 🔥 NEW: Show appropriate success message
       toast({
-        title: 'Answer saved! ✅',
-        description: 'Your task answer has been saved successfully.',
+        title: questJustCompleted ? '🎉 Quest Completed!' : 'Answer saved! ✅',
+        description: questJustCompleted
+          ? `You've completed all tasks and earned ${totalPointsDelta} points (including 20 bonus points)!`
+          : 'Your task answer has been saved successfully.',
       })
 
       // 🔥 5. Optimistic UI update

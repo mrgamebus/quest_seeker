@@ -113,9 +113,9 @@ export default function Help() {
           <div className="flex-1 overflow-y-auto p-6 scroll-smooth">
             <div className="w-full max-w-3xl mx-auto">
               <img src={logo} alt="logo" />
-              <h1 className="text-3xl font-bold">
-                Fundraising & Fun Through Treasure Hunt Quests: QuestSeeker Help
-                Guide
+              <h1 className="text-lg font-bold">
+                Everything you need to get started — whether you're joining an
+                adventure or creating one
               </h1>
 
               <ul className="flex flex-col gap-2 mt-4">

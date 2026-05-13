@@ -93,7 +93,7 @@ export const helpSections: HelpSection[] = [
     ],
   },
   {
-    title: 'How to Participate as a Quest Seeker (Step-by-Step)',
+    title: 'How to Participate as a Quest Seeker',
     paragraphs: [
       <>
         <strong>
@@ -181,7 +181,7 @@ export const helpSections: HelpSection[] = [
     ],
   },
   {
-    title: 'How to Create a Quest as a Quest Creator (Step-by-Step)',
+    title: 'How to Create a Quest as a Quest Creator',
     paragraphs: [
       <>
         If you want to design your own treasure hunt event, QuestSeeker offers a
@@ -419,12 +419,15 @@ export const helpSections: HelpSection[] = [
       </>,
       <>
         <strong>Publish and Promote the Quest:</strong> Once you’ve set up all
-        the tasks and details, it’s time to launch your Quest! Review everything
-        (you can preview the Quest as a player would see it). When ready, hit “
-        <strong>Publish.</strong>” The Quest will go live on the platform,
-        appearing in the app’s list of available Quests. If you set a future
-        start date, it will be labeled as “Upcoming” until it starts, then
-        automatically switch to “Active” during your chosen dates.
+        the tasks and details, it’s time to launch your Quest!{' '}
+        <strong>“Save as Draft”</strong>
+        to preview your Quest or <strong>“Finish & Create Quest”</strong> to go
+        to Stripe payment gateway where you will be charged a flat-fee before
+        returning to Quest Seeker where your Quest will be published. The Quest
+        will go live on the platform, appearing in the app’s list of available
+        Quests. If you set a future start date, it will be labeled as “Upcoming”
+        until it starts, then automatically switch to “Active” during your
+        chosen dates.
       </>,
       <>
         Now, <strong>promote your Quest</strong> to get participants.
@@ -435,7 +438,7 @@ export const helpSections: HelpSection[] = [
             For a charity or community event: spread the word via email
             newsletters, your organization’s social media, community bulletin
             boards, local press, and partner organizations. Emphasize the fun
-            <strong>and</strong> the cause (e.g. “Join our scavenger hunt to
+            <strong> and</strong> the cause (e.g. “Join our scavenger hunt to
             support the animal shelter – win prizes while helping puppies!”).
             Encourage supporters to invite their friends and family.
           </li>

@@ -19,6 +19,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from './ui/dialog'
+import { useRejectCreator } from '@/hooks/useRejectCreator'
 
 export default function AdminPage() {
   const [view, setView] = useState<'pending' | 'seekers' | 'creators'>(
@@ -41,6 +42,7 @@ export default function AdminPage() {
     refetch: refetchAll,
   } = useAllUsers()
   const approveCreator = useApproveCreator()
+  const rejectCreator = useRejectCreator()
 
   const handleApprove = async (userId: string, userName: string) => {
     if (!confirm(`Approve ${userName} as a Creator?`)) return
@@ -51,6 +53,19 @@ export default function AdminPage() {
       console.error('Approval failed:', err)
       alert(
         `Failed to approve: ${err instanceof Error ? err.message : 'Unknown error'}`,
+      )
+    }
+  }
+
+  const handleReject = async (userId: string, userName: string) => {
+    if (!confirm(`Reject ${userName} as a Creator?`)) return
+    try {
+      await rejectCreator.mutateAsync(userId)
+      alert(`You have rejected ${userName} as a Creator!`)
+    } catch (err) {
+      console.error('Rejection failed:', err)
+      alert(
+        `Failed to reject: ${err instanceof Error ? err.message : 'Unknown error'}`,
       )
     }
   }
@@ -221,7 +236,7 @@ export default function AdminPage() {
                           variant="destructive"
                           onClick={(e) => {
                             e.stopPropagation() // Prevent row click
-                            console.log('Reject', user.id)
+                            handleReject(user.id, user.full_name || 'User')
                           }}
                         >
                           Reject
