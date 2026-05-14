@@ -165,7 +165,7 @@ export default function AccountPage() {
                 onClick={() => navigate('/user/help')}
                 disabled={forceNameUpdate} // Disable
               >
-                About QS
+                Help Guide
               </Button>
               <SignOutButton /> {/* NOT disabled - this one stays active */}
             </Toolbar>

@@ -16,7 +16,11 @@ type MyQuestsProps = {
 
 export default function MyQuests({ profile }: MyQuestsProps) {
   const { data: quests } = useQuestList()
-  const allQuests: Quest[] = quests ?? []
+  // Add the sort method right after the fallback assignment
+  const allQuests: Quest[] = (quests ?? []).sort(
+    (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
+  )
+
   const { deleteQuest } = useQuestDeletion()
 
   const now = new Date()
@@ -80,8 +84,6 @@ export default function MyQuests({ profile }: MyQuestsProps) {
   })
 
   return (
-    // <Card className="bg-white/80 backdrop-blur-md shadow-xl rounded-2xl p-8 max-w-md w-full">
-    //   <CardContent className="flex flex-col gap-4">
     <>
       <div className="space-y-3">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-2 gap-1">
@@ -240,12 +242,6 @@ export default function MyQuests({ profile }: MyQuestsProps) {
           </ul>
         )}
       </div>
-      {/* 
-      <Button variant="yellow" onClick={() => navigate('/user/region')}>
-        Back to Home
-      </Button> */}
     </>
-    //     </CardContent>
-    //   </Card>
   )
 }

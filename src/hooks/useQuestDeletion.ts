@@ -3,6 +3,10 @@ import { useNavigate } from 'react-router-dom'
 import { deleteS3Object } from '@/tools/deleteS3Object'
 import { useDeleteQuest } from '@/hooks/userQuests'
 import { Quest } from '@/types'
+import { generateClient as generateDataClient } from 'aws-amplify/data'
+import { Schema } from 'amplify/data/resource'
+
+const dataClient = generateDataClient<Schema>()
 
 interface UseDeleteQuestOptions {
   onSuccess?: () => void
@@ -20,8 +24,7 @@ export function useQuestDeletion(options?: UseDeleteQuestOptions) {
 
     setLoading(true)
     try {
-      // Delete main quest image
-      // Delete main quest image and thumbnail
+      // 1. Delete quest images
       if (quest.quest_image) {
         await deleteS3Object(quest.quest_image)
       }
@@ -29,7 +32,7 @@ export function useQuestDeletion(options?: UseDeleteQuestOptions) {
         await deleteS3Object(quest.quest_image_thumb)
       }
 
-      // Delete sponsor images
+      // 2. Delete sponsor images
       const sponsors = Array.isArray(quest.quest_sponsor)
         ? quest.quest_sponsor
         : JSON.parse(quest.quest_sponsor || '[]')
@@ -39,7 +42,7 @@ export function useQuestDeletion(options?: UseDeleteQuestOptions) {
         }
       }
 
-      // Delete prize images
+      // 3. Delete prize images
       const prizes = Array.isArray(quest.quest_prize_info)
         ? quest.quest_prize_info
         : JSON.parse(quest.quest_prize_info || '[]')
@@ -49,13 +52,15 @@ export function useQuestDeletion(options?: UseDeleteQuestOptions) {
         }
       }
 
-      // Delete quest record
+      // 4. Delete all UserQuests for this quest and their task images
+      await deleteUserQuestsAndTaskImages(quest.id)
+
+      // 5. Delete quest record
       await deleteQuestMutation.mutateAsync(quest.id)
 
       window.alert('Quest and associated images deleted successfully!')
       options?.onSuccess?.()
 
-      // 👇 Only navigate if the caller didn't request to stay on page
       if (!opts?.stayHere) {
         navigate(-1)
       }
@@ -69,4 +74,76 @@ export function useQuestDeletion(options?: UseDeleteQuestOptions) {
   }
 
   return { deleteQuest, loading }
+}
+
+// Helper function to delete UserQuests and their task images
+async function deleteUserQuestsAndTaskImages(questId: string) {
+  try {
+    // Fetch all UserQuests for this quest
+    const { data, errors } = await dataClient.models.UserQuest.list({
+      filter: { questId: { eq: questId } },
+    })
+
+    if (errors?.length) {
+      console.error('Error fetching UserQuests:', errors)
+      throw new Error(errors[0].message)
+    }
+
+    const userQuests = data ?? []
+
+    // Process each UserQuest
+    for (const userQuest of userQuests) {
+      // Delete task images from S3
+      if (userQuest.tasks) {
+        let tasks
+        try {
+          tasks =
+            typeof userQuest.tasks === 'string'
+              ? JSON.parse(userQuest.tasks)
+              : userQuest.tasks
+        } catch (err) {
+          console.error(
+            'Failed to parse tasks for UserQuest:',
+            userQuest.id,
+            err,
+          )
+          tasks = []
+        }
+
+        for (const task of tasks) {
+          // Handle both DynamoDB Map format and regular format
+          const taskData = task.M || task
+
+          // Extract values (handle DynamoDB format)
+          const isImage = taskData.isImage?.BOOL ?? taskData.isImage
+          const answer = taskData.answer?.S ?? taskData.answer
+
+          // Delete image if this is an image task with an answer
+          if (isImage && answer) {
+            console.log('🗑️ Deleting task image:', answer)
+            await deleteS3Object(answer)
+          }
+        }
+      }
+
+      // Delete the UserQuest record
+      console.log('🗑️ Deleting UserQuest:', userQuest.id)
+      const { errors: deleteErrors } = await dataClient.models.UserQuest.delete(
+        {
+          id: userQuest.id,
+        },
+      )
+
+      if (deleteErrors?.length) {
+        console.error('Error deleting UserQuest:', deleteErrors)
+      }
+    }
+
+    console.log(
+      `✅ Deleted ${userQuests.length} UserQuest records and their images`,
+    )
+  } catch (err) {
+    console.error('Failed to delete UserQuests:', err)
+    // Don't throw - we still want to delete the quest even if UserQuest deletion fails
+  }
 }

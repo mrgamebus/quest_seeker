@@ -507,6 +507,8 @@ export default function QuestDetailPage() {
     (currentUserProfile?.role === 'creator' ||
       currentUserProfile.role === 'Admin')
 
+  const isAdmin = currentUserProfile.role === 'Admin'
+
   const joinedQuestEntry = userQuests?.find((uq) => uq.questId === quest.id)
   const hasJoined = !!joinedQuestEntry
   const joinedTasks = Array.isArray(joinedQuestEntry?.tasks)
@@ -657,7 +659,6 @@ export default function QuestDetailPage() {
               <Button
                 variant="yellow"
                 onClick={() => navigate('/user/region')}
-                size="icon"
                 aria-label="Home"
               >
                 <Home />
@@ -1757,6 +1758,15 @@ export default function QuestDetailPage() {
                 )}
               </div>
             </div>
+            {isAdmin && (
+              <Button
+                onClick={() => deleteQuest(quest)}
+                className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded"
+                disabled={deleting}
+              >
+                {deleting ? 'Deleting...' : 'Delete Quest'}
+              </Button>
+            )}
           </div>
         </CardContent>
       </Card>
