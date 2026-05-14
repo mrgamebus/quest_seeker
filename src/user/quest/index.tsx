@@ -213,7 +213,7 @@ export default function QuestPage() {
               </Button>
 
               <Button variant="yellow" onClick={() => navigate('/user/help')}>
-                About QS
+                Help Guide
               </Button>
 
               <SignOutButton />

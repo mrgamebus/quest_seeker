@@ -112,6 +112,22 @@ export const useDeleteQuest = () => {
   })
 }
 
+export const useDeleteUserQuest = () => {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: async (id: string) => {
+      const { errors } = await dataClient.models.UserQuest.delete({ id })
+      if (errors?.length) throw new Error(errors[0].message)
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['userQuests'] })
+      queryClient.invalidateQueries({ queryKey: ['allUserQuests'] })
+      queryClient.invalidateQueries({ queryKey: ['questParticipants'] })
+    },
+  })
+}
+
 export const useUserQuests = (profileId?: string) => {
   return useQuery({
     queryKey: ['userQuests', profileId],

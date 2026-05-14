@@ -9,7 +9,7 @@ export function useRejectCreator() {
 
   return useMutation({
     mutationFn: async (profileId: string) => {
-      const { data, errors } = await client.mutations.approveCreator({
+      const { data, errors } = await client.mutations.rejectCreator({
         profileId,
       })
 
