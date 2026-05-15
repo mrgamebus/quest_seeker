@@ -18,7 +18,8 @@ export default function MyQuests({ profile }: MyQuestsProps) {
   const { data: quests } = useQuestList()
   // Add the sort method right after the fallback assignment
   const allQuests: Quest[] = (quests ?? []).sort(
-    (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
+    (a: { createdAt: string }, b: { createdAt: string }) =>
+      new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
   )
 
   const { deleteQuest } = useQuestDeletion()
