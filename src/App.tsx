@@ -78,7 +78,7 @@ export default function App() {
           <Authenticator
             components={components}
             formFields={formFields}
-            hideSignUp={true}
+            // hideSignUp={true}
           >
             {({ user }) => {
               return user ? <UserRoutes /> : <div>Loading...</div>
