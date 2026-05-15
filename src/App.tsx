@@ -75,7 +75,11 @@ export default function App() {
       <Route
         path="/user/*"
         element={
-          <Authenticator components={components} formFields={formFields}>
+          <Authenticator
+            components={components}
+            formFields={formFields}
+            hideSignUp={true}
+          >
             {({ user }) => {
               return user ? <UserRoutes /> : <div>Loading...</div>
             }}
