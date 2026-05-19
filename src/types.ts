@@ -133,3 +133,13 @@ export type PdfUser = {
 }
 
 export type UserQuest = Schema['UserQuest']['type'] & { tasks: Task[] }
+
+export type Winner = {
+  place: number
+  prize_id: string
+  user_id: string
+  username: string
+  email: string
+  phone: string
+  selected_at: string
+}
