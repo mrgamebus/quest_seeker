@@ -10,7 +10,6 @@ export const handler: Schema['createStripeSession']['functionHandler'] = async (
 ) => {
   const { questId, profileId, returnUrl } = event.arguments
 
-  // 1. Logic: Map business types to prices (in cents for Stripe)
   const priceMap: Record<string, number> = {
     'Registered Company': 95000,
     'Small Business': 29900,
@@ -29,16 +28,12 @@ export const handler: Schema['createStripeSession']['functionHandler'] = async (
     }
   `
 
-  // Execute the signed fetch
   const response = await signedAppSyncFetch(query, { id: profileId })
   const result = await response.json()
 
-  // ⚠️ IMPORTANT: Access via result.data.getProfile
   const profile = result.data?.getProfile
 
   if (!profile) {
-    // If result.errors exists, it's a permission issue.
-    // If result.data.getProfile is null, the ID doesn't exist.
     console.error('AppSync Error Details:', JSON.stringify(result.errors))
     throw new Error(`Profile not found: ${profileId}`)
   }

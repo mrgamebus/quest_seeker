@@ -70,17 +70,16 @@ export const schema = a
       'UPDATE_COMPLETED',
     ]),
 
-    // Return type for mutateQuest
     MutateQuestResponse: a.customType({
       questId: a.string().required(),
       status: a.ref('QuestStatus').required(),
     }),
-    /* --- 2. CUSTOM MUTATIONS --- */
+    /* --- CUSTOM MUTATIONS --- */
 
     mutateQuest: a
       .mutation()
       .arguments({
-        action: a.ref('MutateQuestAction').required(), // Use .ref() for enums in args
+        action: a.ref('MutateQuestAction').required(),
         questId: a.string(),
         name: a.string(),
         details: a.string(),
@@ -97,7 +96,7 @@ export const schema = a
         status: a.string(),
         creator_message: a.string(),
       })
-      .returns(a.ref('MutateQuestResponse')) // Reference the customType here
+      .returns(a.ref('MutateQuestResponse'))
       .authorization((allow) => [allow.groups(['creator', 'Admin'])])
       .handler(a.handler.function(mutateQuest)),
 
@@ -110,7 +109,7 @@ export const schema = a
       })
       .returns(a.string())
       .authorization((allow) => [allow.authenticated()])
-      .handler(a.handler.function(createStripeSession)), // Ensure this matches your imported resource
+      .handler(a.handler.function(createStripeSession)),
 
     createQuestEntrySession: a
       .mutation()
@@ -199,9 +198,7 @@ export const schema = a
         tasks: a.json(),
       })
       .secondaryIndexes((index) => [
-        // GSI1: find all users on a quest
         index('questId').queryField('listUsersByQuest'),
-        // GSI2: find all users on a quest by status
         index('questId')
           .sortKeys(['status'])
           .queryField('listUsersByQuestAndStatus'),
@@ -213,8 +210,6 @@ export const schema = a
       ]),
   })
   .authorization((allow) => [
-    // 🔗 This global block IS where you grant function access.
-    // It applies IAM permissions across the data resources.
     allow.resource(joinQuest),
     allow.resource(expiredQuests).to(['query', 'mutate']),
     allow.resource(postRegistration).to(['mutate']),

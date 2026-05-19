@@ -20,9 +20,8 @@ const ddb = DynamoDBDocumentClient.from(client, {
 
 const QUEST_TABLE = process.env.QUEST_TABLE_NAME!
 
-// -----------------------------
 // Types
-// -----------------------------
+
 type QuestAction =
   | 'CREATE_DRAFT'
   | 'UPDATE_DRAFT'
@@ -64,7 +63,7 @@ interface AppSyncEvent {
     tasks?: unknown
     quest_winners?: string
     status?: string
-    creator_message?: string // ✅ Add this line
+    creator_message?: string
   }
   identity: {
     sub: string
@@ -74,9 +73,8 @@ interface AppSyncEvent {
   }
 }
 
-// -----------------------------
 // Handler
-// -----------------------------
+
 export const handler = async (event: AppSyncEvent) => {
   const input = event.arguments
   const userId = event.identity.sub
@@ -91,9 +89,8 @@ export const handler = async (event: AppSyncEvent) => {
 
   const now = new Date().toISOString()
 
-  // -----------------------------
   // JSON Helper
-  // -----------------------------
+
   const parseAwsJson = <T>(value: unknown, fallback: T): T => {
     if (value === undefined || value === null) return fallback
     if (typeof value === 'string') return JSON.parse(value)
@@ -105,7 +102,6 @@ export const handler = async (event: AppSyncEvent) => {
     if (typeof value === 'string') {
       try {
         const parsed = JSON.parse(value)
-        // If it parsed to an array or object, re-stringify cleanly
         return JSON.stringify(parsed)
       } catch {
         return fallback
@@ -114,15 +110,12 @@ export const handler = async (event: AppSyncEvent) => {
     return JSON.stringify(value)
   }
 
-  // -----------------------------
   // CREATE DRAFT
-  // -----------------------------
+
   if (input.action === 'CREATE_DRAFT') {
     const questId = randomUUID()
 
     const normalizedTasks = normalizeAwsJson(input.tasks)
-    console.log('about to write tasks:', normalizedTasks)
-    console.log('tasks type:', typeof normalizedTasks)
 
     await ddb.send(
       new PutCommand({
@@ -155,9 +148,6 @@ export const handler = async (event: AppSyncEvent) => {
     }
   }
 
-  // -----------------------------
-  // UPDATE / PUBLISH (needs quest)
-  // -----------------------------
   if (!input.questId) {
     throw new Error('questId is required')
   }
@@ -175,47 +165,38 @@ export const handler = async (event: AppSyncEvent) => {
 
   const quest = existing.Item
 
-  // Ownership enforcement
   if (quest.creator_id !== userId && !isAdmin) {
     throw new Error('Not allowed to modify this quest')
   }
 
-  // ✅ UPDATE_COMPLETED: Allow creators to update winners AND restart expired quests
   if (input.action === 'UPDATE_COMPLETED') {
     if (quest.status !== 'expired') {
       throw new Error('Can only update completed quests that have expired')
     }
 
-    // Build dynamic update based on what's provided
     const updateParts: string[] = []
     const attributeNames: Record<string, string> = {}
     const attributeValues: Record<string, unknown> = {
       ':updatedAt': now,
     }
 
-    // Always allow winner updates
     if (input.quest_winners !== undefined) {
       updateParts.push('quest_winners = :winners')
       attributeValues[':winners'] = input.quest_winners
     }
 
-    // ✅ Allow creator message updates
     if (input.creator_message !== undefined) {
       updateParts.push('creator_message = :creatorMessage')
       attributeValues[':creatorMessage'] = input.creator_message
     }
 
-    // ✅ Allow status change (for restart) - ONLY IF PROVIDED
     if (input.status !== undefined && input.status !== null) {
-      // ← ADD THIS CHECK
       updateParts.push('#status = :status')
       attributeNames['#status'] = 'status'
       attributeValues[':status'] = input.status
     }
 
-    // ✅ Allow end date extension (for restart) - ONLY IF PROVIDED
     if (input.endAt !== undefined && input.endAt !== null) {
-      // ← ADD THIS CHECK
       updateParts.push('quest_end_at = :endAt')
       attributeValues[':endAt'] = input.endAt
     }
@@ -236,11 +217,10 @@ export const handler = async (event: AppSyncEvent) => {
 
     return {
       questId: input.questId,
-      status: input.status ?? quest.status, // ← Return existing status if not updating
+      status: input.status ?? quest.status,
     }
   }
 
-  // Published quests are immutable (except admin or UPDATE_PUBLISHED)
   if (
     quest.status === 'published' &&
     !isAdmin &&
@@ -249,9 +229,6 @@ export const handler = async (event: AppSyncEvent) => {
     throw new Error('Published quests cannot be edited')
   }
 
-  // -----------------------------
-  // PUBLISH validation
-  // -----------------------------
   if (input.action === 'PUBLISH') {
     if (!input.name) throw new Error('Quest name required')
     if (!input.details) throw new Error('Quest details required')
@@ -268,9 +245,6 @@ export const handler = async (event: AppSyncEvent) => {
     }
   }
 
-  // -----------------------------
-  // Build update expression
-  // -----------------------------
   const updates: Record<string, unknown> = {
     quest_name: input.name ?? quest.quest_name,
     quest_details: input.details ?? quest.quest_details,
@@ -304,9 +278,6 @@ export const handler = async (event: AppSyncEvent) => {
     updates.published_at = now
   }
 
-  // -----------------------------
-  // DynamoDB update
-  // -----------------------------
   const expressionParts: string[] = []
   const ExpressionAttributeNames: Record<string, string> = {}
   const ExpressionAttributeValues: Record<string, unknown> = {}

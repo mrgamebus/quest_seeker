@@ -61,9 +61,7 @@ export const handler = async (event: LambdaFunctionURLEvent) => {
     const { questId, profileId, type } = session.metadata ?? {}
     const now = new Date().toISOString()
 
-    // ✅ Quest publication payment
     if (type !== 'quest_entry' && questId) {
-      // Fetch quest for name
       const { Item: quest } = await ddb.send(
         new GetCommand({ TableName: QUEST_TABLE, Key: { id: questId } }),
       )
@@ -79,14 +77,12 @@ export const handler = async (event: LambdaFunctionURLEvent) => {
           ConditionExpression: 'attribute_exists(id)',
         }),
       )
-      console.log(`Quest ${questId} successfully published`)
 
-      // ✅ Send published email to creator
       try {
         const creatorId = quest?.creator_id
         if (creatorId) {
           await sendPublishedEmail(
-            creatorId, // 👈 creatorId not questId
+            creatorId,
             quest?.quest_name ?? 'your quest',
             PROFILE_TABLE,
           )
@@ -96,9 +92,7 @@ export const handler = async (event: LambdaFunctionURLEvent) => {
       }
     }
 
-    // ✅ Quest entry payment
     if (type === 'quest_entry' && questId && profileId) {
-      // 1️⃣ Fetch quest for tasks
       const { Item: quest } = await ddb.send(
         new GetCommand({ TableName: QUEST_TABLE, Key: { id: questId } }),
       )
@@ -108,7 +102,6 @@ export const handler = async (event: LambdaFunctionURLEvent) => {
         return { statusCode: 200, body: JSON.stringify({ received: true }) }
       }
 
-      // 2️⃣ Parse quest tasks
       const rawTasks = (() => {
         try {
           if (!quest.quest_tasks) return []
@@ -133,7 +126,6 @@ export const handler = async (event: LambdaFunctionURLEvent) => {
         })),
       )
 
-      // 3️⃣ Create UserQuest item
       try {
         await ddb.send(
           new PutCommand({
@@ -154,9 +146,6 @@ export const handler = async (event: LambdaFunctionURLEvent) => {
             ConditionExpression: 'attribute_not_exists(id)',
           }),
         )
-        console.log(
-          `UserQuest created for profile ${profileId} quest ${questId}`,
-        )
       } catch (err: unknown) {
         const name = (err as { name: string }).name
         if (name === 'ConditionalCheckFailedException') {
@@ -166,7 +155,6 @@ export const handler = async (event: LambdaFunctionURLEvent) => {
         }
       }
 
-      // 4️⃣ Award join points
       await ddb.send(
         new UpdateCommand({
           TableName: PROFILE_TABLE,

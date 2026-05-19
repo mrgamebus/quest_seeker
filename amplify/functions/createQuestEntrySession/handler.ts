@@ -1,4 +1,3 @@
-// amplify/functions/createQuestEntrySession/handler.ts
 import type { Schema } from '../../data/resource'
 import Stripe from 'stripe'
 import { env } from '$amplify/env/createQuestEntrySession'
@@ -35,7 +34,7 @@ export const handler: Schema['createQuestEntrySession']['functionHandler'] =
       metadata: {
         questId,
         profileId,
-        type: 'quest_entry', // 👈 distinguishes from publication payments in webhook
+        type: 'quest_entry',
       },
     })
 
