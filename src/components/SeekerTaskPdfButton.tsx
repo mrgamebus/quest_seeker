@@ -238,24 +238,20 @@ export default function SeekerTaskPdfButton({
     ;(async () => {
       try {
         const normalized = await Promise.all(
-          seekerTasks.map(
-            async (task, index): Promise<TaskWithNormalizedImage> => {
-              const result: TaskWithNormalizedImage = { ...task }
+          seekerTasks.map(async (task): Promise<TaskWithNormalizedImage> => {
+            const result: TaskWithNormalizedImage = { ...task }
 
-              if (task.isImage && task.answer) {
-                result.normalizedAnswer = await normalizeImage(task.answer)
-              }
+            if (task.isImage && task.answer) {
+              result.normalizedAnswer = await normalizeImage(task.answer)
+            }
 
-              // Generate map image for location tasks
-              if (task.isLocation && task.location) {
-                result.normalizedMapImage = await generateMapImage(
-                  task.location,
-                )
-              }
+            // Generate map image for location tasks
+            if (task.isLocation && task.location) {
+              result.normalizedMapImage = await generateMapImage(task.location)
+            }
 
-              return result
-            },
-          ),
+            return result
+          }),
         )
 
         if (mounted) {
