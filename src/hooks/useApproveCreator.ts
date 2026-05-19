@@ -20,7 +20,6 @@ export function useApproveCreator() {
       return data
     },
     onSuccess: () => {
-      // Refetch the pending users list
       queryClient.invalidateQueries({ queryKey: ['pendingUsers'] })
     },
   })

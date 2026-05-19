@@ -18,14 +18,14 @@ type ProfileProps = {
   profile: Profile
   onUpdate: (updates: Partial<Profile>) => void
   isProfileComplete: boolean
-  forceNameUpdate?: boolean // Add this prop
+  forceNameUpdate?: boolean
 }
 
 export default function UpdateAccount({
   profile,
   onUpdate,
   isProfileComplete,
-  forceNameUpdate: forceNameUpdateProp, // Rename to avoid conflict
+  forceNameUpdate: forceNameUpdateProp,
 }: ProfileProps) {
   const forceNameUpdate =
     forceNameUpdateProp ?? profile.full_name === profile.email
@@ -36,7 +36,6 @@ export default function UpdateAccount({
     profile.image_thumbnail || '',
   )
 
-  // ✅ Keep oldImagePath updated when profile changes
   useEffect(() => {
     if (profile.image) {
       setOldImagePath(profile.image)
@@ -53,19 +52,16 @@ export default function UpdateAccount({
     const file = e.target.files?.[0]
     if (!file || !profile.id) return
 
-    // Show local preview immediately
     setPreviewImage(URL.createObjectURL(file))
 
     try {
-      // 1️⃣ Upload full image + thumbnail
       const { fullPath, thumbPath } = await uploadImageWithThumbnail(file)
       if (!fullPath || !thumbPath) return
 
-      // 2️⃣ Delete old images if needed
       if (
         oldImagePath &&
         !oldImagePath.startsWith('http') &&
-        oldImagePath !== fullPath // ← guard against same path
+        oldImagePath !== fullPath
       ) {
         try {
           const cleanFull = oldImagePath.startsWith('/')
@@ -81,7 +77,6 @@ export default function UpdateAccount({
         }
       }
 
-      // 3️⃣ Update state & profile
       setOldImagePath(fullPath)
       setOldImageThumbPath(thumbPath)
       onUpdate({ image: fullPath, image_thumbnail: thumbPath })
@@ -90,7 +85,6 @@ export default function UpdateAccount({
     }
   }
 
-  // Helper function to upload full + thumbnail
   const uploadImageWithThumbnail = async (
     file: File,
   ): Promise<{ fullPath: string; thumbPath: string }> => {
@@ -98,10 +92,9 @@ export default function UpdateAccount({
     const thumbPath = `public/thumbnails/${crypto.randomUUID()}-${file.name}`
 
     try {
-      // 1️⃣ Convert + upload FULL image (WebP)
       const compressedFullFile = await imageCompression(file, {
-        maxWidthOrHeight: 1400, // good balance for quality
-        maxSizeMB: 1, // ~1MB max
+        maxWidthOrHeight: 1400,
+        maxSizeMB: 1,
         fileType: 'image/webp',
         useWebWorker: true,
       })
@@ -114,7 +107,6 @@ export default function UpdateAccount({
         },
       })
 
-      // 2️⃣ Convert + upload THUMBNAIL (WebP)
       const compressedThumbFile = await imageCompression(file, {
         maxWidthOrHeight: 300,
         maxSizeMB: 0.2,

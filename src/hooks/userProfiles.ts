@@ -40,12 +40,12 @@ export const useProfile = (
   return useQuery<GetProfileQuery['getProfile'] | null, Error>({
     queryKey: ['profiles', id],
     queryFn: async () => {
-      if (!id) return null // ✅ skip if no id
+      if (!id) return null
 
       const result = await client.graphql<GraphQLResult<GetProfileQuery>>({
         query: getProfile,
         variables: { id },
-        authMode: 'userPool', // ✅ force Cognito auth
+        authMode: 'userPool',
       })
 
       if ('data' in result) {
@@ -53,7 +53,7 @@ export const useProfile = (
       }
       return null
     },
-    enabled: !!id, // ✅ don’t run if id is falsy
+    enabled: !!id,
     ...options,
   })
 }
@@ -64,7 +64,6 @@ export const useCurrentUserProfile = () => {
     queryFn: async () => {
       const { userId, signInDetails } = await getCurrentUser()
 
-      // 1️⃣ Fetch profile
       const res = await client.graphql<GetProfileQuery>({
         query: getProfile,
         variables: { id: userId },
@@ -73,7 +72,6 @@ export const useCurrentUserProfile = () => {
 
       let profile = 'data' in res ? (res.data?.getProfile ?? null) : null
 
-      // 2️⃣ Create profile if missing
       if (!profile) {
         const createRes = await client.graphql<CreateProfileMutation>({
           query: createProfile,
@@ -127,14 +125,10 @@ export const useUpdateProfile = (
 
       const updated = result.data.updateProfile
 
-      console.log('🟢 useUpdateProfile returned profile:', updated)
-
       return updated
     },
-    // src/hooks/userProfiles.ts
 
     onSuccess: (data, variables, onMutateResult, context) => {
-      // 1. Use 4 args here
       queryClient.invalidateQueries({ queryKey: profileKeys.current })
 
       if (variables?.input?.id) {
@@ -143,11 +137,10 @@ export const useUpdateProfile = (
         })
       }
 
-      // 2. Pass all 4 args to your internal options callback
       options?.onSuccess?.(data, variables, onMutateResult, context)
     },
 
-    ...options, // spread any other options
+    ...options,
   })
 }
 
@@ -159,7 +152,7 @@ export const useUpdateSeeker = () => {
       const result = (await client.graphql<UpdateProfileMutation>({
         query: updateProfile,
         variables,
-      })) as { data: UpdateProfileMutation } // force-narrow to GraphQL shape
+      })) as { data: UpdateProfileMutation }
 
       return result.data.updateProfile
     },

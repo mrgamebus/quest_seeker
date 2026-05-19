@@ -5,10 +5,8 @@ export function ensureArray<T>(value: unknown): T[] {
     try {
       let parsed = JSON.parse(value)
       if (typeof parsed === 'string') {
-        // second parse if double-encoded
         parsed = JSON.parse(parsed)
       }
-      console.log('Final parsed:', parsed)
       return Array.isArray(parsed) ? parsed : []
     } catch (err) {
       console.error('ensureArray JSON parse failed:', err)

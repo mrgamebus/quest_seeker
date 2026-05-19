@@ -30,8 +30,6 @@ export default function Support() {
         )
       }
 
-      console.log('Sending to:', functionUrl)
-
       const response = await fetch(functionUrl, {
         method: 'POST',
         headers: {

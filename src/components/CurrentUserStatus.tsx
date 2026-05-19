@@ -33,8 +33,8 @@ export default function CurrentUserStatus({
     accountNumber: '',
   })
   const { submitApplication, isSending } = useBecomePending()
-  const { refetch } = useCurrentUserProfile() // ✅ Get refetch from the hook
-  const navigate = useNavigate() // ✅ Import from react-router-dom
+  const { refetch } = useCurrentUserProfile()
+  const navigate = useNavigate()
 
   const isBankValid =
     bankDetails.accountName.trim() !== '' &&
@@ -67,7 +67,6 @@ export default function CurrentUserStatus({
           : 'Application submitted successfully!',
       )
 
-      // ✅ Navigate back to account page
       navigate('/user/account', { replace: true })
     } else {
       alert(`Failed to send: ${result.error}`)

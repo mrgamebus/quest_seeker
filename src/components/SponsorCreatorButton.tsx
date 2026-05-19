@@ -2,12 +2,9 @@ import React, { useEffect, useState } from 'react'
 import { SponsorCreatorButtonProps, Sponsor } from '@/types'
 import { SponsorModal } from './SponsorModal'
 import { uploadData } from 'aws-amplify/storage'
-// import { Switch } from './ui/switch'
-// import PrizeCreatorButton from './PrizeCreatorButton'
 import { deleteS3Object } from '@/tools/deleteS3Object'
 import RemoteImage from './RemoteImage'
 import placeHold from '@/assets/images/placeholder_view_vector.svg'
-// import { PrizeModal } from './PrizeModal'
 
 const SponsorCreatorButton: React.FC<SponsorCreatorButtonProps> = ({
   sponsorUpdates,
@@ -38,7 +35,6 @@ const SponsorCreatorButton: React.FC<SponsorCreatorButtonProps> = ({
   const handleAddSponsor = async () => {
     if (!sponsor) return
 
-    // ---------------- Add/Update Sponsor ----------------
     const updatedSponsors = [...sponsors]
     let sponsorImagePath =
       editIndex !== -1 ? updatedSponsors[editIndex].image : ''
@@ -58,7 +54,6 @@ const SponsorCreatorButton: React.FC<SponsorCreatorButtonProps> = ({
         }
       }
     } else if (!sponsorImage && editIndex !== -1 && currentSponsorImage) {
-      // ✅ Sponsor image unchecked — delete old image and clear path
       await deleteS3Object(currentSponsorImage)
       sponsorImagePath = ''
     }
@@ -177,12 +172,12 @@ const SponsorCreatorButton: React.FC<SponsorCreatorButtonProps> = ({
           sponsors={sponsors}
           setSponsors={setSponsors}
           setSponsor={setSponsor}
-          setPreview={setPreviewUrl} // renamed for clarity
+          setPreview={setPreviewUrl}
           setEditIndex={setEditIndex}
           visible={modalVisible}
           onClose={() => setModalVisible(false)}
           onNewSponsor={onNewSponsor}
-          handleEdit={handleEdit} // pass edit handler
+          handleEdit={handleEdit}
         />
       )}
     </div>

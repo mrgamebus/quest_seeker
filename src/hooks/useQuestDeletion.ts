@@ -85,7 +85,6 @@ async function deleteUserQuestsAndTaskImages(questId: string) {
     })
 
     if (errors?.length) {
-      console.error('Error fetching UserQuests:', errors)
       throw new Error(errors[0].message)
     }
 
@@ -111,23 +110,19 @@ async function deleteUserQuestsAndTaskImages(questId: string) {
         }
 
         for (const task of tasks) {
-          // Handle both DynamoDB Map format and regular format
           const taskData = task.M || task
 
-          // Extract values (handle DynamoDB format)
           const isImage = taskData.isImage?.BOOL ?? taskData.isImage
           const answer = taskData.answer?.S ?? taskData.answer
 
           // Delete image if this is an image task with an answer
           if (isImage && answer) {
-            console.log('🗑️ Deleting task image:', answer)
             await deleteS3Object(answer)
           }
         }
       }
 
       // Delete the UserQuest record
-      console.log('🗑️ Deleting UserQuest:', userQuest.id)
       const { errors: deleteErrors } = await dataClient.models.UserQuest.delete(
         {
           id: userQuest.id,
@@ -138,12 +133,7 @@ async function deleteUserQuestsAndTaskImages(questId: string) {
         console.error('Error deleting UserQuest:', deleteErrors)
       }
     }
-
-    console.log(
-      `✅ Deleted ${userQuests.length} UserQuest records and their images`,
-    )
   } catch (err) {
     console.error('Failed to delete UserQuests:', err)
-    // Don't throw - we still want to delete the quest even if UserQuest deletion fails
   }
 }

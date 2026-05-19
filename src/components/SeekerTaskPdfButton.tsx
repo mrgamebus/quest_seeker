@@ -36,13 +36,11 @@ type TaskWithNormalizedImage = Task & {
   normalizedMapImage?: string | null
 }
 
-// ✅ ADD TIMEOUT AND BETTER ERROR HANDLING
 async function normalizeImage(url: string): Promise<string | null> {
   try {
     const img = new window.Image()
     img.crossOrigin = 'anonymous'
 
-    // Add timeout protection
     const loadPromise = new Promise<void>((resolve, reject) => {
       img.onload = () => resolve()
       img.onerror = () => reject(new Error('Image load failed'))
@@ -67,11 +65,10 @@ async function normalizeImage(url: string): Promise<string | null> {
     return canvas.toDataURL('image/jpeg', 0.92)
   } catch (error) {
     console.error('❌ Image normalization failed:', url, error)
-    return null // Return null instead of throwing
+    return null
   }
 }
 
-// Create a visual map placeholder with coordinates
 function createMapPlaceholder(lat: number, lng: number): string {
   const canvas = document.createElement('canvas')
   const size = 400
@@ -79,14 +76,12 @@ function createMapPlaceholder(lat: number, lng: number): string {
   canvas.height = size
   const ctx = canvas.getContext('2d')!
 
-  // Background gradient
   const gradient = ctx.createLinearGradient(0, 0, 0, size)
   gradient.addColorStop(0, '#e8f4f8')
   gradient.addColorStop(1, '#b8d4e8')
   ctx.fillStyle = gradient
   ctx.fillRect(0, 0, size, size)
 
-  // Grid lines (to simulate map)
   ctx.strokeStyle = '#90b8d0'
   ctx.lineWidth = 1
   const gridSize = 40
@@ -101,19 +96,16 @@ function createMapPlaceholder(lat: number, lng: number): string {
     ctx.stroke()
   }
 
-  // Pin shadow
   ctx.fillStyle = 'rgba(0, 0, 0, 0.2)'
   ctx.beginPath()
   ctx.ellipse(size / 2, size / 2 + 65, 20, 8, 0, 0, Math.PI * 2)
   ctx.fill()
 
-  // Pin body (red marker)
   ctx.fillStyle = '#ff4444'
   ctx.beginPath()
   ctx.arc(size / 2, size / 2 - 20, 25, 0, Math.PI * 2)
   ctx.fill()
 
-  // Pin point
   ctx.beginPath()
   ctx.moveTo(size / 2, size / 2 + 5)
   ctx.lineTo(size / 2 - 15, size / 2 + 35)
@@ -121,25 +113,21 @@ function createMapPlaceholder(lat: number, lng: number): string {
   ctx.closePath()
   ctx.fill()
 
-  // Pin inner circle (white)
   ctx.fillStyle = '#ffffff'
   ctx.beginPath()
   ctx.arc(size / 2, size / 2 - 20, 10, 0, Math.PI * 2)
   ctx.fill()
 
-  // Border
   ctx.strokeStyle = '#4a90a4'
   ctx.lineWidth = 3
   ctx.strokeRect(0, 0, size, size)
 
-  // Text background
   ctx.fillStyle = 'rgba(255, 255, 255, 0.95)'
   ctx.fillRect(20, size - 100, size - 40, 80)
   ctx.strokeStyle = '#4a90a4'
   ctx.lineWidth = 2
   ctx.strokeRect(20, size - 100, size - 40, 80)
 
-  // Text
   ctx.fillStyle = '#333'
   ctx.font = 'bold 20px Arial'
   ctx.textAlign = 'center'
@@ -155,13 +143,9 @@ function createMapPlaceholder(lat: number, lng: number): string {
   return canvas.toDataURL('image/png')
 }
 
-// ✅ ADD TIMEOUT TO MAP GENERATION
 async function generateMapImage(location: string): Promise<string | null> {
   try {
-    console.log('🗺️ Generating map for location:', location)
-
     if (!location || location.trim() === '') {
-      console.log('❌ No location provided')
       return null
     }
 
@@ -188,7 +172,6 @@ async function generateMapImage(location: string): Promise<string | null> {
       return null
     }
 
-    // Try fetching an OSM tile via fetch (to avoid CORS on img element)
     try {
       const zoom = 15
       const tileX = Math.floor(((lng + 180) / 360) * Math.pow(2, zoom))
@@ -204,7 +187,6 @@ async function generateMapImage(location: string): Promise<string | null> {
       )
 
       const tileUrl = `https://tile.openstreetmap.org/${zoom}/${tileX}/${tileY}.png`
-      console.log('🔍 Fetching OSM tile:', tileUrl)
 
       const response = await fetch(tileUrl)
       if (!response.ok) throw new Error('Tile fetch failed')
@@ -217,11 +199,8 @@ async function generateMapImage(location: string): Promise<string | null> {
         reader.readAsDataURL(blob)
       })
 
-      console.log('✅ OSM tile converted successfully')
       return base64
     } catch (tileError) {
-      console.log('⚠️ Tile fetch failed, using placeholder:', tileError)
-      // Always fall back to placeholder - it's reliable and looks professional
       return createMapPlaceholder(lat, lng)
     }
   } catch (error) {
@@ -239,7 +218,6 @@ export default function SeekerTaskPdfButton({
   const [isReady, setIsReady] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
-  // ✅ Create a stable identifier for this set of tasks
   const tasksKey = useMemo(() => {
     return seekerTasks.map((t) => t.id).join('-')
   }, [seekerTasks])
@@ -248,8 +226,6 @@ export default function SeekerTaskPdfButton({
     let mounted = true
     setIsReady(false)
     setError(null)
-
-    console.log('📋 Starting to process tasks:', seekerTasks)
 
     const processTimeout = setTimeout(() => {
       if (mounted) {
@@ -264,34 +240,16 @@ export default function SeekerTaskPdfButton({
         const normalized = await Promise.all(
           seekerTasks.map(
             async (task, index): Promise<TaskWithNormalizedImage> => {
-              console.log(`\n🔍 Processing task ${index + 1}:`, {
-                id: task.id,
-                description: task.description,
-                isImage: task.isImage,
-                isLocation: task.isLocation,
-                location: task.location,
-                answer: task.answer,
-              })
-
               const result: TaskWithNormalizedImage = { ...task }
 
-              // Normalize image tasks
               if (task.isImage && task.answer) {
-                console.log(`  📸 Normalizing image for task ${index + 1}`)
                 result.normalizedAnswer = await normalizeImage(task.answer)
-                console.log(
-                  `  ${result.normalizedAnswer ? '✅' : '⚠️'} Image ${result.normalizedAnswer ? 'normalized' : 'failed'} for task ${index + 1}`,
-                )
               }
 
               // Generate map image for location tasks
               if (task.isLocation && task.location) {
-                console.log(`  🗺️ Generating map for task ${index + 1}`)
                 result.normalizedMapImage = await generateMapImage(
                   task.location,
-                )
-                console.log(
-                  `  ${result.normalizedMapImage ? '✅' : '❌'} Map generation ${result.normalizedMapImage ? 'succeeded' : 'failed'} for task ${index + 1}`,
                 )
               }
 
@@ -299,8 +257,6 @@ export default function SeekerTaskPdfButton({
             },
           ),
         )
-
-        console.log('\n✅ All tasks processed:', normalized)
 
         if (mounted) {
           setTasks(normalized)
@@ -311,7 +267,7 @@ export default function SeekerTaskPdfButton({
         console.error('❌ Error processing tasks:', err)
         if (mounted) {
           setError(err instanceof Error ? err.message : 'Unknown error')
-          setIsReady(true) // Still set ready to show partial results
+          setIsReady(true)
           clearTimeout(processTimeout)
         }
       }
@@ -321,13 +277,8 @@ export default function SeekerTaskPdfButton({
       mounted = false
       clearTimeout(processTimeout)
     }
-  }, [tasksKey]) // ✅ Only re-run when the tasks actually change
+  }, [tasksKey])
 
-  console.log('Seeker tasks: ', tasks)
-  console.log('Is ready: ', isReady)
-  console.log('Error: ', error)
-
-  // ✅ Show loading or error state
   if (!isReady) {
     return (
       <Document>

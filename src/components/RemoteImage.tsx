@@ -19,7 +19,6 @@ const RemoteImage = ({
       return
     }
 
-    // Case 1: Local asset or already a valid URL
     if (
       path.startsWith('data:') ||
       path.startsWith('/') ||
@@ -31,7 +30,6 @@ const RemoteImage = ({
       return
     }
 
-    // Case 2: S3 path — fetch signed URL
     ;(async () => {
       try {
         const cleanPath = path.startsWith('/') ? path.slice(1) : path

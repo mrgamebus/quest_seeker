@@ -27,7 +27,7 @@ export default function AdminPage() {
   )
   const [displayCount, setDisplayCount] = useState(10)
   const [searchTerm, setSearchTerm] = useState('')
-  const [selectedUser, setSelectedUser] = useState<any>(null) // Store selected user for modal
+  const [selectedUser, setSelectedUser] = useState<any>(null)
 
   const {
     data: pendingUsers,
@@ -87,13 +87,11 @@ export default function AdminPage() {
     }
   }
 
-  // Filter users based on view
   const filteredUsers =
     view === 'pending'
       ? pendingUsers
       : allUsers?.filter((user) => user.role === view.slice(0, -1))
 
-  // Apply search filter
   const filteredAndSearchedUsers = filteredUsers?.filter((user) => {
     if (!searchTerm) return true
     const search = searchTerm.toLowerCase()
@@ -223,7 +221,7 @@ export default function AdminPage() {
                           variant="default"
                           disabled={approveCreator.isPending}
                           onClick={(e) => {
-                            e.stopPropagation() // Prevent row click
+                            e.stopPropagation()
                             handleApprove(user.id, user.full_name || 'User')
                           }}
                         >
@@ -235,7 +233,7 @@ export default function AdminPage() {
                           size="sm"
                           variant="destructive"
                           onClick={(e) => {
-                            e.stopPropagation() // Prevent row click
+                            e.stopPropagation()
                             handleReject(user.id, user.full_name || 'User')
                           }}
                         >
@@ -248,7 +246,7 @@ export default function AdminPage() {
                         size="sm"
                         variant="outline"
                         onClick={(e) => {
-                          e.stopPropagation() // Prevent row click
+                          e.stopPropagation()
                           setSelectedUser(user)
                         }}
                       >
@@ -431,7 +429,6 @@ export default function AdminPage() {
                   <Button
                     variant="destructive"
                     onClick={() => {
-                      console.log('Reject', selectedUser.id)
                       setSelectedUser(null)
                     }}
                   >

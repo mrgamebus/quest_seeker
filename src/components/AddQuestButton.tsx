@@ -27,11 +27,9 @@ export default function AddQuestButton({ to }: AddQuestButtonProps) {
   const navigate = useNavigate()
   const { data: currentProfile, isLoading } = useCurrentUserProfile()
 
-  // const { becomePending } = useBecomePending()
   const [modalOpen, setModalOpen] = useState(false)
   const [loading, setLoading] = useState(false)
 
-  // Treat missing role as "seeker" by default
   const role = currentProfile?.role ?? ProfileRole.seeker
 
   const handleClick = () => {
@@ -47,9 +45,7 @@ export default function AddQuestButton({ to }: AddQuestButtonProps) {
   const handleBecomeCreator = async () => {
     setLoading(true)
     try {
-      // await becomePending()
       setModalOpen(false)
-      // Pass the state object here:
       navigate('/user/account', { state: { defaultTab: 'status' } })
     } catch (err) {
       console.error('Failed to become creator:', err)

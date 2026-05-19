@@ -55,7 +55,7 @@ export const useQuest = (id?: string | number) => {
 
       const result = await client.graphql({
         query: getQuest,
-        variables: { id: String(id) }, // GraphQL expects string for ID
+        variables: { id: String(id) },
         authMode: 'userPool',
       })
 
@@ -72,7 +72,7 @@ export const useMutateQuest = () => {
     mutationFn: async (variables: MutateQuestMutationVariables) => {
       const result = await client.graphql({
         query: mutateQuest,
-        variables, // ✅ FLAT VARIABLES
+        variables,
         authMode: 'userPool',
       })
 

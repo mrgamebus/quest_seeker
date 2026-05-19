@@ -29,7 +29,7 @@ export const SponsorModal: React.FC<SponsorModalProps> = ({
   const handleDelete = async (index: number) => {
     const sponsor = sponsors[index]
 
-    // ✅ Delete sponsor image from S3 if it exists
+    // Delete sponsor image from S3 if it exists
     if (sponsor.image) {
       await deleteS3Object(sponsor.image)
     }

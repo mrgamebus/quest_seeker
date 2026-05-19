@@ -71,9 +71,8 @@ export default function TaskInformationWindow({
           handleLocationChange(selectedTask.id, coords)
         }
 
-        setLocationStatus('success') // ✅ Set success state
+        setLocationStatus('success')
 
-        // Optional: Reset to idle after 2 seconds
         setTimeout(() => setLocationStatus('idle'), 2000)
       },
       (err) => {
@@ -82,7 +81,7 @@ export default function TaskInformationWindow({
           title: 'Failed to get location',
           description: err.message,
         })
-        setLocationStatus('idle') // ✅ Reset on error
+        setLocationStatus('idle')
       },
       { enableHighAccuracy: true },
     )
@@ -154,7 +153,6 @@ export default function TaskInformationWindow({
     const tempUrl = file ? URL.createObjectURL(file) : null
     setPreviewUrl(tempUrl) // show temporary preview immediately
 
-    // Optional: store temp path in editableTasks for optimistic UI
     if (selectedTask && tempUrl) {
       handleAnswerChange(selectedTask.id, tempUrl)
     }
@@ -187,7 +185,6 @@ export default function TaskInformationWindow({
     try {
       setSaving(true)
 
-      // 🔥 1. Determine if this specific task is now complete
       const taskIsCompleted = (() => {
         if (selectedTask.isImage)
           return !!(
@@ -205,7 +202,6 @@ export default function TaskInformationWindow({
       const shouldAwardPoints = !wasCompletedBefore && taskIsCompleted
       const pointsDelta = shouldAwardPoints ? 1 : 0
 
-      // 🔥 2. Build updated task entry for DB
       const updatedTasksForUser = editableTasks.map((t) =>
         t.id === selectedTask.id
           ? {
@@ -220,15 +216,12 @@ export default function TaskInformationWindow({
           : t,
       )
 
-      // 🔥 3. Compute quest-wide `completed` state AFTER updating this task
       const allCompleted = updatedTasksForUser.every((t) => t.completed)
 
-      // 🔥 NEW: Check if quest was just completed (wasn't complete before, but is now)
       const wasQuestCompletedBefore = editableTasks.every((t) => t.completed)
       const questJustCompleted = !wasQuestCompletedBefore && allCompleted
       const questCompletionBonus = questJustCompleted ? 20 : 0
 
-      // 🔥 NEW: Total points to award (task completion + optional quest completion bonus)
       const totalPointsDelta = pointsDelta + questCompletionBonus
 
       if (totalPointsDelta > 0 && currentUserProfile) {
@@ -240,14 +233,12 @@ export default function TaskInformationWindow({
         })
       }
 
-      // 🔥 4. Save progress to UserQuest
       await updateQuestProgressInProfile(
         questId,
         updatedTasksForUser,
         allCompleted,
       )
 
-      // 🔥 NEW: Show appropriate success message
       toast({
         title: questJustCompleted ? '🎉 Quest Completed!' : 'Answer saved! ✅',
         description: questJustCompleted
@@ -255,7 +246,6 @@ export default function TaskInformationWindow({
           : 'Your task answer has been saved successfully.',
       })
 
-      // 🔥 5. Optimistic UI update
       setEditableTasks((prev) =>
         prev.map((t) =>
           t.id === selectedTask.id ? { ...t, completed: taskIsCompleted } : t,

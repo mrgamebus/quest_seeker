@@ -27,7 +27,6 @@ export default function CreatorApplicationForm() {
     setLoading(true)
 
     try {
-      // Show success message and redirect
       navigate('/application-submitted')
     } catch (err) {
       console.error('Failed to submit application:', err)
