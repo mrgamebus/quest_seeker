@@ -7,16 +7,14 @@ import {
   useQuestParticipants,
   useUserQuests,
 } from '@/hooks/userQuests'
-import { FacebookShareButton, FacebookIcon } from 'react-share'
 import { useProfile, useCurrentUserProfile } from '@/hooks/userProfiles'
 import bg from '@/assets/images/background_main.jpeg'
 import { Button } from './ui/button'
 import { Card, CardContent } from './ui/card'
 import { useEffect, useState } from 'react'
-import { Prize, Sponsor, Task, Profile, UserQuest } from '@/types'
+import { Prize, Sponsor, Task, Profile, UserQuest, Winner } from '@/types'
 import RemoteImage from './RemoteImage'
 import placeHold from '@/assets/images/placeholder_view_vector.svg'
-import useEmblaCarousel from 'embla-carousel-react'
 import {
   Dialog,
   DialogClose,
@@ -26,13 +24,7 @@ import {
   DialogTrigger,
 } from '@radix-ui/react-dialog'
 import TaskInformationWindow from './TaskInformationWindow'
-import { Pencil, Home } from 'lucide-react'
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from '@radix-ui/react-tooltip'
+import { Home } from 'lucide-react'
 import { Toolbar } from './Toolbar'
 import TaskPreview from './TaskPreview'
 import { GetProfileQuery, MutateQuestAction, QuestStatus } from '@/graphql/API'
@@ -47,24 +39,24 @@ import { ensureArray } from '@/tools/ensureArray'
 import { joinQuest, createQuestEntrySession } from '@/graphql/mutations'
 import { useToast } from '@/hooks/use-toast'
 
+// Components
+import QuestBanner from './QuestBanner'
+import WinnerSelection from './WinnerSelection'
+import WinnerDisplay from './WinnerDisplay'
+
 export default function QuestDetailPage() {
   const { id } = useParams<{ id: string }>()
   const { toast } = useToast()
   const [joining, setJoining] = useState(false)
-  const [winners, setWinners] = useState<any[]>([])
-  const [winnerProfiles, setWinnerProfiles] = useState<Record<string, Profile>>(
-    {},
-  )
+  const [winners, setWinners] = useState<Winner[]>([])
+
   const [creatorMessage, setCreatorMessage] = useState('')
 
   const { mutate: updateQuestMutation, isPending: isUpdatingQuest } =
     useMutateQuest()
 
-  const [emblaRef, emblaApi] = useEmblaCarousel({ loop: true })
   const { deleteQuest, loading: deleting } = useQuestDeletion()
 
-  const scrollPrev = () => emblaApi && emblaApi.scrollPrev()
-  const scrollNext = () => emblaApi && emblaApi.scrollNext()
   const navigate = useNavigate()
 
   const { data: quest, isLoading, error, refetch } = useQuest(id)
@@ -145,41 +137,6 @@ export default function QuestDetailPage() {
       setCreatorMessage(quest.creator_message)
     }
   }, [quest])
-
-  useEffect(() => {
-    const fetchWinnerProfiles = async () => {
-      if (winners.length === 0) return
-
-      const winnerIds = winners.map((w: any) => w.user_id)
-      const uniqueIds = [...new Set(winnerIds)] // Remove duplicates
-
-      try {
-        const profiles = await Promise.all(
-          uniqueIds.map(async (id) => {
-            const res = await client.graphql<GraphQLResult<GetProfileQuery>>({
-              query: getProfile,
-              variables: { id },
-              authMode: 'userPool',
-            })
-            return 'data' in res ? res.data?.getProfile : null
-          }),
-        )
-
-        const profileMap: Record<string, Profile> = {}
-        profiles.forEach((profile) => {
-          if (profile) {
-            profileMap[profile.id] = profile as Profile
-          }
-        })
-
-        setWinnerProfiles(profileMap)
-      } catch (err) {
-        console.error('Failed to fetch winner profiles:', err)
-      }
-    }
-
-    fetchWinnerProfiles()
-  }, [winners]) // Re-fetch whenever winners change
 
   const client = generateClient()
 
@@ -533,8 +490,6 @@ export default function QuestDetailPage() {
     }
   })()
 
-  const displayedSponsors = sponsors.slice(0, 2)
-
   const handleOpenParticipants = async () => {
     if (participantsLoaded) return
 
@@ -662,170 +617,16 @@ export default function QuestDetailPage() {
             </Toolbar>
           </div>
 
-          {/* Banner Image with overlayed quest title */}
-          <div className="relative w-full mb-4 md:mb-20">
-            {/* Banner Image */}
-            <RemoteImage
-              path={quest.quest_image || placeHold}
-              fallback={placeHold}
-              className="w-full h-[250px] md:h-[350px] object-cover rounded-t-2xl"
-            />
-
-            {/* Gradient overlay at bottom for contrast */}
-            <div className="absolute bottom-0 left-0 right-0 h-40 bg-gradient-to-t from-black/70 to-transparent rounded-b-2xl" />
-
-            {/* Overlayed quest name (left) */}
-            <div className="absolute bottom-8 left-6 z-10">
-              <h1 className="text-3xl md:text-4xl font-bold text-white drop-shadow-lg">
-                {quest.quest_name}
-              </h1>
-            </div>
-
-            {/* Social Share Button Card - positioned like sponsors */}
-            <div className="absolute top-2 left-2 z-20 md:top-auto md:left-10 md:bottom-[-60px] md:bg-white md:rounded-2xl md:shadow-xl md:border md:border-gray-200 md:p-5">
-              <div className="flex items-center gap-2">
-                {/* <span className="hidden md:inline text-sm font-semibold text-gray-700">
-                  
-                </span> */}
-                <FacebookShareButton
-                  url={window.location.href}
-                  hashtag={`#${quest.quest_name?.replace(/\s+/g, '')}`}
-                >
-                  <FacebookIcon size={32} round />
-                </FacebookShareButton>
-              </div>
-            </div>
-
-            {/* Sponsors card */}
-            {displayedSponsors.length > 0 && (
-              <Dialog>
-                {' '}
-                {/* Moved Dialog here to wrap the whole card */}
-                <div
-                  className="
-        absolute top-2 right-2 flex flex-col items-end gap-1 z-20
-        md:top-auto md:right-10 md:bottom-[-60px]
-        md:bg-white md:rounded-2xl md:shadow-xl md:border md:border-gray-200
-        md:p-5 md:gap-3
-      "
-                >
-                  {/* Featured Sponsors link — desktop only */}
-                  {sponsors.length >= 3 && (
-                    <div className="hidden md:block">
-                      <DialogTrigger asChild>
-                        <span className="text-sm text-blue-600 font-medium underline cursor-pointer hover:text-blue-800">
-                          Featured Sponsors
-                        </span>
-                      </DialogTrigger>
-                    </div>
-                  )}
-
-                  {/* Sponsor Avatars - Now Clickable */}
-                  <DialogTrigger asChild>
-                    <div className="flex gap-2 md:gap-4 flex-wrap justify-end cursor-pointer hover:opacity-80 transition-opacity">
-                      {displayedSponsors.map((sponsor) => (
-                        <div
-                          key={sponsor.id}
-                          className="flex flex-col items-center w-10 md:w-20 text-center"
-                        >
-                          <div className="p-[2px] md:p-[3px] bg-white/80 md:bg-gradient-to-b md:from-gray-100 md:to-gray-200 rounded-full shadow">
-                            <RemoteImage
-                              path={sponsor.image || placeHold}
-                              fallback={placeHold}
-                              className="w-8 h-8 md:w-14 md:h-14 object-contain rounded-full border border-gray-300 shadow-sm bg-white"
-                            />
-                          </div>
-                          <span className="hidden md:block text-xs mt-1 font-semibold text-gray-700">
-                            {sponsor.name}
-                          </span>
-                        </div>
-                      ))}
-                    </div>
-                  </DialogTrigger>
-
-                  {/* Modal Content remains the same */}
-                  <DialogOverlay className="fixed inset-0 bg-black/30 z-40" />
-                  <DialogContent className="fixed top-1/2 left-1/2 z-50 max-h-[90vh] w-full max-w-lg bg-white rounded-xl p-6 shadow-lg -translate-x-1/2 -translate-y-1/2 overflow-y-auto">
-                    <DialogTitle className="text-lg font-bold mb-4">
-                      Featured Sponsors
-                    </DialogTitle>
-                    <div className="overflow-hidden" ref={emblaRef}>
-                      <div className="flex">
-                        {sponsors.map((sponsor) => (
-                          <div
-                            key={sponsor.id}
-                            className="flex-[0_0_100%] flex flex-col items-center justify-center p-4"
-                          >
-                            <RemoteImage
-                              path={sponsor.image || placeHold}
-                              fallback={placeHold}
-                              className="w-24 h-24 object-contain rounded-full mb-2"
-                            />
-                            <p className="font-semibold text-sm text-gray-700">
-                              {sponsor.name}
-                            </p>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                    <div className="flex justify-between items-center mt-4">
-                      <button
-                        onClick={scrollPrev}
-                        className="text-sm text-blue-600 hover:underline"
-                      >
-                        Previous
-                      </button>
-                      <button
-                        onClick={scrollNext}
-                        className="text-sm text-blue-600 hover:underline"
-                      >
-                        Next
-                      </button>
-                    </div>
-                    <DialogClose asChild>
-                      <button className="mt-6 bg-gray-200 hover:bg-gray-300 px-4 py-2 rounded">
-                        Close
-                      </button>
-                    </DialogClose>
-                  </DialogContent>
-                </div>
-              </Dialog>
-            )}
-
-            {/* Edit Button (top right of banner) */}
-
-            {isOwner && (
-              <TooltipProvider>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <button
-                      onClick={() => navigate(`/user/quest/${id}/edit`)}
-                      className={`absolute top-4 right-4 p-2 rounded-full bg-white/80 shadow z-20 ${
-                        !canEdit
-                          ? 'cursor-not-allowed opacity-50 hover:bg-white/80'
-                          : 'hover:bg-white'
-                      }`}
-                      disabled={!canEdit}
-                    >
-                      <Pencil className="w-5 h-5 text-gray-700" />
-                    </button>
-                  </TooltipTrigger>
-                  <TooltipContent
-                    side="top"
-                    className="bg-gray-800 text-white text-xs px-2 py-1 rounded shadow-lg"
-                  >
-                    {quest.status === QuestStatus.expired
-                      ? 'Expired quests cannot be edited'
-                      : participantIds.length > 0
-                        ? 'Quests with participants cannot be edited'
-                        : !canEdit
-                          ? 'Only draft and published quests with no participants can be edited'
-                          : 'Edit quest'}
-                  </TooltipContent>
-                </Tooltip>
-              </TooltipProvider>
-            )}
-          </div>
+          <QuestBanner
+            questId={quest.id}
+            questName={quest.quest_name ?? 'Untitled Quest'}
+            questImage={quest.quest_image}
+            questStatus={quest.status}
+            sponsors={sponsors}
+            canEdit={canEdit}
+            isOwner={isOwner}
+            participantCount={participantIds.length}
+          />
 
           <div className="flex flex-col lg:flex-row gap-6 mt-2 w-full">
             {/* ---------------- LEFT SIDE ---------------- */}
@@ -834,11 +635,9 @@ export default function QuestDetailPage() {
                 /* ---------- EXPIRED VERSION: Show only the 4 fields ---------- */
                 <>
                   <p className="text-gray-700 mb-2">{quest.quest_details}</p>
-
                   <p className="text-sm text-gray-500 mb-1">
                     Region: <strong>{quest.region}</strong>
                   </p>
-
                   {/* Changed from <p> to <div> */}
                   <div className="text-sm mb-1">
                     Organisation:{' '}
@@ -877,13 +676,11 @@ export default function QuestDetailPage() {
                       <span className="text-gray-500">N/A</span>
                     )}
                   </div>
-
                   {/* Changed from <p> to <div> */}
                   <div className="text-sm text-gray-500">
                     Ended on:{' '}
                     <strong>{formatNzDateTime(quest.quest_end_at)}</strong>
                   </div>
-
                   {/* Changed from <p> to <div> */}
                   <div className="text-sm text-gray-500">
                     People who joined:
@@ -947,228 +744,18 @@ export default function QuestDetailPage() {
                       </Dialog>
                     )}
                   </div>
-                  {/* 🏆 WINNERS DISPLAY - For Seekers */}
-                  {!isOwner && winners.length > 0 && (
-                    <div className="mt-4 bg-gradient-to-r from-yellow-50 to-amber-50 border-l-4 border-yellow-400 rounded-lg p-4">
-                      <h4 className="font-bold text-sm mb-3 flex items-center gap-2">
-                        <span className="text-xl">🏆</span>
-                        Quest Winners
-                      </h4>
-                      <div className="flex flex-col gap-2">
-                        {winners
-                          .sort((a: any, b: any) => a.place - b.place)
-                          .map((winner: any, index: number) => {
-                            const prize = prizes.find(
-                              (p) => p.id === winner.prize_id,
-                            )
-                            const medal =
-                              index === 0 ? '🥇' : index === 1 ? '🥈' : '🥉'
-
-                            return (
-                              <div
-                                key={winner.prize_id}
-                                className="flex items-center gap-3 bg-white p-3 rounded-lg shadow-sm"
-                              >
-                                <span className="text-2xl">{medal}</span>
-                                <div className="flex-1">
-                                  <p className="font-semibold text-sm text-gray-800">
-                                    {winner.username}
-                                  </p>
-                                  {prize && (
-                                    <p className="text-xs text-gray-600">
-                                      Prize: {prize.name}
-                                    </p>
-                                  )}
-                                </div>
-                              </div>
-                            )
-                          })}
-                      </div>
-                    </div>
+                  {isOwner && isExpired && (
+                    <WinnerSelection
+                      prizes={prizes}
+                      winners={winners}
+                      completedParticipants={completedParticipants}
+                      onSelectWinner={selectWinnerForPrize}
+                      onRandomPick={pickWinnerForPrize}
+                      isUpdating={isUpdatingQuest}
+                    />
                   )}
-
-                  {isOwner && (
-                    <div className="lg:w-[450px] w-full bg-white/70 p-4 rounded-xl shadow">
-                      <h4 className="text-md font-bold mb-3">
-                        Select Winners by Prize
-                      </h4>
-                      {prizes.length > 0 ? (
-                        <div className="mt-6 border-t pt-4">
-                          <div className="flex flex-col gap-3">
-                            {prizes.map((prize, index) => {
-                              const prizeWinner = winners.find(
-                                (w: any) => w.prize_id === prize.id,
-                              )
-
-                              const winnerProfile = prizeWinner
-                                ? winnerProfiles[prizeWinner.user_id]
-                                : null
-
-                              return (
-                                <Dialog key={prize.id}>
-                                  <DialogTrigger asChild>
-                                    <button
-                                      className={`flex items-center gap-3 p-3 rounded-lg border-2 transition-all ${
-                                        prizeWinner
-                                          ? 'bg-green-50 border-green-400 hover:bg-green-100'
-                                          : 'bg-white border-gray-300 hover:border-yellow-400 hover:bg-yellow-50'
-                                      }`}
-                                    >
-                                      <RemoteImage
-                                        path={prize.image || placeHold}
-                                        fallback={placeHold}
-                                        className="w-12 h-12 object-contain rounded shrink-0"
-                                      />
-                                      <div className="flex-1 text-left">
-                                        <p className="font-semibold text-sm">
-                                          {prize.name}
-                                        </p>
-                                        {prizeWinner ? (
-                                          <div>
-                                            <p className="text-xs text-green-700 font-medium">
-                                              🎉 Winner: {prizeWinner.username}
-                                            </p>
-                                            {/* ✅ Use winnerProfile for contact info */}
-                                            {winnerProfile?.email && (
-                                              <p className="text-xs text-gray-600 mt-1">
-                                                📧 {winnerProfile.email}
-                                              </p>
-                                            )}
-                                            {winnerProfile?.phone && (
-                                              <p className="text-xs text-gray-600">
-                                                📱 {winnerProfile.phone}
-                                              </p>
-                                            )}
-                                            {/* ✅ Show loading state if profile not yet fetched */}
-                                            {!winnerProfile && (
-                                              <p className="text-xs text-gray-500 mt-1">
-                                                Loading contact info...
-                                              </p>
-                                            )}
-                                          </div>
-                                        ) : (
-                                          <p className="text-xs text-gray-500">
-                                            Click to select winner
-                                          </p>
-                                        )}
-                                      </div>
-                                      <span className="text-2xl">
-                                        {index === 0
-                                          ? '🥇'
-                                          : index === 1
-                                            ? '🥈'
-                                            : '🥉'}
-                                      </span>
-                                    </button>
-                                  </DialogTrigger>
-
-                                  <DialogOverlay className="fixed inset-0 bg-black/30 z-40" />
-                                  <DialogContent className="fixed top-1/2 left-1/2 z-50 max-h-[80vh] w-full max-w-md bg-white rounded-xl p-6 shadow-lg -translate-x-1/2 -translate-y-1/2 overflow-y-auto">
-                                    <DialogTitle className="text-lg font-bold mb-4">
-                                      Select Winner for {prize.name}
-                                    </DialogTitle>
-
-                                    {/* Prize Details */}
-                                    <div className="flex items-center gap-3 mb-4 p-3 bg-gray-50 rounded-lg">
-                                      <RemoteImage
-                                        path={prize.image || placeHold}
-                                        fallback={placeHold}
-                                        className="w-16 h-16 object-contain rounded"
-                                      />
-                                      <div>
-                                        <p className="font-semibold">
-                                          {prize.name}
-                                        </p>
-                                      </div>
-                                    </div>
-
-                                    {/* Random Selection Button */}
-                                    <button
-                                      onClick={() =>
-                                        pickWinnerForPrize(prize.id, index + 1)
-                                      }
-                                      disabled={isUpdatingQuest}
-                                      className="w-full bg-yellow-500 hover:bg-yellow-600 text-white font-semibold py-3 rounded-lg shadow mb-4 disabled:opacity-50"
-                                    >
-                                      {isUpdatingQuest
-                                        ? 'Selecting...'
-                                        : '🎲 Pick Random Winner'}
-                                    </button>
-
-                                    {/* Manual Selection List */}
-                                    <div className="border-t pt-4">
-                                      <p className="text-sm font-semibold mb-2">
-                                        Or select manually:
-                                      </p>
-                                      <div className="flex flex-col gap-2 max-h-60 overflow-y-auto">
-                                        {completedParticipants.map(
-                                          (profile) => {
-                                            const alreadyWon = winners.some(
-                                              (w: any) =>
-                                                w.user_id === profile.id,
-                                            )
-
-                                            return (
-                                              <button
-                                                key={profile.id}
-                                                onClick={() =>
-                                                  selectWinnerForPrize(
-                                                    prize.id,
-                                                    index + 1,
-                                                    profile,
-                                                  )
-                                                }
-                                                disabled={
-                                                  alreadyWon || isUpdatingQuest
-                                                }
-                                                className={`flex items-center gap-3 p-2 rounded-lg text-left transition-all ${
-                                                  alreadyWon
-                                                    ? 'bg-gray-100 opacity-50 cursor-not-allowed'
-                                                    : 'bg-white hover:bg-yellow-50 border border-gray-200 hover:border-yellow-400'
-                                                }`}
-                                              >
-                                                <RemoteImage
-                                                  path={
-                                                    profile.image_thumbnail ||
-                                                    placeHold
-                                                  }
-                                                  fallback={placeHold}
-                                                  className="w-10 h-10 rounded-full object-cover shrink-0"
-                                                />
-                                                <div className="flex-1">
-                                                  <p className="font-medium text-sm">
-                                                    {profile.full_name}
-                                                  </p>
-                                                  {alreadyWon && (
-                                                    <p className="text-xs text-gray-500">
-                                                      Already won a prize
-                                                    </p>
-                                                  )}
-                                                </div>
-                                              </button>
-                                            )
-                                          },
-                                        )}
-                                      </div>
-                                    </div>
-
-                                    <DialogClose asChild>
-                                      <button className="mt-4 w-full bg-gray-200 hover:bg-gray-300 px-4 py-2 rounded">
-                                        Close
-                                      </button>
-                                    </DialogClose>
-                                  </DialogContent>
-                                </Dialog>
-                              )
-                            })}
-                          </div>
-                        </div>
-                      ) : (
-                        <p className="text-gray-500">
-                          No prizes chosen for this quest.
-                        </p>
-                      )}
-                    </div>
+                  {!isOwner && winners.length > 0 && (
+                    <WinnerDisplay winners={winners} prizes={prizes} />
                   )}
                 </>
               ) : (
