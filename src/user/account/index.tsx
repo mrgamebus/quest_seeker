@@ -40,15 +40,13 @@ export default function AccountPage() {
 
   useEffect(() => {
     if (location.state?.defaultTab) {
-      // 1. Set the active tab from the navigation state
       setActiveTab(location.state.defaultTab)
       refetch()
-      // 2. Immediately wipe the state from the browser history
+
       navigate(location.pathname, { replace: true, state: {} })
     }
   }, [location.state, location.pathname, navigate])
 
-  // ✅ EARLY RETURN COMES AFTER ALL HOOKS
   if (isLoading || !currentProfile) return null
 
   const admin = currentProfile?.role === 'Admin'
@@ -135,39 +133,39 @@ export default function AccountPage() {
               <Button
                 variant="yellow"
                 onClick={() => navigate('/user/region')}
-                disabled={forceNameUpdate} // Disable
+                disabled={forceNameUpdate}
               >
                 <Home />
               </Button>
               <Button
                 variant={activeTab === 'account' ? 'default' : 'yellow'}
                 onClick={() => setActiveTab('account')}
-                disabled={forceNameUpdate} // Disable
+                disabled={forceNameUpdate}
               >
                 My Account
               </Button>
               <Button
                 variant={activeTab === 'my-quests' ? 'default' : 'yellow'}
                 onClick={() => setActiveTab('my-quests')}
-                disabled={forceNameUpdate} // Disable
+                disabled={forceNameUpdate}
               >
                 My Quests
               </Button>
               <Button
                 variant="yellow"
                 onClick={() => navigate('/user/leader')}
-                disabled={forceNameUpdate} // Disable
+                disabled={forceNameUpdate}
               >
                 Leader Board
               </Button>
               <Button
                 variant="yellow"
                 onClick={() => navigate('/user/help')}
-                disabled={forceNameUpdate} // Disable
+                disabled={forceNameUpdate}
               >
                 Help Guide
               </Button>
-              <SignOutButton /> {/* NOT disabled - this one stays active */}
+              <SignOutButton />
             </Toolbar>
           </div>
 
@@ -186,7 +184,7 @@ export default function AccountPage() {
                       setActiveTab('status')
                     }
                   }}
-                  disabled={forceNameUpdate} // Disable account status link
+                  disabled={forceNameUpdate}
                 >
                   {accountStatus}
                 </button>
@@ -205,7 +203,7 @@ export default function AccountPage() {
                   profile={currentProfile}
                   onUpdate={handleUpdate}
                   isProfileComplete={isComplete}
-                  forceNameUpdate={forceNameUpdate} // Pass the prop
+                  forceNameUpdate={forceNameUpdate}
                 />
               )}
               {activeTab === 'my-quests' && (

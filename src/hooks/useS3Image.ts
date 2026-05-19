@@ -12,19 +12,16 @@ export function useS3Image(path?: string | null) {
       return
     }
 
-    // Already a full URL → just use it
     if (path.startsWith('http')) {
       setUrl(path)
       return
     }
 
-    // For public images, build permanent URL
     if (path.startsWith('public/')) {
       setUrl(`https://${BUCKET}.s3.${REGION}.amazonaws.com/${path}`)
       return
     }
 
-    // If path doesn’t match known patterns, fallback
     setUrl(null)
   }, [path])
 

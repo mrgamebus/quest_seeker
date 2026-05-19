@@ -1,4 +1,3 @@
-// hooks/useLeaderboard.ts
 import { useEffect, useState } from 'react'
 import { generateClient } from 'aws-amplify/data'
 import type { Schema } from '../../amplify/data/resource'
@@ -19,11 +18,6 @@ type LeaderboardListResult = {
   nextToken?: string | null
 }
 
-/**
- * Fetch ALL profiles ordered by points DESC
- * Used only to compute the current user's rank
- * Filters out admin users
- */
 async function fetchAllProfilesByPoints(): Promise<LeaderboardProfile[]> {
   const all: LeaderboardProfile[] = []
   let nextToken: string | null | undefined = undefined
@@ -34,7 +28,6 @@ async function fetchAllProfilesByPoints(): Promise<LeaderboardProfile[]> {
         { leaderboard: 'GLOBAL' },
         { sortDirection: 'DESC', nextToken },
       )
-    // Filter out admin users
     const nonAdminProfiles = (res.data ?? []).filter(
       (profile) => profile.role !== 'Admin',
     )
@@ -64,23 +57,20 @@ export function useLeaderboardProfiles(
       setError(null)
 
       try {
-        // 1) Global Top 10 (excluding admins)
         const topRes: LeaderboardListResult =
           await client.models.Profile.listLeaderboard(
             { leaderboard: 'GLOBAL' },
-            { sortDirection: 'DESC', limit: 20 }, // Fetch more to ensure we get 10 non-admins
+            { sortDirection: 'DESC', limit: 20 },
           )
 
         if (cancelled) return
 
-        // Filter out admins and take top 10
         const nonAdminTop = (topRes.data ?? [])
           .filter((profile) => profile.role !== 'Admin')
           .slice(0, 10)
 
         setTopTen(nonAdminTop)
 
-        // 2) Compute global rank (excluding admins)
         const allProfiles = await fetchAllProfilesByPoints()
         if (cancelled) return
 

@@ -9,12 +9,12 @@ interface PrizeModalProps {
   setPrizes: React.Dispatch<React.SetStateAction<Prize[]>>
   setPrize: React.Dispatch<React.SetStateAction<string>>
   contributor: string
-  setPreview: React.Dispatch<React.SetStateAction<string | null>> // renamed from setImage
+  setPreview: React.Dispatch<React.SetStateAction<string | null>>
   setEditIndex: React.Dispatch<React.SetStateAction<number>>
   visible: boolean
   onClose: () => void
   onNewPrize: (updated: Prize[]) => void
-  handlePrizeEdit: (index: number) => void // optional if you pass edit handler
+  handlePrizeEdit: (index: number) => void
 }
 
 export const PrizeModal: React.FC<PrizeModalProps> = ({
@@ -30,7 +30,6 @@ export const PrizeModal: React.FC<PrizeModalProps> = ({
   const handleDelete = async (index: number) => {
     const prize = prizes[index]
 
-    // ✅ Delete prize image from S3 if it exists
     if (prize.image) {
       await deleteS3Object(prize.image)
     }

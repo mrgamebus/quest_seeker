@@ -46,7 +46,6 @@ export default function RegionPage() {
       </div>
     )
   }
-  // console.log({ currentProfile, isLoading, error: currentError })
 
   return (
     <div

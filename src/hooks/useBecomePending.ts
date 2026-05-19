@@ -19,7 +19,7 @@ export function useBecomePending() {
     bankDetails: BankDetails,
     _isProfileComplete: boolean,
     onProfileUpdate: (updates: Partial<Profile>) => void,
-    refetchProfile?: () => Promise<void>, // ✅ Add refetch callback
+    refetchProfile?: () => Promise<void>,
   ) => {
     setIsSending(true)
     setError(null)
@@ -30,7 +30,6 @@ export function useBecomePending() {
           ? 'CREATOR_APPLICATION'
           : 'BANK_ACCOUNT_UPDATE'
 
-      // ✅ CHANGE 2: Strip out metadata before stringifying
       const profileFields = {
         full_name: profile.full_name,
         email: profile.email,
@@ -72,11 +71,10 @@ export function useBecomePending() {
         throw new Error(errors?.[0]?.message || 'Failed to submit')
       }
 
-      // ✅ Update local state and refetch
       if (type === 'CREATOR_APPLICATION') {
         onProfileUpdate({ role: 'pending' })
         if (refetchProfile) {
-          await refetchProfile() // ✅ Wait for refetch to complete
+          await refetchProfile()
         }
       }
 

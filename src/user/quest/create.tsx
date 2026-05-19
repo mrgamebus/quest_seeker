@@ -55,7 +55,6 @@ export default function CreateQuestPage() {
   const participantIds = questParticipants?.map((uq) => uq.profileId) ?? []
 
   const effectiveQuestId = questId ?? createdQuestId
-  // const isEffectivelyUpdating = !!effectiveQuestId
 
   const currencyExp = /^\d*\.?\d{0,2}$/
 
@@ -88,12 +87,10 @@ export default function CreateQuestPage() {
 
   const { data: updatingQuest } = useQuest(questId)
 
-  // --- Prefill fields if editing ---
   useEffect(() => {
     if (!isUpdating) return
     if (!updatingQuest) return
 
-    // In the prefill useEffect, add:
     setOldImagePath(updatingQuest.quest_image ?? '')
     setOldImageThumbPath(updatingQuest.quest_image_thumb ?? '')
     setName(updatingQuest.quest_name ?? '')
@@ -127,8 +124,6 @@ export default function CreateQuestPage() {
     )
   }
 
-  // --- Helpers ---
-
   const canEdit =
     !isUpdating ||
     updatingQuest?.status === QuestStatus.draft ||
@@ -140,18 +135,15 @@ export default function CreateQuestPage() {
 
   const NZ_TZ = 'Pacific/Auckland'
 
-  // UI (NZT) → UTC ISO (for state / payload)
   const nzToUtcIso = (date: Date) => {
     const nzDate = toZonedTime(date, NZ_TZ)
     return nzDate.toISOString()
   }
 
-  // UTC ISO → NZ Date (for UI)
   const utcIsoToNzDate = (iso: string) => {
     return toZonedTime(new Date(iso), NZ_TZ)
   }
 
-  // UTC ISO → HH:mm (NZT, for <input type="time">)
   const utcIsoToNzTime = (iso: string) =>
     utcIsoToNzDate(iso).toLocaleTimeString('en-NZ', {
       hour: '2-digit',
@@ -195,7 +187,7 @@ export default function CreateQuestPage() {
 
     try {
       const compressedFullFile = await imageCompression(file, {
-        maxWidthOrHeight: 1400, // good balance for quality
+        maxWidthOrHeight: 1400,
         maxSizeMB: 1, // ~1MB max
         fileType: 'image/webp',
         useWebWorker: true,
@@ -209,7 +201,6 @@ export default function CreateQuestPage() {
         },
       })
 
-      // 2️⃣ Convert + upload THUMBNAIL (WebP)
       const compressedThumbFile = await imageCompression(file, {
         maxWidthOrHeight: 300,
         maxSizeMB: 0.2,
@@ -283,7 +274,6 @@ export default function CreateQuestPage() {
     setModalOpen(true)
   }
   const saveQuest = async (status: QuestStatus) => {
-    // 1. Validation
     if (status === QuestStatus.published && !validateInput()) return null
 
     try {
@@ -295,7 +285,6 @@ export default function CreateQuestPage() {
             thumbPath: updatingQuest?.quest_image_thumb ?? '',
           }
 
-      // ✅ Delete old images if a new one was uploaded
       if (
         imageFile &&
         oldImagePath &&
@@ -311,7 +300,6 @@ export default function CreateQuestPage() {
             : oldImageThumbPath
           if (cleanFull) await remove({ path: cleanFull })
           if (cleanThumb) await remove({ path: cleanThumb })
-          console.log('✅ Old quest images removed')
         } catch (err) {
           console.error('Error deleting old quest images:', err)
         }
@@ -333,7 +321,6 @@ export default function CreateQuestPage() {
 
       let currentQuestId = effectiveQuestId
 
-      // 2. Create or Update Draft (Always save as draft first)
       if (!currentQuestId) {
         const draftResult = await mutateQuest({
           action: MutateQuestAction.CREATE_DRAFT,
@@ -342,7 +329,6 @@ export default function CreateQuestPage() {
         currentQuestId = draftResult?.questId
         setCreatedQuestId(currentQuestId)
       } else if (updatingQuest?.status === QuestStatus.published) {
-        // ✅ Updating a published quest with no participants
         await mutateQuest({
           action: MutateQuestAction.UPDATE_PUBLISHED,
           questId: currentQuestId,
@@ -358,15 +344,11 @@ export default function CreateQuestPage() {
         })
       }
 
-      // 3. Logic Branch
-      // If the status passed is specifically 'draft', it means the user clicked the "Save as Draft" button.
       if (status === QuestStatus.draft) {
         navigate('/user/account')
         return null
       }
 
-      // If we are here, it means we are in the "Publish/Pay" flow.
-      // We've saved the draft, now we return the ID to the payment handler.
       return currentQuestId
     } catch (err) {
       console.error('saveQuest failed:', err)
@@ -377,7 +359,6 @@ export default function CreateQuestPage() {
     }
   }
 
-  // --- Render ---
   return (
     <div
       className="min-h-screen flex items-center justify-center bg-cover bg-center"
@@ -579,7 +560,6 @@ export default function CreateQuestPage() {
                   onSelect={(date) => {
                     if (!date) return
 
-                    // user picked a NZ date → force 9am NZT
                     date.setHours(9, 0, 0, 0)
 
                     setStartDateTime(nzToUtcIso(date))
@@ -616,7 +596,6 @@ export default function CreateQuestPage() {
                     endDateTime
                       ? (() => {
                           const endNz = utcIsoToNzDate(endDateTime)
-                          // Add 1 second to roll over to next hour for display
                           const displayDate = new Date(endNz.getTime() + 1000)
                           return displayDate.toLocaleDateString('en-NZ', {
                             day: 'numeric',
@@ -668,7 +647,6 @@ export default function CreateQuestPage() {
                     endDateTime
                       ? (() => {
                           const endNz = utcIsoToNzDate(endDateTime)
-                          // Display next hour (add 1 second to roll over)
                           const displayTime = new Date(endNz.getTime() + 1000)
                           return `${String(displayTime.getHours()).padStart(2, '0')}:00`
                         })()
@@ -680,7 +658,6 @@ export default function CreateQuestPage() {
                     const endNz = endDateTime
                       ? utcIsoToNzDate(endDateTime)
                       : utcIsoToNzDate(startDateTime)
-                    // Set to previous hour at 59:59
                     const actualHour = h === 0 ? 23 : h - 1
                     endNz.setHours(actualHour, 59, 59, 0)
                     const minEndNz = getMinEndNzDate(startDateTime)
@@ -739,7 +716,7 @@ export default function CreateQuestPage() {
                   onClick={() => {
                     setSponsorsEnabled(false)
                     setSponsors([])
-                    setStep(8) // skip sponsor creator
+                    setStep(8)
                   }}
                 >
                   No
@@ -890,7 +867,7 @@ export default function CreateQuestPage() {
                 disabled={loading || isProfileLoading || !canEdit}
                 onClick={
                   updatingQuest?.status === QuestStatus.published
-                    ? () => saveQuest(QuestStatus.published) // ← save published directly
+                    ? () => saveQuest(QuestStatus.published)
                     : handlePayAndPublish
                 }
               >

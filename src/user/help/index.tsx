@@ -20,7 +20,6 @@ export default function Help() {
   )
   const [openIndex, setOpenIndex] = useState<number | null>(null)
 
-  // All useEffect hooks together
   useEffect(() => {
     checkAuthStatus()
   }, [])
@@ -31,7 +30,6 @@ export default function Help() {
     }
   }, [location.state])
 
-  // Helper functions after hooks
   const checkAuthStatus = async () => {
     try {
       const session = await fetchAuthSession()
@@ -47,15 +45,12 @@ export default function Help() {
     setOpenIndex(openIndex === index ? null : index)
   }
 
-  // Custom rendering for specific sections with styled layouts
   const renderSectionContent = (index: number) => {
     const section = helpSections[index]
 
-    // "QuestSeeker in a Nutshell" section with card layout
     if (index === 0) {
       return (
         <div className="px-5 py-6 bg-white/50 text-gray-700 text-sm border-t border-gray-100">
-          {/* Hero message with yellow border */}
           <div className="bg-white border-b-2 border-[#F0A800] rounded-lg p-6 mb-6 text-center">
             <p className="font-bold text-base mb-2">
               Adventure. Community. Purpose.
@@ -67,12 +62,10 @@ export default function Help() {
             </p>
           </div>
 
-          {/* What is a Quest heading */}
           <h3 className="font-bold text-[#3A2E1A] text-base mb-4">
             What is a Quest?
           </h3>
 
-          {/* Three feature cards in a grid */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mb-6">
             <div className="bg-[#FDF6E8] border border-[#E8D8A0] rounded-lg p-4">
               <p className="font-bold text-[#111111] text-sm mb-2">
@@ -149,7 +142,6 @@ export default function Help() {
             </div>
           </div>
 
-          {/* Two role cards */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-6">
             <div className="bg-[#FDF6E8] border border-[#E8D8A0] rounded-lg p-4">
               <p className="font-bold text-[#111111] text-sm mb-2">
@@ -176,7 +168,6 @@ export default function Help() {
             </div>
           </div>
 
-          {/* Footer quote */}
           <div className="text-center text-sm text-gray-600 italic">
             "A brilliant way to have some fun and support a cause." Get started
             at <span className="font-bold not-italic">questseeker.co.nz</span>
@@ -185,7 +176,6 @@ export default function Help() {
       )
     }
 
-    // "Quick Step-by-Step Guide for Seekers" section with numbered steps
     if (index === 1) {
       return (
         <div className="px-5 py-6 bg-white/50 text-gray-700 text-sm border-t border-gray-100">
@@ -412,13 +402,11 @@ export default function Help() {
       )
     }
 
-    // "Quick Step-by-Step Guide for Creators" section with numbered steps
     if (index === 3) {
       return (
         <div className="px-5 py-6 bg-white/50 text-gray-700 text-sm border-t border-gray-100">
           <div className="border-b-2 border-[#F0A800] mb-6"></div>
 
-          {/* FOR QUEST CREATORS */}
           <h3 className="font-bold text-[#111111] text-lg mb-3">
             🗺️ FOR QUEST CREATORS
           </h3>
@@ -427,7 +415,6 @@ export default function Help() {
             school, or business, here's how to launch a Quest from scratch:
           </p>
 
-          {/* 7 steps for Creators */}
           <div className="space-y-3 mb-8">
             {[
               {
@@ -498,7 +485,6 @@ export default function Help() {
       )
     }
 
-    // "Quick Step-by-Step Guide for Seekers" section with numbered steps
     if (index === 5) {
       return (
         <div className="px-5 py-6 bg-white/50 text-gray-700 text-sm border-t border-gray-100">
@@ -567,7 +553,6 @@ export default function Help() {
       )
     }
 
-    // Default rendering for other sections (original list format)
     return (
       <div className="px-5 py-4 bg-white/50 text-gray-700 text-sm border-t border-gray-100">
         <ul className="flex flex-col gap-3 list-disc list-outside pl-5">
@@ -579,7 +564,6 @@ export default function Help() {
     )
   }
 
-  // NOW you can do early returns
   if (isLoading) {
     return <div>Loading...</div>
   }

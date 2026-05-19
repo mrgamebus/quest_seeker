@@ -1,7 +1,6 @@
 import { useRef, useState, useEffect } from 'react'
 import { Input } from '@/components/ui/input'
 
-// 1. Updated interface to handle both values
 interface BankDetails {
   accountName: string
   accountNumber: string
@@ -31,7 +30,6 @@ export const SegmentedBankInput = ({
     suffix: useRef<HTMLInputElement>(null),
   }
 
-  // 2. Updated useEffect to handle pre-filling name and number
   useEffect(() => {
     if (initialValue && initialValue.includes('|')) {
       const [name, fullNumber] = initialValue.split('|')

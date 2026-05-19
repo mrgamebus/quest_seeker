@@ -58,7 +58,7 @@ export default function QuestDetailPage() {
   const [creatorMessage, setCreatorMessage] = useState('')
 
   const { mutate: updateQuestMutation, isPending: isUpdatingQuest } =
-    useMutateQuest() // ✅ Add this
+    useMutateQuest()
 
   const [emblaRef, emblaApi] = useEmblaCarousel({ loop: true })
   const { deleteQuest, loading: deleting } = useQuestDeletion()
@@ -72,7 +72,6 @@ export default function QuestDetailPage() {
   const { data: currentUserProfile, refetch: refetchProfile } =
     useCurrentUserProfile()
 
-  // 🧩 Fetch quest data
   const { data: userQuests, refetch: refetchUserQuests } = useUserQuests(
     currentUserProfile?.id,
   )
@@ -82,8 +81,6 @@ export default function QuestDetailPage() {
   const [participantsLoaded, setParticipantsLoaded] = useState(false)
   const [tasks, setTasks] = useState<Task[]>([])
 
-  // const [pdfTasks, setPdfTasks] = useState<Task[]>([])
-  // const [pdfLoading, setPdfLoading] = useState(false)
   const [pdfTasksByParticipant, setPdfTasksByParticipant] = useState<
     Record<string, Task[]>
   >({})
@@ -95,14 +92,11 @@ export default function QuestDetailPage() {
 
   const isExpired = quest?.status === QuestStatus.expired
   const NZ_TZ = 'Pacific/Auckland'
-  // Update edit fields when quest data is fetched
 
-  // Parse winners when quest loads
   useEffect(() => {
     if (!quest) return
     setTasks(ensureArray<Task>(quest.quest_tasks))
 
-    // ✅ Parse existing winners
     try {
       const parsedWinners = quest.quest_winners
         ? JSON.parse(quest.quest_winners)
@@ -136,7 +130,6 @@ export default function QuestDetailPage() {
     if (!quest) return
     setTasks(ensureArray<Task>(quest.quest_tasks))
 
-    // ✅ Parse existing winners
     try {
       const parsedWinners = quest.quest_winners
         ? JSON.parse(quest.quest_winners)
@@ -172,7 +165,6 @@ export default function QuestDetailPage() {
           }),
         )
 
-        // Create a map of user_id -> profile
         const profileMap: Record<string, Profile> = {}
         profiles.forEach((profile) => {
           if (profile) {
@@ -180,7 +172,6 @@ export default function QuestDetailPage() {
           }
         })
 
-        console.log('✅ Fetched winner profiles:', profileMap)
         setWinnerProfiles(profileMap)
       } catch (err) {
         console.error('Failed to fetch winner profiles:', err)
@@ -216,7 +207,6 @@ export default function QuestDetailPage() {
     let tasksToResolve: Task[]
 
     if (participantId) {
-      // CREATOR VIEW: Get specific participant's tasks
       const participantQuest = questParticipants?.find(
         (uq) => uq.profileId === participantId,
       )
@@ -250,7 +240,6 @@ export default function QuestDetailPage() {
         }
       })
     } else {
-      // SEEKER VIEW: Use current user's tasks
       tasksToResolve = seekerTasks
     }
 
@@ -280,7 +269,6 @@ export default function QuestDetailPage() {
     return resolved
   }
 
-  // 🔜 REMOVE MyQuest dependency — now uses UserQuest status
   const completedParticipants = participantProfiles.filter((profile) => {
     const userQuest = questParticipants?.find(
       (uq) => uq.profileId === profile.id,
@@ -331,9 +319,6 @@ export default function QuestDetailPage() {
     place: number,
     profile: Profile,
   ) => {
-    console.log('🔍 Profile received:', profile)
-    console.log('📱 Profile phone:', profile.phone)
-
     const filteredWinners = winners.filter((w) => w.prize_id !== prizeId)
 
     const newWinner = {
@@ -342,19 +327,13 @@ export default function QuestDetailPage() {
       user_id: profile.id,
       username: profile.full_name || 'Unknown',
       email: profile.email || '',
-      phone: profile.phone || '', // ← Check if this is empty string
+      phone: profile.phone || '',
       selected_at: new Date().toISOString(),
     }
-
-    console.log('✅ New winner object BEFORE saving:', newWinner)
-    console.log('📱 Phone in newWinner:', newWinner.phone)
 
     const updatedWinners = [...filteredWinners, newWinner].sort(
       (a, b) => a.place - b.place,
     )
-
-    console.log('💾 Updated winners array BEFORE mutation:', updatedWinners)
-    console.log('📄 Stringified JSON:', JSON.stringify(updatedWinners))
 
     updateQuestMutation(
       {
@@ -365,16 +344,12 @@ export default function QuestDetailPage() {
       },
       {
         onSuccess: () => {
-          console.log(
-            '✅ Save successful, winners set locally:',
-            updatedWinners,
-          )
           setWinners(updatedWinners)
           toast({
             title: 'Winner Selected! 🎉',
             description: `${profile.full_name} has been selected as the winner!`,
           })
-          refetch() // ← Make sure this is here
+          refetch()
         },
         onError: (err) => {
           console.error('Failed to save winner:', err)
@@ -457,7 +432,6 @@ export default function QuestDetailPage() {
     if (!confirmed) return
 
     try {
-      // Calculate new end date (7 days from now in NZ time)
       const NZ_TZ = 'Pacific/Auckland'
       const nowNz = toZonedTime(new Date(), NZ_TZ)
       const newEndDate = new Date(nowNz)
@@ -543,7 +517,6 @@ export default function QuestDetailPage() {
     }
   })
 
-  // Parse sponsors (safe check in case it's undefined or malformed)
   const sponsors: Sponsor[] = (() => {
     try {
       return quest.quest_sponsor ? JSON.parse(quest.quest_sponsor) : []
@@ -552,7 +525,6 @@ export default function QuestDetailPage() {
     }
   })()
 
-  // Parse prizes (safe check in case it's undefined or malformed)
   const prizes: Prize[] = (() => {
     try {
       return quest.quest_prize_info ? JSON.parse(quest.quest_prize_info) : []
@@ -586,9 +558,6 @@ export default function QuestDetailPage() {
           return profile
         }),
       )
-
-      // ✅ Log to check if phone is present
-      console.log('Loaded participant profiles:', profiles)
 
       setParticipantProfiles(profiles.filter(Boolean) as Profile[])
       setParticipantsLoaded(true)
@@ -646,10 +615,6 @@ export default function QuestDetailPage() {
     ? pdfTasksByParticipant[currentUserId]
     : undefined
   const seekerLoading = currentUserId ? pdfLoadingById[currentUserId] : false
-  console.log('isOwner', isOwner)
-  console.log('isExpired', isExpired)
-  console.log('completedParticipants.length', completedParticipants.length)
-  console.log('participantIds.length', participantIds.length)
 
   return (
     <div
@@ -1022,23 +987,6 @@ export default function QuestDetailPage() {
                     </div>
                   )}
 
-                  {/* 📢 CREATOR MESSAGE - For Seekers */}
-                  {/* {!isOwner && quest.creator_message && (
-                    <div className="mt-4 bg-blue-50 border-l-4 border-blue-400 rounded-lg p-4">
-                      <div className="flex items-start gap-2">
-                        <span className="text-xl">📢</span>
-                        <div className="flex-1">
-                          <p className="text-sm font-semibold text-gray-800 mb-1">
-                            Message from Quest Creator
-                          </p>
-                          <p className="text-sm text-gray-700 whitespace-pre-wrap">
-                            {quest.creator_message}
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-                  )} */}
-                  {/* 🏆 PRIZE SELECTION SECTION - Only visible to owner */}
                   {isOwner && (
                     <div className="lg:w-[450px] w-full bg-white/70 p-4 rounded-xl shadow">
                       <h4 className="text-md font-bold mb-3">
@@ -1052,7 +1000,6 @@ export default function QuestDetailPage() {
                                 (w: any) => w.prize_id === prize.id,
                               )
 
-                              // ✅ Get the full profile for this winner
                               const winnerProfile = prizeWinner
                                 ? winnerProfiles[prizeWinner.user_id]
                                 : null
@@ -1371,7 +1318,6 @@ export default function QuestDetailPage() {
             {isExpired ? (
               <div className="lg:w-[450px] w-full bg-white/70 p-4 rounded-xl shadow">
                 {isOwner ? (
-                  // 👑 CREATOR VIEW
                   <>
                     <h3 className="text-lg font-bold mb-3">
                       Participants Who Completed This Quest
@@ -1469,8 +1415,6 @@ export default function QuestDetailPage() {
                     )}
                   </>
                 ) : (
-                  // 🧭 SEEKER VIEW
-
                   <>
                     <h3 className="text-lg font-bold mb-3">
                       Your Completed Quest
@@ -1482,9 +1426,7 @@ export default function QuestDetailPage() {
 
                     {currentUserProfile && (
                       <div className="flex flex-col gap-3">
-                        {/* ✅ Add completion check here */}
                         {completedTasks === totalTasks && totalTasks > 0 ? (
-                          // Show PDF options only if ALL tasks are completed
                           seekerPreparedTasks &&
                           seekerPreparedTasks.length > 0 ? (
                             <PDFDownloadLink
@@ -1522,7 +1464,6 @@ export default function QuestDetailPage() {
                             </button>
                           )
                         ) : (
-                          // Show message if quest is incomplete
                           <div className="bg-yellow-50 border border-yellow-300 rounded-lg p-4">
                             <p className="text-sm font-semibold text-yellow-800 mb-1">
                               ⚠️ Quest Incomplete
@@ -1539,7 +1480,7 @@ export default function QuestDetailPage() {
                 )}
               </div>
             ) : (
-              // ... non-expired JSX unchanged
+              // ... non-expired TSX unchanged
               <>
                 {(isOwner || hasJoined) && (
                   <div className="lg:w-[450px] w-full bg-white/80 p-4 rounded-xl shadow flex flex-col gap-4">

@@ -78,7 +78,6 @@ export default function QuestPage() {
       const matchesRegion =
         selectedRegion === 'Browse all' || quest.region === selectedRegion
 
-      // ✅ Only show published quests to non-creators
       const isPublished = quest.status === QuestStatus.published
       const isOwner = quest.creator_id === currentProfile?.id
 
@@ -86,11 +85,10 @@ export default function QuestPage() {
     })
   }, [allQuests, selectedRegion, currentProfile?.id])
 
-  // 🔍 Filter quests by search term (name, region, organisation)
   const filteredQuests = useMemo(() => {
     const term = searchTerm.toLowerCase()
     return validQuests.filter((q) => {
-      if (!q.creator_id) return false // skip quests with no creator_id
+      if (!q.creator_id) return false
 
       const creatorOrg = profileMap[q.creator_id]?.organization_name ?? ''
 
@@ -102,7 +100,6 @@ export default function QuestPage() {
     })
   }, [validQuests, searchTerm, profileMap])
 
-  // 🧭 Sort quests
   const sortedQuests = useMemo(() => {
     const sorted = [...filteredQuests]
 
@@ -158,7 +155,7 @@ export default function QuestPage() {
   const fetchMoreQuests = () => {
     setTimeout(() => {
       setVisibleCount((prev) => prev + pageSize)
-    }, 500) // simulates load time
+    }, 500)
   }
 
   const participantCounts = useMemo(() => {
@@ -261,7 +258,7 @@ export default function QuestPage() {
               loader={
                 <p className="text-center py-3">Loading more quests...</p>
               }
-              scrollThreshold={0.9} // triggers at 90% scroll
+              scrollThreshold={0.9}
             >
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 py-10">
                 {visibleQuests.map((quest: Quest) => (
