@@ -8,9 +8,7 @@ import {
   AdminGetUserCommand,
 } from '@aws-sdk/client-cognito-identity-provider'
 
-// ============================================================================
 // TYPES
-// ============================================================================
 
 type Role = 'seeker' | 'creator' | 'pending'
 
@@ -37,25 +35,19 @@ export type Profile = {
   points: number
 }
 
-// ============================================================================
 // AWS CLIENTS
-// ============================================================================
 
 const ses = new SESClient({ region: 'ap-southeast-2' })
 const ddb = DynamoDBDocumentClient.from(new DynamoDBClient({}))
 const cognito = new CognitoIdentityProviderClient({ region: 'ap-southeast-2' })
 
-// ============================================================================
 // CONFIGURATION
-// ============================================================================
 
 const USER_POOL_ID = process.env.AMPLIFY_USER_POOL_ID!
 const FROM_ADDRESS = 'tari@tiakiwhenua.co.nz'
 const ADMIN_EMAIL = process.env.ADMIN_EMAIL || 'tari@tiakiwhenua.co.nz'
 
-// ============================================================================
 // UTILITY FUNCTIONS
-// ============================================================================
 
 export const getEmailFromCognito = async (
   userId: string,
@@ -89,9 +81,7 @@ const safeSend = async (command: SendEmailCommand) => {
   }
 }
 
-// ============================================================================
 // CREATOR APPLICATION EMAILS
-// ============================================================================
 
 export const sendCreatorApplicationEmail = async (
   userId: string,
@@ -277,9 +267,7 @@ ${footer}
   )
 }
 
-// ============================================================================
 // BANK UPDATE EMAILS
-// ============================================================================
 
 export const sendBankUpdateEmail = async (
   userId: string,
@@ -329,9 +317,7 @@ ${footer}
   )
 }
 
-// ============================================================================
 // QUEST-RELATED EMAILS
-// ============================================================================
 
 export const sendJoinEmails = async (
   questId: string,
@@ -508,9 +494,7 @@ export const sendSeekerQuestExpiredEmail = async (
   )
 }
 
-// ============================================================================
 // SUPPORT FORM EMAIL
-// ============================================================================
 
 export const sendSupportEmail = async (
   name: string,
@@ -545,7 +529,7 @@ ${footer}
     new SendEmailCommand({
       Source: FROM_ADDRESS,
       Destination: { ToAddresses: [ADMIN_EMAIL] },
-      ReplyToAddresses: [email], // Allows direct reply to the user
+      ReplyToAddresses: [email],
       Message: {
         Subject: { Data: `Support Request: ${subject}` },
         Body: {

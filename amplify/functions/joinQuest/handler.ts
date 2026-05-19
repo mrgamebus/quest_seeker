@@ -45,10 +45,8 @@ type DynamoDBError = {
 
 export const handler: AppSyncResolverHandler<Args, boolean> = async (event) => {
   const { questId, profileId } = event.arguments
-  console.log('joinQuest invoked', { questId, profileId })
   if (!questId || !profileId) throw new Error('Missing questId or profileId')
 
-  // 1️⃣ Fetch quest and profile in parallel
   const [{ Item: quest }, { Item: profile }] = await Promise.all([
     ddb.send(new GetCommand({ TableName: QUEST_TABLE, Key: { id: questId } })),
     ddb.send(
@@ -58,8 +56,6 @@ export const handler: AppSyncResolverHandler<Args, boolean> = async (event) => {
 
   if (!quest) throw new Error('Quest not found')
   if (!profile) throw new Error('Profile not found')
-  console.log('Quest and profile fetched successfully')
-  // 2️⃣ Parse quest tasks
   const rawTasks = (() => {
     try {
       if (!quest.quest_tasks) return []
@@ -74,7 +70,6 @@ export const handler: AppSyncResolverHandler<Args, boolean> = async (event) => {
     }
   })()
 
-  // 3️⃣ Map tasks for user
   const tasksForSave = JSON.stringify(
     rawTasks.map((task: QuestTask) => ({
       ...task,
@@ -85,7 +80,6 @@ export const handler: AppSyncResolverHandler<Args, boolean> = async (event) => {
     })),
   )
 
-  // 4️⃣ Write UserQuest item directly to DynamoDB
   const now = new Date().toISOString()
   try {
     await ddb.send(
@@ -107,16 +101,13 @@ export const handler: AppSyncResolverHandler<Args, boolean> = async (event) => {
         ConditionExpression: 'attribute_not_exists(id)',
       }),
     )
-    console.log(
-      `✅ UserQuest created for profile ${profileId} quest ${questId}`,
-    )
   } catch (err) {
     const dynamoErr = err as DynamoDBError
     const isDuplicate = dynamoErr.name === 'ConditionalCheckFailedException'
     if (isDuplicate) throw new Error('User has already joined this quest')
     throw new Error(`Failed to join quest: ${dynamoErr.message}`)
   }
-  // 5️⃣ Award join points to profile
+
   const JOIN_POINTS = 10
   try {
     await ddb.send(
@@ -132,22 +123,15 @@ export const handler: AppSyncResolverHandler<Args, boolean> = async (event) => {
         },
       }),
     )
-    console.log(`✅ Awarded ${JOIN_POINTS} points to profile ${profileId}`)
   } catch (err) {
-    // Non-fatal — quest join already succeeded
     console.error('Failed to award join points:', err)
   }
 
-  // 6️⃣ Send notifications (non-fatal)
-  // 6️⃣ Send notifications (non-fatal)
-  console.log('Attempting to send join emails...')
   try {
     await sendJoinEmails(questId, profileId, PROFILE_TABLE, QUEST_TABLE)
-    console.log('✅ Join emails sent')
   } catch (err) {
     console.error('Failed to send join emails:', err)
   }
 
-  console.log('Handler complete, returning true')
   return true
 }

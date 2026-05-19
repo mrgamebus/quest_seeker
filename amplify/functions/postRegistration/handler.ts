@@ -5,12 +5,10 @@ import { getAmplifyDataClientConfig } from '@aws-amplify/backend/function/runtim
 import type { Schema } from '../../data/resource'
 import { env } from '$amplify/env/postRegistration'
 
-// 🔐 Configure Amplify for Lambda runtime
 const { resourceConfig, libraryOptions } = await getAmplifyDataClientConfig(env)
 
 Amplify.configure(resourceConfig, libraryOptions)
 
-// 📦 Typed Amplify Data client
 const client = generateClient<Schema>()
 
 export const handler: PostConfirmationTriggerHandler = async (event) => {
@@ -30,8 +28,6 @@ export const handler: PostConfirmationTriggerHandler = async (event) => {
       full_name: fullName,
       role: 'seeker',
     })
-
-    // console.log('Profile created for user:', sub)
   } catch (err: unknown) {
     if (err instanceof Error) {
       console.warn('Profile creation failed:', err.message)

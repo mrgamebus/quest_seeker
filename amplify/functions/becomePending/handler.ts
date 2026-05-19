@@ -38,7 +38,6 @@ export const handler: Schema['becomePending']['functionHandler'] = async (
   const { type, userId, accountName, bankAccount, profileData } =
     event.arguments
 
-  // ✅ Parse the JSON string
   const parsedProfileData =
     typeof profileData === 'string' ? JSON.parse(profileData) : profileData
 
@@ -51,11 +50,9 @@ export const handler: Schema['becomePending']['functionHandler'] = async (
       if (parsedProfileData.role === 'seeker') {
         await updateUserRole(userId, 'pending', process.env.PROFILE_TABLE_NAME!)
       }
-      // Get user email for confirmation
       const userEmail = await getEmailFromCognito(userId)
       const userName = parsedProfileData.full_name ?? 'User'
 
-      // Replace the sequential await calls with:
       await Promise.all([
         sendCreatorApplicationEmail(
           userId,
@@ -73,13 +70,6 @@ export const handler: Schema['becomePending']['functionHandler'] = async (
         accountName,
         bankAccount,
         process.env.PROFILE_TABLE_NAME!,
-      )
-    } else {
-      console.log(
-        'No matching condition. Type:',
-        type,
-        'isProfile:',
-        isProfile(parsedProfileData),
       )
     }
 

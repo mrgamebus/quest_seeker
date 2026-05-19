@@ -14,7 +14,6 @@ export const updateUserRole = async (
   console.log('tableName:', tableName)
 
   try {
-    // Update DynamoDB only
     console.log('Updating DynamoDB...')
     await ddb.send(
       new UpdateCommand({
@@ -26,8 +25,6 @@ export const updateUserRole = async (
       }),
     )
     console.log('DynamoDB update complete')
-
-    // No Cognito update needed - role is stored in DynamoDB Profile table
   } catch (error) {
     console.error('Error in updateUserRole:', error)
     throw error

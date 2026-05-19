@@ -1,4 +1,3 @@
-// amplify/functions/createQuestEntrySession/resource.ts
 import { defineFunction, secret } from '@aws-amplify/backend'
 
 export const createQuestEntrySession = defineFunction({

@@ -30,7 +30,6 @@ export const handler: Handler = async () => {
       status: 'expired',
     })
 
-    // ✅ Notify creator that quest has expired
     if (quest.creator_id) {
       try {
         await sendQuestExpiredEmail(
@@ -46,7 +45,6 @@ export const handler: Handler = async () => {
       }
     }
 
-    // ✅ Notify all participants (seekers) that the quest has expired
     try {
       const { data: userQuests } = await client.models.UserQuest.list({
         filter: {
@@ -55,7 +53,6 @@ export const handler: Handler = async () => {
       })
 
       if (userQuests && userQuests.length > 0) {
-        // Send emails to all participants
         await Promise.allSettled(
           userQuests.map((userQuest) =>
             sendSeekerQuestExpiredEmail(
@@ -64,10 +61,6 @@ export const handler: Handler = async () => {
               quest.id,
             ),
           ),
-        )
-
-        console.log(
-          `Sent ${userQuests.length} seeker notification(s) for quest ${quest.id}`,
         )
       }
     } catch (err) {
