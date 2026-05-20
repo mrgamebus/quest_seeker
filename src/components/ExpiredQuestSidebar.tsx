@@ -41,7 +41,6 @@ export default function ExpiredQuestSidebar({
   if (isOwner) {
     return (
       <>
-        {/* <div className="lg:w-[450px] w-full bg-white/70 p-4 rounded-xl shadow mt-4"> */}
         <CompletedParticipantsList
           quest={quest}
           completedParticipants={completedParticipants}
@@ -49,7 +48,6 @@ export default function ExpiredQuestSidebar({
           tasks={tasks}
           onPreparePdf={onPreparePdf}
         />
-        {/* </div> */}
       </>
     )
   }

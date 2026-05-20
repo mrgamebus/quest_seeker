@@ -1,54 +1,34 @@
 import { Task } from '@/types'
-import RemoteImage from './RemoteImage'
-import placeHold from '@/assets/images/placeholder_view_vector.svg'
+import TaskPreviewCard from './ActiveQuestSideBar/TaskPreviewCard'
 
 interface TaskPreviewProps {
   tasks: Task[]
 }
 
 export default function TaskPreview({ tasks }: TaskPreviewProps) {
-  if (!tasks || tasks.length === 0) return null
-
-  const previewTasks = tasks.slice(0, 3) // first three tasks
+  if (tasks.length === 0) {
+    return (
+      <div className="lg:w-[450px] w-full bg-white/80 p-4 rounded-xl shadow">
+        <h3 className="text-lg font-bold mb-3">Quest Tasks</h3>
+        <p className="text-gray-500">No tasks available for this quest.</p>
+      </div>
+    )
+  }
 
   return (
-    <div className="border rounded-lg p-4 bg-gray-50 shadow-inner max-h-64 lg:w-[450px] w-full overflow-y-auto">
-      <h2 className="text-lg font-semibold mb-2 text-gray-800">Task Preview</h2>
-
-      <ul className="space-y-2">
-        {previewTasks.map((task) => (
-          <li
-            key={task.id}
-            className="p-3 bg-white rounded-lg border border-gray-200 shadow-sm"
-          >
-            {task.description && (
-              <>
-                <p className="text-xs text-gray-500 mt-1">
-                  {task.description.length > 100
-                    ? task.description.slice(0, 100) + '…'
-                    : task.description}
-                </p>
-                <p className="text-xs text-gray-500 mt-1">
-                  Join this quest to answer!
-                </p>
-              </>
-            )}
-            {task.isImage && task.answer && (
-              <RemoteImage
-                path={task.answer}
-                fallback={placeHold}
-                className="h-16 w-16 rounded object-cover mt-2"
-              />
-            )}
-          </li>
-        ))}
-      </ul>
-
-      {tasks.length > 3 && (
-        <p className="text-xs text-gray-400 italic mt-2">
-          …and {tasks.length - 3} more tasks
+    <div className="lg:w-[450px] w-full bg-white/80 p-4 rounded-xl shadow">
+      <div className="mb-4">
+        <h3 className="text-lg font-bold">Quest Tasks Preview</h3>
+        <p className="text-sm text-gray-600">
+          Join this quest to start completing tasks!
         </p>
-      )}
+      </div>
+
+      <div className="flex flex-col gap-3 max-h-96 overflow-y-auto pr-1">
+        {tasks.map((task, index) => (
+          <TaskPreviewCard key={task.id} task={task} index={index} />
+        ))}
+      </div>
     </div>
   )
 }

@@ -17,24 +17,11 @@ import {
   Sponsor,
   Task,
   Profile,
-  UserQuest,
   Winner,
   MinimalQuestParticipant,
 } from '@/types'
-import RemoteImage from './RemoteImage'
-import placeHold from '@/assets/images/placeholder_view_vector.svg'
-import {
-  Dialog,
-  DialogClose,
-  DialogContent,
-  DialogOverlay,
-  DialogTitle,
-  DialogTrigger,
-} from '@radix-ui/react-dialog'
-import TaskInformationWindow from './TaskInformationWindow'
 import { Home } from 'lucide-react'
 import { Toolbar } from './Toolbar'
-import TaskPreview from './TaskPreview'
 import { GetProfileQuery, MutateQuestAction, QuestStatus } from '@/graphql/API'
 import { getProfile } from '@/graphql/queries'
 import SignOutButton from './SignOutButton'
@@ -50,6 +37,12 @@ import QuestBanner from './QuestBanner'
 import WinnerSelection from './WinnerSelection'
 import WinnerDisplay from './WinnerDisplay'
 import ExpiredQuestSidebar from './ExpiredQuestSidebar'
+import ActiveQuestSidebar from './ActiveQuestSidebar'
+import PaymentSuccessBanner from './PaymentSuccessBanner'
+import QuestActions from './QuestActions'
+import CreatorMessageSection from './CreatorMessageSection'
+import CreatorMessageDisplay from './CreatorMessageDisplay'
+import QuestBasicInfo from './QuestBasicInfo'
 
 export default function QuestDetailPage() {
   const { id } = useParams<{ id: string }>()
@@ -79,13 +72,6 @@ export default function QuestDetailPage() {
   const [participantProfiles, setParticipantProfiles] = useState<Profile[]>([])
   const [participantsLoaded, setParticipantsLoaded] = useState(false)
   const [tasks, setTasks] = useState<Task[]>([])
-
-  const [pdfTasksByParticipant, setPdfTasksByParticipant] = useState<
-    Record<string, Task[]>
-  >({})
-  const [pdfLoadingById, setPdfLoadingById] = useState<Record<string, boolean>>(
-    {},
-  )
 
   const [paymentSuccess, setPaymentSuccess] = useState(false)
 
@@ -460,8 +446,6 @@ export default function QuestDetailPage() {
   const completedTasks = joinedTasks.filter(
     (t: { completed: boolean }) => t.completed,
   ).length
-  const progressPercent =
-    totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0
 
   const seekerTasks = tasks.map((task) => {
     const existingAnswer = joinedTasks.find(
@@ -566,12 +550,6 @@ export default function QuestDetailPage() {
     quest.status === QuestStatus.draft ||
     (quest.status === QuestStatus.published && participantIds.length === 0)
 
-  const currentUserId = currentUserProfile?.id
-  const seekerPreparedTasks = currentUserId
-    ? pdfTasksByParticipant[currentUserId]
-    : undefined
-  const seekerLoading = currentUserId ? pdfLoadingById[currentUserId] : false
-
   return (
     <div
       className="relative min-h-screen flex items-center justify-center bg-cover bg-center px-4"
@@ -632,272 +610,32 @@ export default function QuestDetailPage() {
           <div className="flex flex-col lg:flex-row gap-6 mt-2 w-full">
             {/* ---------------- LEFT SIDE ---------------- */}
             <div className="flex-1">
-              {isExpired ? (
-                /* ---------- EXPIRED VERSION: Show only the 4 fields ---------- */
-                <>
-                  <p className="text-gray-700 mb-2">{quest.quest_details}</p>
-                  <p className="text-sm text-gray-500 mb-1">
-                    Region: <strong>{quest.region}</strong>
-                  </p>
-                  {/* Changed from <p> to <div> */}
-                  <div className="text-sm mb-1">
-                    Organisation:{' '}
-                    {questCreatorProfile?.data?.organization_name ? (
-                      <Dialog>
-                        <DialogTrigger asChild>
-                          <span className="text-blue-600 underline cursor-pointer">
-                            {questCreatorProfile.data.organization_name}
-                          </span>
-                        </DialogTrigger>
-                        <DialogOverlay className="fixed inset-0 bg-black/30 z-40" />
-                        <DialogContent className="fixed top-1/2 left-1/2 z-50 max-h-[70vh] w-full max-w-md bg-white rounded-xl p-6 shadow-lg -translate-x-1/2 -translate-y-1/2 overflow-y-auto">
-                          <RemoteImage
-                            path={
-                              questCreatorProfile.data.image_thumbnail ||
-                              placeHold
-                            }
-                            fallback={placeHold}
-                            className="w-32 h-32 rounded-full object-cover"
-                          />
-                          <DialogTitle className="text-lg font-bold mb-4">
-                            {questCreatorProfile.data.organization_name}
-                          </DialogTitle>
-                          <p className="text-gray-700">
-                            {questCreatorProfile.data
-                              .organization_description || 'N/A'}
-                          </p>
-                          <DialogClose asChild>
-                            <button className="mt-6 bg-gray-200 hover:bg-gray-300 px-4 py-2 rounded">
-                              Close
-                            </button>
-                          </DialogClose>
-                        </DialogContent>
-                      </Dialog>
-                    ) : (
-                      <span className="text-gray-500">N/A</span>
-                    )}
-                  </div>
-                  {/* Changed from <p> to <div> */}
-                  <div className="text-sm text-gray-500">
-                    Ended on:{' '}
-                    <strong>{formatNzDateTime(quest.quest_end_at)}</strong>
-                  </div>
-                  {/* Changed from <p> to <div> */}
-                  <div className="text-sm text-gray-500">
-                    People who joined:
-                    {participantIds.length > 0 && (
-                      <Dialog
-                        onOpenChange={(open) =>
-                          open && handleOpenParticipants()
-                        }
-                      >
-                        <DialogTrigger asChild>
-                          <button className="text-blue-600 underline font-medium text-sm">
-                            {participantIds.length} participant
-                            {participantIds.length > 1 ? 's' : ''}
-                          </button>
-                        </DialogTrigger>
-
-                        <DialogOverlay className="fixed inset-0 bg-black/30 z-40" />
-                        <DialogContent className="fixed top-1/2 left-1/2 z-50 max-h-[70vh] w-full max-w-md bg-white rounded-xl p-6 shadow-lg -translate-x-1/2 -translate-y-1/2 overflow-y-auto">
-                          <DialogTitle className="text-lg font-bold mb-4">
-                            Participants
-                          </DialogTitle>
-
-                          <div className="flex flex-col gap-3">
-                            {participantProfiles.map((profile) => (
-                              <div
-                                key={profile.id}
-                                className="flex items-center gap-3"
-                              >
-                                <RemoteImage
-                                  path={profile.image_thumbnail || placeHold}
-                                  fallback={placeHold}
-                                  className="w-32 h-32 rounded-full object-cover"
-                                />
-
-                                {/* Text stacked vertically */}
-                                <div className="flex flex-col">
-                                  <span className="text-sm font-medium">
-                                    <strong>
-                                      {profile.full_name || 'Unknown'}
-                                    </strong>
-                                  </span>
-
-                                  <span className="text-xs text-gray-600">
-                                    {profile.about_me || ''}
-                                  </span>
-                                </div>
-                              </div>
-                            ))}
-
-                            {participantProfiles.length === 0 && (
-                              <p className="text-gray-500">Loading...</p>
-                            )}
-                          </div>
-
-                          <DialogClose asChild>
-                            <button className="mt-6 bg-gray-200 hover:bg-gray-300 px-4 py-2 rounded">
-                              Close
-                            </button>
-                          </DialogClose>
-                        </DialogContent>
-                      </Dialog>
-                    )}
-                  </div>
-                  {isOwner && isExpired && (
-                    <WinnerSelection
-                      prizes={prizes}
-                      winners={winners}
-                      completedParticipants={completedParticipants}
-                      onSelectWinner={selectWinnerForPrize}
-                      onRandomPick={pickWinnerForPrize}
-                      isUpdating={isUpdatingQuest}
-                    />
-                  )}
-                  {!isOwner && winners.length > 0 && (
-                    <WinnerDisplay winners={winners} prizes={prizes} />
-                  )}
-                </>
-              ) : (
-                /* ---------- NORMAL VERSION (NOT EXPIRED) ---------- */
-                <>
-                  <p className="text-gray-700 mb-2">{quest.quest_details}</p>
-
-                  <p className="text-sm text-gray-500 mb-1">
-                    Region: <strong>{quest.region}</strong>
-                  </p>
-
-                  <div className="text-sm mb-1">
-                    Organisation:{' '}
-                    {questCreatorProfile?.data?.organization_name ? (
-                      <Dialog>
-                        <DialogTrigger asChild>
-                          <span className="text-blue-600 underline cursor-pointer">
-                            {questCreatorProfile.data.organization_name}
-                          </span>
-                        </DialogTrigger>
-
-                        <DialogOverlay className="fixed inset-0 bg-black/30 z-40" />
-                        <DialogContent className="fixed top-1/2 left-1/2 z-50 max-h-[70vh] w-full max-w-md bg-white rounded-xl p-6 shadow-lg -translate-x-1/2 -translate-y-1/2 overflow-y-auto">
-                          <RemoteImage
-                            path={
-                              questCreatorProfile.data.image_thumbnail ||
-                              placeHold
-                            }
-                            fallback={placeHold}
-                            className="w-32 h-32 rounded-full object-cover"
-                          />
-                          <DialogTitle className="text-lg font-bold mb-4">
-                            {questCreatorProfile.data.organization_name}
-                          </DialogTitle>
-                          <p className="text-gray-700">
-                            {questCreatorProfile.data
-                              .organization_description || 'N/A'}
-                          </p>
-                          <DialogClose asChild>
-                            <button className="mt-6 bg-gray-200 hover:bg-gray-300 px-4 py-2 rounded">
-                              Close
-                            </button>
-                          </DialogClose>
-                        </DialogContent>
-                      </Dialog>
-                    ) : (
-                      <span className="text-gray-500">N/A</span>
-                    )}
-                  </div>
-
-                  <p className="text-sm text-gray-500 mb-1">
-                    Start:{' '}
-                    <strong>{formatNzDateTime(quest.quest_start_at)}</strong>
-                  </p>
-                  <p className="text-sm text-gray-500">
-                    End: <strong>{formatNzDateTime(quest.quest_end_at)}</strong>
-                  </p>
-                  <p className="text-sm text-gray-500">
-                    Number of tasks in this quest:{' '}
-                    <strong>{ensureArray<Task>(tasks).length}</strong>
-                  </p>
-                  <p className="text-sm text-gray-500">
-                    Entry: <strong>${quest.quest_entry}</strong>
-                  </p>
-
-                  {/* Add fundraised amount here */}
-                  {quest.quest_entry &&
-                    quest.quest_entry > 0 &&
-                    participantIds.length > 0 && (
-                      <p className="text-sm text-green-600 font-semibold">
-                        Funds Raised: $
-                        {(
-                          quest.quest_entry * participantIds.length
-                        ).toLocaleString()}
-                      </p>
-                    )}
-
-                  {/* Participant count block remains */}
-                  <div className="text-sm text-gray-500">
-                    People joined:
-                    {participantIds.length > 0 && (
-                      <Dialog
-                        onOpenChange={(open) =>
-                          open && handleOpenParticipants()
-                        }
-                      >
-                        <DialogTrigger asChild>
-                          <button className="text-blue-600 underline font-medium text-sm">
-                            {participantIds.length} participant
-                            {participantIds.length > 1 ? 's' : ''}
-                          </button>
-                        </DialogTrigger>
-
-                        <DialogOverlay className="fixed inset-0 bg-black/30 z-40" />
-                        <DialogContent className="fixed top-1/2 left-1/2 z-50 max-h-[70vh] w-full max-w-md bg-white rounded-xl p-6 shadow-lg -translate-x-1/2 -translate-y-1/2 overflow-y-auto">
-                          <DialogTitle className="text-lg font-bold mb-4">
-                            Participants
-                          </DialogTitle>
-
-                          <div className="flex flex-col gap-3">
-                            {participantProfiles.map((profile) => (
-                              <div
-                                key={profile.id}
-                                className="flex items-center gap-3"
-                              >
-                                <RemoteImage
-                                  path={profile.image_thumbnail || placeHold}
-                                  fallback={placeHold}
-                                  className="w-32 h-32 rounded-full object-cover"
-                                />
-
-                                {/* Text stacked vertically */}
-                                <div className="flex flex-col">
-                                  <span className="text-sm font-medium">
-                                    <strong>
-                                      {profile.full_name || 'Unknown'}
-                                    </strong>
-                                  </span>
-
-                                  <span className="text-xs text-gray-600">
-                                    {profile.about_me || ''}
-                                  </span>
-                                </div>
-                              </div>
-                            ))}
-
-                            {participantProfiles.length === 0 && (
-                              <p className="text-gray-500">Loading...</p>
-                            )}
-                          </div>
-
-                          <DialogClose asChild>
-                            <button className="mt-6 bg-gray-200 hover:bg-gray-300 px-4 py-2 rounded">
-                              Close
-                            </button>
-                          </DialogClose>
-                        </DialogContent>
-                      </Dialog>
-                    )}
-                  </div>
-                </>
+              <QuestBasicInfo
+                quest={quest}
+                organizationName={questCreatorProfile.data?.organization_name}
+                organizationDescription={
+                  questCreatorProfile.data?.organization_description
+                }
+                imageThumbnail={questCreatorProfile.data?.image_thumbnail}
+                isExpired={isExpired}
+                formatDateTime={formatNzDateTime}
+                participantIds={participantIds}
+                participantProfiles={participantProfiles}
+                onOpenParticipants={handleOpenParticipants}
+                tasks={tasks}
+              />
+              {isOwner && isExpired && (
+                <WinnerSelection
+                  prizes={prizes}
+                  winners={winners}
+                  completedParticipants={completedParticipants}
+                  onSelectWinner={selectWinnerForPrize}
+                  onRandomPick={pickWinnerForPrize}
+                  isUpdating={isUpdatingQuest}
+                />
+              )}
+              {!isOwner && winners.length > 0 && (
+                <WinnerDisplay winners={winners} prizes={prizes} />
               )}
             </div>
 
@@ -924,175 +662,58 @@ export default function QuestDetailPage() {
                 }}
               />
             ) : (
-              // ... non-expired TSX unchanged
-              <>
-                {(isOwner || hasJoined) && (
-                  <div className="lg:w-[450px] w-full bg-white/80 p-4 rounded-xl shadow flex flex-col gap-4">
-                    {/* 🔵 Progress Bar (joined seekers only) */}
-                    {hasJoined && !isOwner && (
-                      <div>
-                        <div className="flex justify-between items-center mb-2">
-                          <span className="text-sm font-semibold text-gray-700">
-                            Quest Progress
-                          </span>
-                          <span className="text-sm text-gray-600">
-                            {completedTasks} / {totalTasks} tasks
-                          </span>
-                        </div>
-
-                        <div className="w-full bg-gray-200 rounded-full h-3 overflow-hidden">
-                          <div
-                            className="h-3 bg-green-500 transition-all duration-300"
-                            style={{ width: `${progressPercent}%` }}
-                          />
-                        </div>
-
-                        <p className="text-xs text-gray-500 mt-1 text-right">
-                          {progressPercent}% complete
-                        </p>
-                      </div>
-                    )}
-
-                    {/* 🧩 Task Window */}
-                    <TaskInformationWindow
-                      questId={quest.id}
-                      tasks={seekerTasks}
-                      userTasks={
-                        joinedQuestEntry ? [joinedQuestEntry as UserQuest] : []
-                      }
-                      readOnly={isOwner}
-                      onTasksUpdated={async () => {
-                        await refetch()
-                        await refetchUserQuests()
-                      }}
-                    />
-                  </div>
-                )}
-
-                {!isOwner && !hasJoined && (
-                  <TaskPreview tasks={ensureArray(tasks)} />
-                )}
-              </>
+              <ActiveQuestSidebar
+                isOwner={isOwner}
+                hasJoined={hasJoined}
+                questId={quest.id}
+                tasks={seekerTasks}
+                joinedQuestEntry={joinedQuestEntry}
+                completedTasks={completedTasks}
+                totalTasks={totalTasks}
+                onTasksUpdated={async () => {
+                  await refetch()
+                  await refetchUserQuests()
+                }}
+              />
             )}
           </div>
 
           <div className="mt-4 flex flex-col gap-3 w-full">
-            {/* Payment success banner */}
-            {paymentSuccess && (
-              <div className="w-full bg-green-100 border border-green-300 text-green-800 rounded-lg px-4 py-3 text-sm font-medium flex items-center gap-2">
-                🎉 Payment successful! You've joined the quest.
-              </div>
-            )}
+            {/* Payment Success Banner */}
+            <PaymentSuccessBanner show={paymentSuccess} />
 
-            {/* Bottom action row - now stacks on mobile */}
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 w-full">
-              {/* Left: Delete / Restart / Join */}
-              <div className="flex flex-wrap items-center gap-2">
-                {isOwner && isExpired && completedParticipants.length === 0 && (
-                  <Button
-                    onClick={handleRestartQuest}
-                    className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded text-sm"
-                    disabled={isUpdatingQuest}
-                  >
-                    {isUpdatingQuest ? 'Restarting...' : '🔄 Restart Quest'}
-                  </Button>
-                )}
-
-                {isOwner && participantIds.length < 1 && !isExpired && (
-                  <Button
-                    onClick={() => deleteQuest(quest)}
-                    className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded text-sm"
-                    disabled={deleting}
-                  >
-                    {deleting ? 'Deleting...' : 'Delete Quest'}
-                  </Button>
-                )}
-
-                {!isOwner &&
-                  (hasJoined ? (
-                    <p className="text-green-600 font-semibold text-sm">
-                      ✅ Joined!
-                    </p>
-                  ) : (
-                    <button
-                      onClick={handleJoinQuest}
-                      disabled={joining}
-                      className={`px-4 py-2 rounded text-white text-sm ${
-                        joining
-                          ? 'bg-yellow-300'
-                          : 'bg-[#facc15] hover:bg-[#ca8a04]'
-                      }`}
-                    >
-                      {joining
-                        ? 'Joining...'
-                        : quest.quest_entry && quest.quest_entry > 0
-                          ? `Join for $${quest.quest_entry}`
-                          : 'Join the quest!'}
-                    </button>
-                  ))}
-              </div>
-
-              {/* Right: Back + Prize Info - now wraps on mobile */}
-              <div className="flex flex-wrap items-center gap-2 sm:ml-auto">
-                <Button
-                  onClick={() => navigate('/user/home?region=')}
-                  variant="yellow"
-                  className="flex-shrink-0 text-sm px-4 py-2"
-                >
-                  Back to Quests
-                </Button>
-
-                {prizes.length > 0 && (
-                  <Dialog>
-                    <DialogTrigger asChild>
-                      <Button className="flex-shrink-0 px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded text-sm">
-                        Prize Info
-                      </Button>
-                    </DialogTrigger>
-                    {/* ... rest of dialog unchanged ... */}
-                  </Dialog>
-                )}
-              </div>
-            </div>
-
+            {/* Quest Actions */}
+            <QuestActions
+              quest={quest}
+              isOwner={isOwner}
+              isAdmin={isAdmin}
+              hasJoined={hasJoined}
+              isExpired={isExpired}
+              prizes={prizes}
+              participantCount={participantIds.length}
+              completedParticipantCount={completedParticipants.length}
+              joining={joining}
+              deleting={deleting}
+              onJoin={handleJoinQuest}
+              onDelete={deleteQuest}
+              onRestart={handleRestartQuest}
+            />
             {/* Creator Message Section */}
             {isOwner && isExpired && (
-              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                <h4 className="font-semibold text-sm mb-2">
-                  📢 Message to Participants
-                </h4>
-                <textarea
-                  value={creatorMessage}
-                  onChange={(e) => setCreatorMessage(e.target.value)}
-                  placeholder="Write a message to all participants..."
-                  className="w-full p-3 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  rows={4}
-                />
-                <Button
-                  onClick={handleSaveMessage}
-                  disabled={isUpdatingQuest}
-                  className="mt-2 bg-blue-500 hover:bg-blue-600 text-white text-sm"
-                >
-                  {isUpdatingQuest ? 'Saving...' : 'Save & Send Message'}
-                </Button>
-              </div>
+              <CreatorMessageSection
+                message={creatorMessage}
+                onMessageChange={setCreatorMessage}
+                onSave={handleSaveMessage}
+                isSaving={isUpdatingQuest}
+              />
             )}
 
             {/* Display creator message */}
             {quest.creator_message && (
-              <div className="bg-yellow-50 border-l-4 border-yellow-400 rounded-lg p-4">
-                <div className="flex items-start gap-2">
-                  <span className="text-xl">📢</span>
-                  <div className="flex-1">
-                    <p className="text-sm font-semibold text-gray-800 mb-1">
-                      Message from Quest Creator
-                    </p>
-                    <p className="text-sm text-gray-700 whitespace-pre-wrap">
-                      {quest.creator_message}
-                    </p>
-                  </div>
-                </div>
-              </div>
+              <CreatorMessageDisplay
+                message={quest.creator_message}
+                creatorName={questCreatorProfile?.data?.organization_name}
+              />
             )}
 
             {isAdmin && (
