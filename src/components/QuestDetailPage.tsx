@@ -12,7 +12,15 @@ import bg from '@/assets/images/background_main.jpeg'
 import { Button } from './ui/button'
 import { Card, CardContent } from './ui/card'
 import { useEffect, useState } from 'react'
-import { Prize, Sponsor, Task, Profile, UserQuest, Winner } from '@/types'
+import {
+  Prize,
+  Sponsor,
+  Task,
+  Profile,
+  UserQuest,
+  Winner,
+  MinimalQuestParticipant,
+} from '@/types'
 import RemoteImage from './RemoteImage'
 import placeHold from '@/assets/images/placeholder_view_vector.svg'
 import {
@@ -31,8 +39,6 @@ import { GetProfileQuery, MutateQuestAction, QuestStatus } from '@/graphql/API'
 import { getProfile } from '@/graphql/queries'
 import SignOutButton from './SignOutButton'
 import { useQuestDeletion } from '@/hooks/useQuestDeletion'
-import { PDFDownloadLink } from '@react-pdf/renderer'
-import SeekerTaskPdfButton from '@/components/SeekerTaskPdfButton'
 import { format, toZonedTime } from 'date-fns-tz'
 import { getUrl } from 'aws-amplify/storage'
 import { ensureArray } from '@/tools/ensureArray'
@@ -43,6 +49,7 @@ import { useToast } from '@/hooks/use-toast'
 import QuestBanner from './QuestBanner'
 import WinnerSelection from './WinnerSelection'
 import WinnerDisplay from './WinnerDisplay'
+import ExpiredQuestSidebar from './ExpiredQuestSidebar'
 
 export default function QuestDetailPage() {
   const { id } = useParams<{ id: string }>()
@@ -154,13 +161,10 @@ export default function QuestDetailPage() {
     })
   }
 
-  const preparePdfTasks = async (participantId?: string) => {
+  const preparePdfTasks = async (participantId?: string): Promise<Task[]> => {
     const targetId = participantId || currentUserProfile?.id
     if (!targetId) return []
 
-    setPdfLoadingById((prev) => ({ ...prev, [targetId]: true }))
-
-    // Determine which tasks to prepare
     let tasksToResolve: Task[]
 
     if (participantId) {
@@ -169,7 +173,6 @@ export default function QuestDetailPage() {
       )
 
       if (!participantQuest) {
-        setPdfLoadingById((prev) => ({ ...prev, [targetId]: false }))
         return []
       }
 
@@ -221,8 +224,6 @@ export default function QuestDetailPage() {
       }),
     )
 
-    setPdfTasksByParticipant((prev) => ({ ...prev, [targetId]: resolved }))
-    setPdfLoadingById((prev) => ({ ...prev, [targetId]: false }))
     return resolved
   }
 
@@ -903,169 +904,25 @@ export default function QuestDetailPage() {
             {/* ---------------- RIGHT SIDE ---------------- */}
 
             {isExpired ? (
-              <div className="lg:w-[450px] w-full bg-white/70 p-4 rounded-xl shadow">
-                {isOwner ? (
-                  <>
-                    <h3 className="text-lg font-bold mb-3">
-                      Participants Who Completed This Quest
-                    </h3>
-
-                    {!participantsLoaded && participantIds.length === 0 ? (
-                      <p className="text-gray-500">
-                        No participants joined this quest.
-                      </p>
-                    ) : !participantsLoaded ? (
-                      <p className="text-gray-500">Loading participants...</p>
-                    ) : completedParticipants.length === 0 ? (
-                      <p className="text-gray-500">
-                        No participants completed all tasks for this quest.
-                      </p>
-                    ) : (
-                      <>
-                        {/* Scrollable participant list */}
-                        <div className="flex flex-col gap-3 mb-4 max-h-72 overflow-y-auto pr-1">
-                          {completedParticipants.map((profile) => {
-                            if (!profile?.id) return null
-
-                            const isLoading = pdfLoadingById[profile.id]
-                            const preparedTasks =
-                              pdfTasksByParticipant[profile.id]
-
-                            return (
-                              <div
-                                key={profile.id}
-                                className="flex items-center gap-3 bg-white p-3 rounded-lg shadow-sm hover:bg-yellow-50 transition border border-gray-100"
-                              >
-                                <RemoteImage
-                                  path={profile.image_thumbnail || placeHold}
-                                  fallback={placeHold}
-                                  className="w-12 h-12 rounded-full object-cover shrink-0"
-                                />
-
-                                <div className="flex flex-col flex-1 min-w-0">
-                                  <span className="font-semibold text-gray-800 truncate">
-                                    {profile.full_name || 'Unknown User'}
-                                  </span>
-                                  <span className="text-xs text-gray-500 truncate">
-                                    {profile.email || ''}
-                                  </span>
-                                </div>
-
-                                {preparedTasks && preparedTasks.length > 0 ? (
-                                  <PDFDownloadLink
-                                    document={
-                                      <SeekerTaskPdfButton
-                                        quest={quest}
-                                        seekerTasks={preparedTasks}
-                                        user={profile}
-                                      />
-                                    }
-                                    fileName={`${quest.quest_name}-${profile.full_name ?? 'participant'}.pdf`}
-                                  >
-                                    {({ loading }) => (
-                                      <span className="text-xs text-blue-600 font-medium shrink-0 cursor-pointer">
-                                        {loading
-                                          ? 'Generating...'
-                                          : '⬇ Download PDF'}
-                                      </span>
-                                    )}
-                                  </PDFDownloadLink>
-                                ) : (
-                                  <button
-                                    onClick={() => preparePdfTasks(profile.id)}
-                                    disabled={isLoading}
-                                    className="bg-gray-200 hover:bg-gray-300 px-3 py-2 rounded-lg text-sm transition-colors disabled:opacity-50"
-                                  >
-                                    {isLoading ? 'Preparing...' : 'Prepare PDF'}
-                                  </button>
-                                )}
-                              </div>
-                            )
-                          })}
-                        </div>
-                        {/* 🧩 Task Window */}
-                        <TaskInformationWindow
-                          questId={quest.id}
-                          tasks={seekerTasks}
-                          userTasks={
-                            joinedQuestEntry
-                              ? [joinedQuestEntry as UserQuest]
-                              : []
-                          }
-                          readOnly={isOwner}
-                          onTasksUpdated={async () => {
-                            await refetch()
-                            await refetchUserQuests()
-                          }}
-                        />
-                      </>
-                    )}
-                  </>
-                ) : (
-                  <>
-                    <h3 className="text-lg font-bold mb-3">
-                      Your Completed Quest
-                    </h3>
-                    <p className="text-sm text-gray-600 mb-4">
-                      This quest has ended. See your completed quest details
-                      below.
-                    </p>
-
-                    {currentUserProfile && (
-                      <div className="flex flex-col gap-3">
-                        {completedTasks === totalTasks && totalTasks > 0 ? (
-                          seekerPreparedTasks &&
-                          seekerPreparedTasks.length > 0 ? (
-                            <PDFDownloadLink
-                              document={
-                                <SeekerTaskPdfButton
-                                  quest={quest}
-                                  seekerTasks={seekerPreparedTasks}
-                                  user={currentUserProfile}
-                                />
-                              }
-                              fileName={`${quest.quest_name}-your-answers.pdf`}
-                            >
-                              {({ loading }) => (
-                                <button className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg w-full">
-                                  {loading
-                                    ? 'Generating PDF...'
-                                    : '⬇ Download My Quest PDF'}
-                                </button>
-                              )}
-                            </PDFDownloadLink>
-                          ) : (
-                            <button
-                              onClick={() => preparePdfTasks()}
-                              disabled={seekerLoading}
-                              className="bg-gray-200 hover:bg-gray-300 px-4 py-2 rounded-lg w-full transition-colors"
-                            >
-                              {seekerLoading ? (
-                                <span className="flex items-center justify-center gap-2">
-                                  <span className="w-4 h-4 border-2 border-gray-400 border-t-transparent rounded-full animate-spin" />
-                                  Preparing Tasks...
-                                </span>
-                              ) : (
-                                'Prepare PDF'
-                              )}
-                            </button>
-                          )
-                        ) : (
-                          <div className="bg-yellow-50 border border-yellow-300 rounded-lg p-4">
-                            <p className="text-sm font-semibold text-yellow-800 mb-1">
-                              ⚠️ Quest Incomplete
-                            </p>
-                            <p className="text-sm text-yellow-700">
-                              You completed {completedTasks} out of {totalTasks}{' '}
-                              tasks.
-                            </p>
-                          </div>
-                        )}
-                      </div>
-                    )}
-                  </>
-                )}
-              </div>
+              <ExpiredQuestSidebar
+                isOwner={isOwner}
+                quest={quest}
+                currentUserProfile={currentUserProfile}
+                completedParticipants={completedParticipants}
+                questParticipants={
+                  questParticipants as MinimalQuestParticipant[]
+                }
+                tasks={tasks}
+                seekerTasks={seekerTasks}
+                joinedQuestEntry={joinedQuestEntry}
+                completedTasks={completedTasks}
+                totalTasks={totalTasks}
+                onPreparePdf={preparePdfTasks}
+                onTasksUpdated={async () => {
+                  await refetch()
+                  await refetchUserQuests()
+                }}
+              />
             ) : (
               // ... non-expired TSX unchanged
               <>

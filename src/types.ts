@@ -58,6 +58,12 @@ export type Profile = {
   points: number
 }
 
+export interface MinimalQuestParticipant {
+  profileId: string
+  tasks: string | Task[] | any[] | null
+  status?: string | null
+}
+
 // ---------------- Tasks ----------------
 export type Task = {
   id: string
