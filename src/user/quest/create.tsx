@@ -18,7 +18,6 @@ import { Calendar } from '@/components/ui/calendar'
 import TaskCreatorButton from '@/components/TaskCreatorButton'
 import SponsorCreatorButton from '@/components/SponsorCreatorButton'
 import PrizeCreatorButton from '@/components/PrizeCreatorButton'
-import RemoteImage from '@/components/RemoteImage'
 import PickRegion from '@/components/PickRegion'
 import placeHold from '@/assets/images/placeholder_view_vector.svg'
 import bg from '@/assets/images/background_main.jpeg'
@@ -39,6 +38,9 @@ import { ensureArray } from '@/tools/ensureArray'
 import { generateClient } from 'aws-amplify/api'
 import { Schema } from 'amplify/data/resource'
 import { useToast } from '@/hooks/use-toast'
+import { StepHeader } from '@/components/StepHeader'
+import { QuestNameStep } from '@/components/QuestNameStep'
+import { QuestImageStep } from '@/components/QuestImageStep'
 
 const client = generateClient<Schema>()
 
@@ -260,6 +262,7 @@ export default function CreateQuestPage() {
           description: response.errors[0].message,
         })
       }
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (err: any) {
       console.error('CRITICAL ERROR:', err)
       toast({
@@ -368,77 +371,39 @@ export default function CreateQuestPage() {
         {/* --- Multi-step UI --- */}
         {step === 0 && (
           <>
-            <div className="flex justify-between mt-4">
-              <h2 className="text-xl font-bold mb-4">Name of the quest</h2>
-              <Button variant="yellow" onClick={handleClick}>
-                <span>Back to Quests</span>
-              </Button>
-            </div>
-            <Input value={name} onChange={(e) => setName(e.target.value)} />
-            <div className="flex justify-between mt-4">
-              <Button
-                variant="outline"
-                disabled={!canEdit}
-                onClick={() => saveQuest(QuestStatus.draft)}
-              >
-                {updatingQuest?.status === QuestStatus.published
-                  ? 'Save Changes'
-                  : 'Save as Draft'}
-              </Button>
-              <Button onClick={next}>Next</Button>
-            </div>
+            <QuestNameStep
+              value={name}
+              onChange={setName}
+              onBack={prev}
+              onNext={next}
+              onSave={() => saveQuest(QuestStatus.draft)}
+              canEdit={canEdit}
+              isPublished={updatingQuest?.status === QuestStatus.published}
+            />
           </>
         )}
 
         {/* Step 1: Image */}
         {step === 1 && (
           <>
-            <div className="flex justify-between mt-4">
-              <h2 className="text-xl font-bold mb-4">Quest Image</h2>
-              <Button variant="yellow" onClick={handleClick}>
-                <span>Back to Quests</span>
-              </Button>
-            </div>
-
-            {previewImage ? (
-              <RemoteImage
-                path={previewImage || updatingQuest?.quest_image}
-                fallback={placeHold}
-                className="w-1/2 mx-auto rounded-lg"
-              />
-            ) : (
-              <RemoteImage
-                path={updatingQuest?.quest_image || placeHold}
-                fallback={placeHold}
-                className="w-1/2 mx-auto rounded-lg"
-              />
-            )}
-            <input type="file" accept="image/*" onChange={handleImageChange} />
-            <div className="flex justify-between mt-4">
-              <Button onClick={prev}>Back</Button>
-              <Button
-                variant="outline"
-                disabled={!canEdit}
-                onClick={() => saveQuest(QuestStatus.draft)}
-              >
-                {updatingQuest?.status === QuestStatus.published
-                  ? 'Save Changes'
-                  : 'Save as Draft'}
-              </Button>
-              <Button onClick={next}>Next</Button>
-            </div>
+            <QuestImageStep
+              previewImage={previewImage}
+              questImage={updatingQuest?.quest_image}
+              placeHold={placeHold}
+              imageChange={handleImageChange}
+              onBack={prev}
+              onNext={next}
+              onSave={() => saveQuest(QuestStatus.draft)}
+              canEdit={canEdit}
+              isPublished={updatingQuest?.status === QuestStatus.published}
+            />
           </>
         )}
 
         {/* Step 2: Region */}
         {step === 2 && (
           <>
-            <div className="flex justify-between mt-4">
-              <h2 className="text-xl font-bold mb-4">Select Region</h2>
-              <Button variant="yellow" onClick={handleClick}>
-                <span>Back to Quests</span>
-              </Button>
-            </div>
+            <StepHeader title="Select Region" onBack={handleClick} />
             <PickRegion value={selectedRegion} onChange={setSelectedRegion} />
             <div className="flex justify-between mt-4">
               <Button onClick={prev}>Back</Button>
@@ -459,12 +424,7 @@ export default function CreateQuestPage() {
         {/* Step 3: Details */}
         {step === 3 && (
           <>
-            <div className="flex justify-between mt-4">
-              <h2 className="text-xl font-bold mb-4">Quest Details</h2>
-              <Button variant="yellow" onClick={handleClick}>
-                <span>Back to Quests</span>
-              </Button>
-            </div>
+            <StepHeader title="Quest Details" onBack={handleClick} />
             <Textarea
               value={details}
               onChange={(e) => setDetails(e.target.value)}
@@ -489,12 +449,7 @@ export default function CreateQuestPage() {
         {/* Step 4: Entry Fee */}
         {step === 4 && (
           <>
-            <div className="flex justify-between mt-4">
-              <h2 className="text-xl font-bold mb-4">Entry Fee</h2>
-              <Button variant="yellow" onClick={handleClick}>
-                <span>Back to Quests</span>
-              </Button>
-            </div>
+            <StepHeader title="Entry Fee" onBack={handleClick} />
             <Input
               inputMode="decimal"
               type="text"
@@ -526,12 +481,7 @@ export default function CreateQuestPage() {
 
         {step === 5 && (
           <>
-            <div className="flex justify-between mt-4">
-              <h2 className="text-xl font-bold mb-4">Quest Dates</h2>
-              <Button variant="yellow" onClick={handleClick}>
-                <span>Back to Quests</span>
-              </Button>
-            </div>
+            <StepHeader title="Quest Dates" onBack={handleClick} />
             {/* --- Start Date Picker --- */}
             <Dialog open={openStart} onOpenChange={setOpenStart}>
               <DialogTrigger asChild>
@@ -693,12 +643,7 @@ export default function CreateQuestPage() {
 
         {step === 6 && (
           <>
-            <div className="flex justify-between mt-4">
-              <h2 className="text-xl font-bold">Any Sponsors?</h2>
-              <Button variant="yellow" onClick={handleClick}>
-                <span>Back to Quests</span>
-              </Button>
-            </div>
+            <StepHeader title="Any Sponsors?" onBack={handleClick} />
 
             <div className="flex justify-between items-center mt-6">
               <Button onClick={prev}>Back</Button>
@@ -760,12 +705,7 @@ export default function CreateQuestPage() {
 
         {step === 8 && (
           <>
-            <div className="flex justify-between mt-4">
-              <h2 className="text-xl font-bold">Any Prizes?</h2>
-              <Button variant="yellow" onClick={handleClick}>
-                <span>Back to Quests</span>
-              </Button>
-            </div>
+            <StepHeader title="Any Prizes?" onBack={handleClick} />
 
             {/* Button row */}
             <div className="flex justify-between items-center mt-6">
