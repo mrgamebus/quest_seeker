@@ -9,6 +9,7 @@ import { createQuestEntrySession } from '../functions/createQuestEntrySession/re
 import { createStripeSession } from '../functions/createStripeSession/resource'
 import { stripeWebhook } from '../functions/stripeWebhook/resource'
 import { rejectCreator } from '../functions/rejectCreator/resource'
+import { questCreatorMessage } from '../functions/questCreatorMessage/resource'
 
 export const schema = a
   .schema({
@@ -50,6 +51,23 @@ export const schema = a
       .returns(a.json())
       .authorization((allow) => [allow.authenticated()])
       .handler(a.handler.function(becomePending)),
+
+    SendEmailResult: a.customType({
+      message: a.string().required(),
+      emailsSent: a.integer().required(),
+      failures: a.integer(),
+    }),
+
+    sendQuestCreatorMessage: a
+      .mutation()
+      .arguments({
+        questId: a.string().required(),
+        creatorMessage: a.string().required(),
+        creatorName: a.string(),
+      })
+      .returns(a.ref('SendEmailResult'))
+      .authorization((allow) => [allow.groups(['creator', 'Admin'])])
+      .handler(a.handler.function(questCreatorMessage)),
 
     /* --- 1. DEFINE CUSTOM TYPES & ENUMS FIRST --- */
     QuestStatus: a.enum([
@@ -220,6 +238,7 @@ export const schema = a
     allow.resource(createStripeSession).to(['query']),
     allow.resource(stripeWebhook).to(['query', 'mutate']),
     allow.resource(joinQuest).to(['query', 'mutate']),
+    allow.resource(questCreatorMessage).to(['query', 'mutate']),
   ])
 
 export type Schema = ClientSchema<typeof schema>
