@@ -7,14 +7,14 @@ interface CompletedParticipantsListProps {
   completedParticipants: Profile[]
   questParticipants?: MinimalQuestParticipant[]
   tasks: Task[]
+  isReady: boolean
   onPreparePdf: (participantId?: string) => Promise<Task[]>
 }
 
 export default function CompletedParticipantsList({
   quest,
   completedParticipants,
-  // questParticipants,
-  // tasks,
+  isReady,
   onPreparePdf,
 }: CompletedParticipantsListProps) {
   const [pdfTasksByParticipant, setPdfTasksByParticipant] = useState<
@@ -74,6 +74,7 @@ export default function CompletedParticipantsList({
               quest={quest}
               preparedTasks={preparedTasks}
               isLoading={isLoading}
+              isReady={isReady}
               onPreparePdf={() => handlePreparePdf(profile.id)}
             />
           )
