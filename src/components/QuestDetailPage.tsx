@@ -73,6 +73,8 @@ export default function QuestDetailPage() {
   const [participantsLoaded, setParticipantsLoaded] = useState(false)
   const [tasks, setTasks] = useState<Task[]>([])
 
+  const [pdfReadyById, setPdfReadyById] = useState<Record<string, boolean>>({})
+
   const [paymentSuccess, setPaymentSuccess] = useState(false)
 
   const isExpired = quest?.status === QuestStatus.expired
@@ -209,9 +211,11 @@ export default function QuestDetailPage() {
         }
       }),
     )
-
+    setPdfReadyById((prev) => ({ ...prev, [targetId]: true }))
     return resolved
   }
+
+  const isReady = pdfReadyById[currentUserProfile?.id]
 
   const completedParticipants = participantProfiles.filter((profile) => {
     const userQuest = questParticipants?.find(
@@ -660,6 +664,7 @@ export default function QuestDetailPage() {
                   await refetch()
                   await refetchUserQuests()
                 }}
+                isReady={isReady || false}
               />
             ) : (
               <ActiveQuestSidebar

@@ -9,6 +9,7 @@ interface ParticipantCardProps {
   quest: Quest
   preparedTasks?: Task[]
   isLoading: boolean
+  isReady: boolean
   onPreparePdf: () => void
 }
 
@@ -17,6 +18,7 @@ export default function ParticipantCard({
   quest,
   preparedTasks,
   isLoading,
+  isReady,
   onPreparePdf,
 }: ParticipantCardProps) {
   return (
@@ -36,7 +38,7 @@ export default function ParticipantCard({
         </span>
       </div>
 
-      {preparedTasks && preparedTasks.length > 0 ? (
+      {preparedTasks && preparedTasks.length > 0 && isReady ? (
         <PDFDownloadLink
           document={
             <SeekerTaskPdfButton

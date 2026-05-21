@@ -10,6 +10,7 @@ interface SeekerQuestSummaryProps {
   completedTasks: number
   totalTasks: number
   seekerTasks: Task[]
+  isReady: boolean
   onPreparePdf: () => Promise<Task[]>
 }
 
@@ -18,7 +19,7 @@ export default function SeekerQuestSummary({
   currentUserProfile,
   completedTasks,
   totalTasks,
-  // seekerTasks,
+  isReady,
   onPreparePdf,
 }: SeekerQuestSummaryProps) {
   const [preparedTasks, setPreparedTasks] = useState<Task[] | undefined>()
@@ -47,7 +48,7 @@ export default function SeekerQuestSummary({
 
       <div className="flex flex-col gap-3">
         {isQuestComplete ? (
-          preparedTasks && preparedTasks.length > 0 ? (
+          preparedTasks && preparedTasks.length > 0 && isReady ? (
             <PDFDownloadLink
               document={
                 <SeekerTaskPdfButton

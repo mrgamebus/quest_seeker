@@ -20,6 +20,7 @@ interface ExpiredQuestSidebarProps {
   joinedQuestEntry?: UserQuest
   completedTasks: number
   totalTasks: number
+  isReady: boolean
   onPreparePdf: (participantId?: string) => Promise<Task[]>
   onTasksUpdated: () => Promise<void>
 }
@@ -32,7 +33,7 @@ export default function ExpiredQuestSidebar({
   questParticipants,
   tasks,
   seekerTasks,
-  // joinedQuestEntry,
+  isReady,
   completedTasks,
   totalTasks,
   onPreparePdf,
@@ -47,6 +48,7 @@ export default function ExpiredQuestSidebar({
           questParticipants={questParticipants}
           tasks={tasks}
           onPreparePdf={onPreparePdf}
+          isReady={isReady}
         />
       </>
     )
@@ -60,6 +62,7 @@ export default function ExpiredQuestSidebar({
       completedTasks={completedTasks}
       totalTasks={totalTasks}
       seekerTasks={seekerTasks}
+      isReady={isReady}
       onPreparePdf={() => onPreparePdf()}
     />
   ) : null
