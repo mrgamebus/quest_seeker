@@ -570,3 +570,82 @@ ${footer}
     }),
   )
 }
+
+export const sendCreatorMessageEmail = async (
+  profileId: string,
+  questName: string,
+  questId: string,
+  creatorMessage: string,
+  creatorName?: string,
+) => {
+  try {
+    // Get user email from Cognito
+    const email = await getEmailFromCognito(profileId)
+
+    if (!email) {
+      console.warn(`No email found for profile: ${profileId}`)
+      return
+    }
+
+    const questUrl = `${process.env.APP_URL || 'https://yourapp.com'}/user/quest/${questId}`
+
+    await safeSend(
+      new SendEmailCommand({
+        Source: FROM_ADDRESS,
+        Destination: {
+          ToAddresses: [email],
+        },
+        Message: {
+          Subject: {
+            Data: `Message from ${creatorName || 'Quest Creator'}: ${questName}`,
+          },
+          Body: {
+            Html: {
+              Data: `
+                <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+                  <h2 style="color: #2563eb;">📢 Message from ${creatorName || 'Quest Creator'}</h2>
+                  <p style="color: #666; font-size: 14px;">Quest: <strong>${questName}</strong></p>
+                  <div style="background-color: #eff6ff; border-left: 4px solid #2563eb; padding: 15px; margin: 20px 0;">
+                    <p style="margin: 0; white-space: pre-wrap;">${creatorMessage}</p>
+                  </div>
+                  <div style="margin: 20px 0;">
+                    <a href="${questUrl}" style="display: inline-block; background-color: #2563eb; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px;">
+                      View Quest
+                    </a>
+                  </div>
+                  <hr style="border: none; border-top: 1px solid #e5e7eb; margin: 20px 0;" />
+                  <p style="color: #9ca3af; font-size: 12px;">
+                    This message was sent to all participants of this quest.
+                  </p>
+                </div>
+              `,
+            },
+            Text: {
+              Data: `
+Message from ${creatorName || 'Quest Creator'}
+
+Quest: ${questName}
+
+${creatorMessage}
+
+View Quest: ${questUrl}
+
+---
+This message was sent to all participants of this quest.
+              `.trim(),
+            },
+          },
+        },
+      }),
+    )
+
+    console.log(
+      `✅ Creator message email sent to ${email} for quest ${questId}`,
+    )
+  } catch (err) {
+    console.error(
+      `Failed to send creator message email to profile ${profileId}:`,
+      err,
+    )
+  }
+}

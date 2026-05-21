@@ -514,6 +514,7 @@ export default function QuestDetailPage() {
     if (!quest?.id) return
 
     try {
+      // First, save the message to the database
       await updateQuestMutation(
         {
           action: MutateQuestAction.UPDATE_COMPLETED,
@@ -522,12 +523,31 @@ export default function QuestDetailPage() {
           quest_winners: quest.quest_winners,
         },
         {
-          onSuccess: () => {
-            toast({
-              title: 'Message Saved! 💬',
-              description: 'Your message has been sent to all participants.',
-            })
-            refetch() // Refresh quest data
+          onSuccess: async () => {
+            // After saving, trigger the Lambda to send emails
+            try {
+              const result = await client.mutations.sendQuestCreatorMessage({
+                questId: quest.id,
+                creatorMessage,
+                creatorName: questCreatorProfile.data?.organization_name,
+              })
+
+              const emailsSent = result.data?.emailsSent || 0
+
+              toast({
+                title: 'Message Saved & Sent! 💬📧',
+                description: `Your message has been saved and emailed to ${emailsSent} participant${emailsSent !== 1 ? 's' : ''}.`,
+              })
+            } catch (emailError) {
+              console.error('Failed to send emails:', emailError)
+              toast({
+                title: 'Message Saved ⚠️',
+                description: 'Message saved but emails could not be sent.',
+                variant: 'destructive',
+              })
+            }
+
+            refetch()
           },
           onError: (err) => {
             console.error('Failed to save message:', err)
