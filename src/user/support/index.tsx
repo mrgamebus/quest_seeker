@@ -185,19 +185,6 @@ export default function Support() {
               {status === 'sending' ? 'Sending...' : 'Send Message'}
             </button>
           </form>
-
-          <div className="text-sm text-gray-600 border-t pt-4">
-            <p>You can also reach us directly at:</p>
-            <p className="mt-2">
-              <strong>Email:</strong>{' '}
-              <a
-                href="mailto:questseekernz@gmail.com"
-                className="text-yellow-600 hover:underline"
-              >
-                questseekernz@gmail.com
-              </a>
-            </p>
-          </div>
         </CardContent>
       </Card>
     </div>
