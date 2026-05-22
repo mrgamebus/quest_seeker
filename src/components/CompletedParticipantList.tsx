@@ -66,7 +66,6 @@ export default function CompletedParticipantsList({
 
           const isLoading = pdfLoadingById[profile.id]
           const preparedTasks = pdfTasksByParticipant[profile.id]
-
           return (
             <ParticipantCard
               key={profile.id}

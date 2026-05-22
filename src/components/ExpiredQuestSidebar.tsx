@@ -1,4 +1,3 @@
-// import TaskInformationWindow from './TaskInformationWindow'
 import CompletedParticipantsList from './CompletedParticipantList'
 import SeekerQuestSummary from './SeekerQuestSummary'
 import {
@@ -39,6 +38,7 @@ export default function ExpiredQuestSidebar({
   onPreparePdf,
   // onTasksUpdated,
 }: ExpiredQuestSidebarProps) {
+  console.log('completedParticipants: ', completedParticipants)
   if (isOwner) {
     return (
       <>
@@ -47,7 +47,7 @@ export default function ExpiredQuestSidebar({
           completedParticipants={completedParticipants}
           questParticipants={questParticipants}
           tasks={tasks}
-          onPreparePdf={onPreparePdf}
+          onPreparePdf={() => onPreparePdf()}
           isReady={isReady}
         />
       </>

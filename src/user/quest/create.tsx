@@ -53,6 +53,8 @@ export default function CreateQuestPage() {
   const { data: profile, isLoading: isProfileLoading } = useCurrentUserProfile()
   const [createdQuestId, setCreatedQuestId] = useState<string | null>(null)
 
+  const isAdmin = profile?.role === 'Admin'
+
   const { data: questParticipants } = useQuestParticipants(questId ?? undefined)
   const participantIds = questParticipants?.map((uq) => uq.profileId) ?? []
 
@@ -127,6 +129,7 @@ export default function CreateQuestPage() {
   }
 
   const canEdit =
+    isAdmin ||
     !isUpdating ||
     updatingQuest?.status === QuestStatus.draft ||
     (updatingQuest?.status === QuestStatus.published &&

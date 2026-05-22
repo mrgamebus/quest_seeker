@@ -573,7 +573,8 @@ export default function QuestDetailPage() {
 
   const canEdit =
     quest.status === QuestStatus.draft ||
-    (quest.status === QuestStatus.published && participantIds.length === 0)
+    (quest.status === QuestStatus.published && participantIds.length === 0) ||
+    isAdmin
 
   return (
     <div
