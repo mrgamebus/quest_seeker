@@ -28,7 +28,6 @@ export default function ParticipantCard({
         fallback={placeHold}
         className="w-12 h-12 rounded-full object-cover shrink-0"
       />
-
       <div className="flex flex-col flex-1 min-w-0">
         <span className="font-semibold text-gray-800 truncate">
           {profile.full_name || 'Unknown User'}
@@ -61,8 +60,16 @@ export default function ParticipantCard({
           disabled={isLoading}
           className="bg-gray-200 hover:bg-gray-300 px-3 py-2 rounded-lg text-sm transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          {isLoading ? 'Preparing...' : 'Prepare PDF'}
+          {isLoading ? (
+            <span className="flex items-center justify-center gap-2">
+              <span className="w-4 h-4 border-2 border-gray-400 border-t-transparent rounded-full animate-spin" />
+              Preparing Tasks...
+            </span>
+          ) : (
+            'Prepare PDF'
+          )}
         </button>
+        //
       )}
     </div>
   )

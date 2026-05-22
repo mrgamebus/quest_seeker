@@ -40,12 +40,12 @@ export const TaskModal: React.FC<TaskModalProps> = ({
         if (!open) onClose()
       }}
     >
-      <DialogContent className="max-w-lg">
+      <DialogContent className="max-w-lg w-full">
         <DialogHeader>
           <DialogTitle>Tasks</DialogTitle>
         </DialogHeader>
 
-        <div className="space-y-4">
+        <div className="space-y-4 max-h-[60vh] overflow-y-auto pr-1">
           {tasks.length === 0 && (
             <div className="text-gray-500">No tasks yet.</div>
           )}
@@ -53,14 +53,16 @@ export const TaskModal: React.FC<TaskModalProps> = ({
           {tasks.map((task, index) => (
             <div
               key={task.id ?? index}
-              className="flex items-center justify-between border p-2 rounded"
+              className="flex items-center justify-between border p-2 rounded w-full min-w-0"
             >
-              <span className="font-semibold mr-2">
+              <span className="font-semibold mr-2 shrink-0">
                 {task.isImage ? 'IMAGE:' : 'TEXT:'}
               </span>
-              <span className="flex-1 truncate">{task.description ?? ''}</span>
+              <span className="flex-1 truncate min-w-0">
+                {task.description ?? ''}
+              </span>
 
-              <div className="flex space-x-2">
+              <div className="flex space-x-2 shrink-0 ml-2">
                 <button
                   onClick={() => handleEditTask(index)}
                   className="text-green-600 font-bold"

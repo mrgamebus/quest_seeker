@@ -276,13 +276,7 @@ export default function SeekerTaskPdfButton({
   }, [tasksKey])
 
   if (!isReady) {
-    return (
-      <Document>
-        <Page style={styles.page}>
-          <Text>Preparing PDF...</Text>
-        </Page>
-      </Document>
-    )
+    console.log('Is not ready')
   }
 
   if (error && tasks.length === 0) {
