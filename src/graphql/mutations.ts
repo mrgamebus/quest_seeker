@@ -305,6 +305,26 @@ export const rejectCreator = /* GraphQL */ `mutation RejectCreator($profileId: S
   APITypes.RejectCreatorMutationVariables,
   APITypes.RejectCreatorMutation
 >;
+export const sendQuestCreatorMessage = /* GraphQL */ `mutation SendQuestCreatorMessage(
+  $creatorMessage: String!
+  $creatorName: String
+  $questId: String!
+) {
+  sendQuestCreatorMessage(
+    creatorMessage: $creatorMessage
+    creatorName: $creatorName
+    questId: $questId
+  ) {
+    emailsSent
+    failures
+    message
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.SendQuestCreatorMessageMutationVariables,
+  APITypes.SendQuestCreatorMessageMutation
+>;
 export const updateProfile = /* GraphQL */ `mutation UpdateProfile(
   $condition: ModelProfileConditionInput
   $input: UpdateProfileInput!

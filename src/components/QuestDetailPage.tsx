@@ -31,6 +31,7 @@ import { getUrl } from 'aws-amplify/storage'
 import { ensureArray } from '@/tools/ensureArray'
 import { joinQuest, createQuestEntrySession } from '@/graphql/mutations'
 import { useToast } from '@/hooks/use-toast'
+import { Schema } from 'amplify/data/resource'
 
 // Components
 import QuestBanner from './QuestBanner'
@@ -133,7 +134,7 @@ export default function QuestDetailPage() {
     }
   }, [quest])
 
-  const client = generateClient()
+  const client = generateClient<Schema>()
 
   if (isLoading) return <p>Loading quest...</p>
   if (error) return <p>Failed to fetch quest.</p>
