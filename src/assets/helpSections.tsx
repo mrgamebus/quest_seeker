@@ -691,15 +691,16 @@ export const helpSections: HelpSection[] = [
   },
 
   {
-    title: 'QuestSeeker for Non-Profits: Tips to Maximize Fundraising',
+    title: 'Maximising Your Fundraising Quest',
     paragraphs: [
       <>
-        QuestSeeker is built with non-profit fundraising in mind. Here are some
-        tips to help charities and community organisations get the most out of
-        the platform and meet their goals:
+        QuestSeeker is built with non-profit fundraising in mind. These tips are
+        designed to help charities and community organisations get the most out
+        of the platform — from setting entry fees thoughtfully to turning
+        participants into long-term supporters.
         <ul className="list-[circle] list-outside pl-5 mt-2 flex flex-col gap-1">
           <li>
-            <strong>Low Upfront Cost, High Return:</strong> For non-profits,
+            <strong>Make Your Entry Fee Work Hard</strong> For non-profits,
             creating a Quest is very budget-friendly – just a $50 setup fee.
             This low cost means almost all the money raised through participant
             donations goes directly to your cause. By setting a reasonable entry
