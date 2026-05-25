@@ -9,7 +9,6 @@ interface ParticipantCardProps {
   quest: Quest
   preparedTasks?: Task[]
   isLoading: boolean
-  isReady: boolean
   onPreparePdf: () => void
 }
 
@@ -18,9 +17,11 @@ export default function ParticipantCard({
   quest,
   preparedTasks,
   isLoading,
-  isReady,
   onPreparePdf,
 }: ParticipantCardProps) {
+  // Tasks are ready when they exist AND have answers
+  const tasksAreReady = preparedTasks && preparedTasks.length > 0
+
   return (
     <div className="flex items-center gap-3 bg-white p-3 rounded-lg shadow-sm hover:bg-yellow-50 transition border border-gray-100">
       <RemoteImage
@@ -28,6 +29,7 @@ export default function ParticipantCard({
         fallback={placeHold}
         className="w-12 h-12 rounded-full object-cover shrink-0"
       />
+
       <div className="flex flex-col flex-1 min-w-0">
         <span className="font-semibold text-gray-800 truncate">
           {profile.full_name || 'Unknown User'}
@@ -37,7 +39,7 @@ export default function ParticipantCard({
         </span>
       </div>
 
-      {preparedTasks && preparedTasks.length > 0 && isReady ? (
+      {tasksAreReady ? (
         <PDFDownloadLink
           document={
             <SeekerTaskPdfButton
@@ -63,13 +65,12 @@ export default function ParticipantCard({
           {isLoading ? (
             <span className="flex items-center justify-center gap-2">
               <span className="w-4 h-4 border-2 border-gray-400 border-t-transparent rounded-full animate-spin" />
-              Preparing Tasks...
+              Preparing...
             </span>
           ) : (
             'Prepare PDF'
           )}
         </button>
-        //
       )}
     </div>
   )
