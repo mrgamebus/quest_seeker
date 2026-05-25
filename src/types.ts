@@ -58,6 +58,12 @@ export type Profile = {
   points: number
 }
 
+export interface MinimalQuestParticipant {
+  profileId: string
+  tasks: string | Task[] | any[] | null
+  status?: string | null
+}
+
 // ---------------- Tasks ----------------
 export type Task = {
   id: string
@@ -133,3 +139,13 @@ export type PdfUser = {
 }
 
 export type UserQuest = Schema['UserQuest']['type'] & { tasks: Task[] }
+
+export type Winner = {
+  place: number
+  prize_id: string
+  user_id: string
+  username: string
+  email: string
+  phone: string
+  selected_at: string
+}

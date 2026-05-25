@@ -1,14 +1,14 @@
 import { generateClient } from 'aws-amplify/data'
 import { getCurrentUser } from 'aws-amplify/auth'
 import { Schema } from 'amplify/data/resource'
-// import { Task } from '@/types'
+import { Task } from '@/types'
 
 const client = generateClient<Schema>()
 
 export async function updateQuestProgressInProfile(
   questId: string,
-  // updatedTasks: Task[],
-  // isCompleted: boolean,
+  updatedTasks: Task[],
+  isCompleted: boolean,
 ) {
   try {
     const user = await getCurrentUser()
@@ -30,13 +30,13 @@ export async function updateQuestProgressInProfile(
       return
     }
 
-    // const result = await client.models.UserQuest.update({
-    //   id: userQuest.id,
-    //   tasks: JSON.stringify(updatedTasks),
-    //   status: isCompleted ? 'COMPLETED' : 'ACTIVE',
-    // })
+    const result = await client.models.UserQuest.update({
+      id: userQuest.id,
+      tasks: JSON.stringify(updatedTasks),
+      status: isCompleted ? 'COMPLETED' : 'ACTIVE',
+    })
 
-    // console.log('UserQuest update result:', result)
+    console.log('UserQuest update result:', result)
   } catch (err) {
     console.error('❌ Failed to update quest progress:', err)
   }

@@ -446,6 +446,13 @@ export type MutateQuestResponse = {
   status: QuestStatus,
 };
 
+export type SendEmailResult = {
+  __typename: "SendEmailResult",
+  emailsSent: number,
+  failures?: number | null,
+  message: string,
+};
+
 export type UpdateProfileInput = {
   about_me?: string | null,
   business_type?: string | null,
@@ -1155,6 +1162,21 @@ export type RejectCreatorMutationVariables = {
 
 export type RejectCreatorMutation = {
   rejectCreator?: string | null,
+};
+
+export type SendQuestCreatorMessageMutationVariables = {
+  creatorMessage: string,
+  creatorName?: string | null,
+  questId: string,
+};
+
+export type SendQuestCreatorMessageMutation = {
+  sendQuestCreatorMessage?:  {
+    __typename: "SendEmailResult",
+    emailsSent: number,
+    failures?: number | null,
+    message: string,
+  } | null,
 };
 
 export type UpdateProfileMutationVariables = {
