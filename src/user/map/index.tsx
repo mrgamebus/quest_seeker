@@ -62,6 +62,7 @@ export default function SeekerMap() {
               <SignOutButton />
             </Toolbar>
           </div>
+          <RegionMap className="mt-6 w-full max-w-xl mx-auto" />
 
           {currentProfile && (
             <div className="px-4">
@@ -81,8 +82,6 @@ export default function SeekerMap() {
               </div>
             </div>
           )}
-
-          <RegionMap className="mt-6 w-full max-w-xl mx-auto" />
         </CardContent>
       </Card>
     </div>
