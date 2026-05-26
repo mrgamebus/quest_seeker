@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import PickRegion from '@/components/PickRegion'
-import RegionMap from '@/components/RegionMap'
+// import RegionMap from '@/components/RegionMap'
 import { useNavigate } from 'react-router-dom'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -29,6 +29,10 @@ export default function RegionPage() {
 
   const updateAccount = () => {
     navigate('/user/account')
+  }
+
+  const seekerMap = () => {
+    navigate('/user/map')
   }
 
   const handleSignOut = async () => {
@@ -67,7 +71,6 @@ export default function RegionPage() {
 
           <PickRegion value={selectedRegion} onChange={setSelectedRegion} />
 
-          <RegionMap className="mt-6 w-full max-w-xl mx-auto" />
           <p className="text-xl font-semibold mb-4">
             Seeker Map for Quest Marks!
           </p>
@@ -76,6 +79,9 @@ export default function RegionPage() {
           </Button>
           <Button className="w-full mt-6" onClick={updateAccount}>
             Update Account
+          </Button>
+          <Button className="w-full mt-6" onClick={seekerMap}>
+            Seeker Map
           </Button>
           <Button className="w-full mt-6" onClick={handleSignOut}>
             <LogOut />
