@@ -13,7 +13,7 @@ import Help from './user/help'
 import SeekerMap from './user/map'
 import Leader from './user/leader'
 import logo from '@/assets/images/no_ordinary.png'
-
+import bg from '@/assets/images/background_main.jpeg'
 import { useEffect } from 'react'
 import Legal from './user/legal'
 import { useCurrentUserProfile } from './hooks/userProfiles'
@@ -95,7 +95,7 @@ export default function App() {
 const components = {
   Header() {
     return (
-      <div className="w-full bg-white rounded-t-2xl flex flex-col items-center justify-center py-8 px-6 gap-3">
+      <div className="w-full bg-white rounded-t-2xl flex flex-col items-center justify-center py-8 px-6 gap-3" style={{ backgroundImage: `url(${bg})` }}>
         <img
           src={logo}
           alt="QuestSeeker"
