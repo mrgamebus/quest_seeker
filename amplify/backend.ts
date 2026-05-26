@@ -16,6 +16,7 @@ import { createStripeSession } from './functions/createStripeSession/resource'
 import { stripeWebhook } from './functions/stripeWebhook/resource'
 import { support } from './functions/support/resource'
 import { rejectCreator } from './functions/rejectCreator/resource'
+import { questCreatorMessage } from './functions/questCreatorMessage/resource'
 
 const backend = defineBackend({
   auth,
@@ -32,6 +33,7 @@ const backend = defineBackend({
   createStripeSession,
   stripeWebhook,
   support,
+  questCreatorMessage,
 })
 
 // Tables
@@ -57,6 +59,8 @@ const joinQuestLambda = backend.joinQuest.resources.lambda as lambda.Function
 const expiredQuestsLambda = backend.expiredQuests.resources
   .lambda as lambda.Function
 const supportLambda = backend.support.resources.lambda as lambda.Function
+const questCreatorMessageLambda = backend.questCreatorMessage.resources
+  .lambda as lambda.Function
 
 stripeWebhookLambda.addFunctionUrl({
   authType: lambda.FunctionUrlAuthType.NONE,
@@ -120,6 +124,7 @@ joinQuestLambda.addToRolePolicy(sesPolicy)
 stripeWebhookLambda.addToRolePolicy(sesPolicy)
 expiredQuestsLambda.addToRolePolicy(sesPolicy)
 supportLambda.addToRolePolicy(sesPolicy)
+questCreatorMessageLambda.addToRolePolicy(sesPolicy)
 
 const cognitoPolicy = new iam.PolicyStatement({
   actions: [
@@ -135,6 +140,7 @@ const cognitoPolicy = new iam.PolicyStatement({
 joinQuestLambda.addToRolePolicy(cognitoPolicy)
 stripeWebhookLambda.addToRolePolicy(cognitoPolicy)
 expiredQuestsLambda.addToRolePolicy(cognitoPolicy)
+questCreatorMessageLambda.addToRolePolicy(cognitoPolicy)
 
 joinQuestLambda.addEnvironment(
   'AMPLIFY_USER_POOL_ID',
@@ -150,6 +156,14 @@ supportLambda.addEnvironment(
   'AMPLIFY_USER_POOL_ID',
   backend.auth.resources.userPool.userPoolId,
 )
+
+questCreatorMessageLambda.addEnvironment(
+  'AMPLIFY_USER_POOL_ID',
+  backend.auth.resources.userPool.userPoolId,
+)
+
+backend.data.resources.graphqlApi.grantQuery(questCreatorMessageLambda)
+backend.data.resources.graphqlApi.grantMutation(questCreatorMessageLambda)
 
 const becomePendingLambda = backend.becomePending.resources
   .lambda as lambda.Function
