@@ -10,6 +10,8 @@ import { Toolbar } from '@/components/Toolbar'
 import SignOutButton from '@/components/SignOutButton'
 import { fetchAuthSession } from 'aws-amplify/auth'
 
+const SUPPORT_FUNCTION_URL = import.meta.env.VITE_SUPPORT_FUNCTION_URL
+
 export default function Help() {
   const location = useLocation()
   const navigate = useNavigate()
@@ -19,6 +21,18 @@ export default function Help() {
     location.state?.defaultTab || 'help',
   )
   const [openIndex, setOpenIndex] = useState<number | null>(null)
+
+  const [formData, setFormData] = useState({
+    name: '',
+    email: '',
+    subject: '',
+    message: '',
+  })
+
+  const [formStatus, setFormStatus] = useState<
+    'idle' | 'sending' | 'success' | 'error'
+  >('idle')
+  const [errorMessage, setErrorMessage] = useState('')
 
   useEffect(() => {
     checkAuthStatus()
@@ -45,140 +59,61 @@ export default function Help() {
     setOpenIndex(openIndex === index ? null : index)
   }
 
+  const handleSupportSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setFormStatus('sending')
+    setErrorMessage('')
+
+    try {
+      const functionUrl = SUPPORT_FUNCTION_URL
+
+      if (!functionUrl) {
+        throw new Error(
+          'Support function URL not configured. Add VITE_SUPPORT_FUNCTION_URL to .env',
+        )
+      }
+
+      const response = await fetch(functionUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(formData),
+      })
+
+      const data = await response.json()
+
+      if (!response.ok) {
+        throw new Error(data.error || `Server error: ${response.status}`)
+      }
+
+      setFormStatus('success')
+      setFormData({ name: '', email: '', subject: '', message: '' })
+      setTimeout(() => setFormStatus('idle'), 5000)
+    } catch (error) {
+      console.error('Failed to send support message:', error)
+      setFormStatus('error')
+      setErrorMessage(
+        error instanceof Error
+          ? error.message
+          : 'Failed to send your message. Please try again.',
+      )
+    }
+  }
+
+  const handleFormChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
+  ) => {
+    setFormData((prev) => ({
+      ...prev,
+      [e.target.name]: e.target.value,
+    }))
+  }
+
   const renderSectionContent = (index: number) => {
     const section = helpSections[index]
 
     if (index === 0) {
-      return (
-        <div className="px-5 py-6 bg-white/50 text-gray-700 text-sm border-t border-gray-100">
-          <div className="bg-white border-b-2 border-[#F0A800] rounded-lg p-6 mb-6 text-center">
-            <p className="font-bold text-base mb-2">
-              Adventure. Community. Purpose.
-            </p>
-            <p className="text-sm text-gray-600">
-              QuestSeeker turns fundraising and marketing into real-world Quest
-              adventures. Join a Quest, complete challenges, support a cause —
-              and have a blast doing it.
-            </p>
-          </div>
-
-          <h3 className="font-bold text-[#3A2E1A] text-base mb-4">
-            What is a Quest?
-          </h3>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mb-6">
-            <div className="bg-[#FDF6E8] border border-[#E8D8A0] rounded-lg p-4">
-              <p className="font-bold text-[#111111] text-sm mb-2">
-                🗺️ Real-World Adventures
-              </p>
-              <p className="text-[#666666] text-xs">
-                Quests are time-bound events played through the app. Complete
-                challenges by snapping photos, answering questions, or checking
-                in at locations.
-              </p>
-            </div>
-            <div className="bg-[#FDF6E8] border border-[#E8D8A0] rounded-lg p-4">
-              <p className="font-bold text-[#111111] text-sm mb-2">
-                🤝 Fun With Purpose
-              </p>
-              <p className="text-[#666666] text-xs">
-                Whether it's raising money for a cause or promoting a brand,
-                every Quest has a goal behind the game. Play, compete, and make
-                a difference at the same time.
-              </p>
-            </div>
-            <div className="bg-[#FDF6E8] border border-[#E8D8A0] rounded-lg p-4">
-              <p className="font-bold text-[#111111] text-sm mb-2">
-                👨‍👩‍👧 For Everyone
-              </p>
-              <p className="text-[#666666] text-xs">
-                Family-friendly and flexible. Play solo or with friends, in your
-                neighbourhood or anywhere in New Zealand. All you need is your
-                phone.
-              </p>
-            </div>
-          </div>
-
-          {/* How it Works heading */}
-          <h3 className="font-bold text-[#3A2E1A] text-base mb-4">
-            How it Works
-          </h3>
-
-          {/* Four step cards in a grid */}
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-3 mb-6">
-            <div className="bg-[#FDF6E8] border border-[#E8D8A0] rounded-lg p-4">
-              <p className="font-bold text-[#111111] text-sm mb-2">01 Join</p>
-              <p className="text-[#666666] text-xs">
-                Browse available Quests and tap Join. Pay a small entry fee if
-                it's a fundraiser — your contribution goes straight to the
-                cause.
-              </p>
-            </div>
-            <div className="bg-[#FDF6E8] border border-[#E8D8A0] rounded-lg p-4">
-              <p className="font-bold text-[#111111] text-sm mb-2">02 Seek</p>
-              <p className="text-[#666666] text-xs">
-                When the Quest begins, your challenges unlock. Answer questions,
-                check in at locations, and submit photo evidence — in any order
-                you like.
-              </p>
-            </div>
-            <div className="bg-[#FDF6E8] border border-[#E8D8A0] rounded-lg p-4">
-              <p className="font-bold text-[#111111] text-sm mb-2">
-                03 Explore
-              </p>
-              <p className="text-[#666666] text-xs">
-                Track your progress in the app. Earn points with every task you
-                complete and watch your standing grow on the QuestSeeker
-                leaderboard.
-              </p>
-            </div>
-            <div className="bg-[#FDF6E8] border border-[#E8D8A0] rounded-lg p-4">
-              <p className="font-bold text-[#111111] text-sm mb-2">
-                04 Quest Complete!
-              </p>
-              <p className="text-[#666666] text-xs">
-                Finish all tasks before time runs out. Top finishers win prizes
-                — and if it was a fundraiser, you helped make a real difference.
-              </p>
-            </div>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-6">
-            <div className="bg-[#FDF6E8] border border-[#E8D8A0] rounded-lg p-4">
-              <p className="font-bold text-[#111111] text-sm mb-2">
-                🏃 For Quest Seekers
-              </p>
-              <p className="text-[#666666] text-xs">
-                Join Quests, complete challenges, and earn points on the annual
-                QuestSeeker leaderboard. Your entry fee (if any) goes directly
-                to the hosting cause. At every Matariki reset, the top-ranked
-                Seekers receive special recognition before the leaderboard
-                resets for the new year.
-              </p>
-            </div>
-            <div className="bg-[#FDF6E8] border border-[#E8D8A0] rounded-lg p-4">
-              <p className="font-bold text-[#111111] text-sm mb-2">
-                🗺️ For Quest Creators
-              </p>
-              <p className="text-[#666666] text-xs">
-                Design your own Quest event for fundraising, marketing, or
-                community engagement. Set your tasks, entry fee, and prizes —
-                QuestSeeker handles the tech. Non-profits start from just $50.
-                Businesses choose from flat-fee plans catering up to 3,000
-                participants.
-              </p>
-            </div>
-          </div>
-
-          <div className="text-center text-sm text-gray-600 italic">
-            "A brilliant way to have some fun and support a cause." Get started
-            at <span className="font-bold not-italic">questseeker.co.nz</span>
-          </div>
-        </div>
-      )
-    }
-
-    if (index === 1) {
       return (
         <div className="px-5 py-6 bg-white/50 text-gray-700 text-sm border-t border-gray-100">
           <p className="text-center text-gray-600 italic text-sm mb-6">
@@ -493,7 +428,7 @@ export default function Help() {
       )
     }
 
-    if (index === 3) {
+    if (index === 1) {
       return (
         <div className="px-5 py-6 bg-white/50 text-gray-700 text-sm border-t border-gray-100">
           <div className="border-b-2 border-[#F0A800] mb-6"></div>
@@ -578,7 +513,176 @@ export default function Help() {
       )
     }
 
-    if (index === 4) {
+    if (index === 2) {
+      return (
+        <div className="px-5 py-6 bg-white/50 text-gray-700 text-sm border-t border-gray-100">
+          <div className="border-b-2 border-[#F0A800] mb-6"></div>
+
+          {/* Pricing table */}
+          <h3 className="font-bold text-[#111111] text-base mb-3">
+            💳 Creator Pricing at a Glance
+          </h3>
+
+          <p className="text-[#555555] text-sm mb-4">
+            All prices are in NZD. Flat fees are charged once at time of
+            publishing via Stripe.
+          </p>
+
+          <div className="overflow-x-auto">
+            <table className="w-full border-collapse border border-gray-300 text-xs">
+              <thead>
+                <tr className="bg-gray-100">
+                  <th className="border border-gray-300 px-3 py-2 text-left font-bold">
+                    Plan
+                  </th>
+                  <th className="border border-gray-300 px-3 py-2 text-left font-bold">
+                    Fee
+                  </th>
+                  <th className="border border-gray-300 px-3 py-2 text-left font-bold">
+                    Participants
+                  </th>
+                  <th className="border border-gray-300 px-3 py-2 text-left font-bold">
+                    Commission
+                  </th>
+                  <th className="border border-gray-300 px-3 py-2 text-left font-bold">
+                    Entry Fee
+                  </th>
+                  <th className="border border-gray-300 px-3 py-2 text-left font-bold">
+                    Free Entry
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td className="border border-gray-300 px-3 py-2 font-semibold">
+                    Non-Profit Quest
+                  </td>
+                  <td className="border border-gray-300 px-3 py-2">$50</td>
+                  <td className="border border-gray-300 px-3 py-2">
+                    Unlimited
+                  </td>
+                  <td className="border border-gray-300 px-3 py-2">
+                    15% on entry fees
+                  </td>
+                  <td>Required</td>
+                  <td>No</td>
+                </tr>
+                <tr className="bg-gray-50">
+                  <td className="border border-gray-300 px-3 py-2 font-semibold">
+                    Individual Quest
+                  </td>
+                  <td className="border border-gray-300 px-3 py-2">$149</td>
+                  <td className="border border-gray-300 px-3 py-2">
+                    Up to 500
+                  </td>
+                  <td className="border border-gray-300 px-3 py-2">None</td>
+                  <td>Optional</td>
+                  <td>Yes</td>
+                </tr>
+                <tr>
+                  <td className="border border-gray-300 px-3 py-2 font-semibold">
+                    Local Business Quest
+                  </td>
+                  <td className="border border-gray-300 px-3 py-2">$299</td>
+                  <td className="border border-gray-300 px-3 py-2">
+                    Up to 500
+                  </td>
+                  <td className="border border-gray-300 px-3 py-2">None</td>
+                  <td>Optional</td>
+                  <td>Yes</td>
+                </tr>
+                <tr>
+                  <td className="border border-gray-300 px-3 py-2 font-semibold">
+                    National Business Quest
+                  </td>
+                  <td className="border border-gray-300 px-3 py-2">$950</td>
+                  <td className="border border-gray-300 px-3 py-2">
+                    Up to 3,000
+                  </td>
+                  <td className="border border-gray-300 px-3 py-2">None</td>
+                  <td>Optional</td>
+                  <td>Yes</td>
+                </tr>
+              </tbody>
+            </table>
+            <p className="text-[#555555] text-sm mb-4">
+              Note: Non-Profit Quests must charge an entry fee — free-entry
+              Quests are not available for this plan type. A 15% service fee
+              applies to all entry fees collected by Non-Profit and Individual
+              Quest hosts. Local and National Business Quest hosts do not pay
+              commission on entry fees collected.
+            </p>
+
+            <h3 className="font-bold text-[#111111] text-lg mb-3">
+              📌 QuestMarks
+            </h3>
+            <p className="text-[#555555] text-sm mb-4">
+              QuestMarks are NFC-enabled stickers, each programmed uniquely to a
+              specific physical location. When a seeker taps a QuestMark, their
+              profile is credited with 100 points.
+            </p>
+            <h4 className="font-bold text-[#111111] text-lg mb-3">
+              QuestMarks for Quest Creators
+            </h4>
+            <p className="text-[#555555] text-sm mb-4">
+              Quest Creators receive QuestMarks as part of their plan. The
+              number included varies by plan type, and additional QuestMarks can
+              be purchased at $50.00 each. Each QuestMark represents a single
+              location pin on the Seeker map — multiple locations require
+              individual QuestMarks, each delivering its own analytics.
+            </p>
+            <h4 className="font-bold text-[#111111] text-lg mb-3">
+              Quest Stops — QuestMarks Without a Creator Account
+            </h4>
+            <p className="text-[#555555] text-sm mb-4">
+              Any business or location can participate in the QuestSeeker
+              community by registering as a Quest Stop — without needing to
+              become a full Quest Creator. Quest Stops purchase QuestMarks to
+              place at their location, appearing on the Seeker map as permanent
+              community waypoints. This is designed to encourage broad local
+              participation and make more of your community discoverable to
+              seekers.
+            </p>
+            <p className="text-[#555555] text-sm mb-4">
+              Quest Stop analytics — including tap counts and peak visit times —
+              are accessed through My Account for verified Quest Stop holders.
+            </p>
+            <h4 className="font-bold text-[#111111] text-lg mb-3">
+              QuestMarks as a Sponsor Benefit (Non-Profits)
+            </h4>
+            <p className="text-[#555555] text-sm mb-4">
+              Non-profit Quest Creators can offer QuestMark placement as a
+              sponsor benefit. Sponsors gain visibility on the Seeker map and
+              their location earns points for seekers who visit, creating a
+              genuine community fundraising loop that rewards both sponsors and
+              participants.
+            </p>
+            <h3 className="font-bold text-[#111111] text-lg mb-3">
+              ✅ Task Types
+            </h3>
+            <p className="text-[#555555] text-sm mb-4">
+              When building your Quest, you can use three types of tasks:
+            </p>
+            <ul>
+              <li>
+                Image Upload — Participants submit a photo as evidence of
+                completing the task.
+              </li>
+              <li>
+                Caption / Text — Participants type a response to a question or
+                prompt.
+              </li>
+              <li>
+                Map Co-ordinates — Participants check in at a specific GPS
+                location.
+              </li>
+            </ul>
+          </div>
+        </div>
+      )
+    }
+
+    if (index === 3) {
       return (
         <div className="px-5 py-6 bg-white/50 text-gray-700 border-t border-gray-100">
           <p className="text-sm text-gray-700 mb-8">
@@ -881,176 +985,7 @@ export default function Help() {
       )
     }
 
-    if (index === 5) {
-      return (
-        <div className="px-5 py-6 bg-white/50 text-gray-700 text-sm border-t border-gray-100">
-          <div className="border-b-2 border-[#F0A800] mb-6"></div>
-
-          {/* Pricing table */}
-          <h3 className="font-bold text-[#111111] text-base mb-3">
-            💳 Creator Pricing at a Glance
-          </h3>
-
-          <p className="text-[#555555] text-sm mb-4">
-            All prices are in NZD. Flat fees are charged once at time of
-            publishing via Stripe.
-          </p>
-
-          <div className="overflow-x-auto">
-            <table className="w-full border-collapse border border-gray-300 text-xs">
-              <thead>
-                <tr className="bg-gray-100">
-                  <th className="border border-gray-300 px-3 py-2 text-left font-bold">
-                    Plan
-                  </th>
-                  <th className="border border-gray-300 px-3 py-2 text-left font-bold">
-                    Fee
-                  </th>
-                  <th className="border border-gray-300 px-3 py-2 text-left font-bold">
-                    Participants
-                  </th>
-                  <th className="border border-gray-300 px-3 py-2 text-left font-bold">
-                    Commission
-                  </th>
-                  <th className="border border-gray-300 px-3 py-2 text-left font-bold">
-                    Entry Fee
-                  </th>
-                  <th className="border border-gray-300 px-3 py-2 text-left font-bold">
-                    Free Entry
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td className="border border-gray-300 px-3 py-2 font-semibold">
-                    Non-Profit Quest
-                  </td>
-                  <td className="border border-gray-300 px-3 py-2">$50</td>
-                  <td className="border border-gray-300 px-3 py-2">
-                    Unlimited
-                  </td>
-                  <td className="border border-gray-300 px-3 py-2">
-                    15% on entry fees
-                  </td>
-                  <td>Required</td>
-                  <td>No</td>
-                </tr>
-                <tr className="bg-gray-50">
-                  <td className="border border-gray-300 px-3 py-2 font-semibold">
-                    Individual Quest
-                  </td>
-                  <td className="border border-gray-300 px-3 py-2">$149</td>
-                  <td className="border border-gray-300 px-3 py-2">
-                    Up to 500
-                  </td>
-                  <td className="border border-gray-300 px-3 py-2">None</td>
-                  <td>Optional</td>
-                  <td>Yes</td>
-                </tr>
-                <tr>
-                  <td className="border border-gray-300 px-3 py-2 font-semibold">
-                    Local Business Quest
-                  </td>
-                  <td className="border border-gray-300 px-3 py-2">$299</td>
-                  <td className="border border-gray-300 px-3 py-2">
-                    Up to 500
-                  </td>
-                  <td className="border border-gray-300 px-3 py-2">None</td>
-                  <td>Optional</td>
-                  <td>Yes</td>
-                </tr>
-                <tr>
-                  <td className="border border-gray-300 px-3 py-2 font-semibold">
-                    National Business Quest
-                  </td>
-                  <td className="border border-gray-300 px-3 py-2">$950</td>
-                  <td className="border border-gray-300 px-3 py-2">
-                    Up to 3,000
-                  </td>
-                  <td className="border border-gray-300 px-3 py-2">None</td>
-                  <td>Optional</td>
-                  <td>Yes</td>
-                </tr>
-              </tbody>
-            </table>
-            <p className="text-[#555555] text-sm mb-4">
-              Note: Non-Profit Quests must charge an entry fee — free-entry
-              Quests are not available for this plan type. A 15% service fee
-              applies to all entry fees collected by Non-Profit and Individual
-              Quest hosts. Local and National Business Quest hosts do not pay
-              commission on entry fees collected.
-            </p>
-
-            <h3 className="font-bold text-[#111111] text-lg mb-3">
-              📌 QuestMarks
-            </h3>
-            <p className="text-[#555555] text-sm mb-4">
-              QuestMarks are NFC-enabled stickers, each programmed uniquely to a
-              specific physical location. When a seeker taps a QuestMark, their
-              profile is credited with 100 points.
-            </p>
-            <h4 className="font-bold text-[#111111] text-lg mb-3">
-              QuestMarks for Quest Creators
-            </h4>
-            <p className="text-[#555555] text-sm mb-4">
-              Quest Creators receive QuestMarks as part of their plan. The
-              number included varies by plan type, and additional QuestMarks can
-              be purchased at $50.00 each. Each QuestMark represents a single
-              location pin on the Seeker map — multiple locations require
-              individual QuestMarks, each delivering its own analytics.
-            </p>
-            <h4 className="font-bold text-[#111111] text-lg mb-3">
-              Quest Stops — QuestMarks Without a Creator Account
-            </h4>
-            <p className="text-[#555555] text-sm mb-4">
-              Any business or location can participate in the QuestSeeker
-              community by registering as a Quest Stop — without needing to
-              become a full Quest Creator. Quest Stops purchase QuestMarks to
-              place at their location, appearing on the Seeker map as permanent
-              community waypoints. This is designed to encourage broad local
-              participation and make more of your community discoverable to
-              seekers.
-            </p>
-            <p className="text-[#555555] text-sm mb-4">
-              Quest Stop analytics — including tap counts and peak visit times —
-              are accessed through My Account for verified Quest Stop holders.
-            </p>
-            <h4 className="font-bold text-[#111111] text-lg mb-3">
-              QuestMarks as a Sponsor Benefit (Non-Profits)
-            </h4>
-            <p className="text-[#555555] text-sm mb-4">
-              Non-profit Quest Creators can offer QuestMark placement as a
-              sponsor benefit. Sponsors gain visibility on the Seeker map and
-              their location earns points for seekers who visit, creating a
-              genuine community fundraising loop that rewards both sponsors and
-              participants.
-            </p>
-            <h3 className="font-bold text-[#111111] text-lg mb-3">
-              ✅ Task Types
-            </h3>
-            <p className="text-[#555555] text-sm mb-4">
-              When building your Quest, you can use three types of tasks:
-            </p>
-            <ul>
-              <li>
-                Image Upload — Participants submit a photo as evidence of
-                completing the task.
-              </li>
-              <li>
-                Caption / Text — Participants type a response to a question or
-                prompt.
-              </li>
-              <li>
-                Map Co-ordinates — Participants check in at a specific GPS
-                location.
-              </li>
-            </ul>
-          </div>
-        </div>
-      )
-    }
-
-    if (index === 6) {
+    if (index === 4) {
       return (
         <div className="px-5 py-6 bg-white/50 text-gray-700 border-t border-gray-100">
           <p className="text-center text-sm italic text-gray-600 mb-4">
@@ -1312,6 +1247,127 @@ export default function Help() {
           {/* Footer */}
           <div className="text-center mt-8 pt-6 border-t border-gray-200">
             <p className="font-bold text-sm mb-1">Need help? We're here.</p>
+            <p className="text-sm text-gray-600 mb-2">
+              questseeker.co.nz · support@questseeker.co.nz
+            </p>
+            <p className="text-xs text-gray-500 italic">
+              ❖ Proudly New Zealand made · Launching 2026 ❖
+            </p>
+          </div>
+        </div>
+      )
+    }
+
+    if (index === 5) {
+      return (
+        <div className="px-5 py-6 bg-white/50 text-gray-700 border-t border-gray-100">
+          <p className="text-sm text-gray-700 mb-6">
+            Need help? Have a question? We're here to assist you. Send us a
+            message and we'll get back to you as soon as possible.
+          </p>
+
+          {formStatus === 'success' && (
+            <div className="p-4 bg-green-100 border border-green-400 text-green-700 rounded mb-6">
+              Your message has been sent successfully! We'll get back to you
+              soon.
+            </div>
+          )}
+
+          {formStatus === 'error' && (
+            <div className="p-4 bg-red-100 border border-red-400 text-red-700 rounded mb-6">
+              {errorMessage}
+            </div>
+          )}
+
+          <form onSubmit={handleSupportSubmit} className="space-y-4">
+            <div>
+              <label
+                htmlFor="name"
+                className="block text-sm font-medium text-gray-700 mb-1"
+              >
+                Name *
+              </label>
+              <input
+                type="text"
+                id="name"
+                name="name"
+                required
+                value={formData.name}
+                onChange={handleFormChange}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#F0A800] bg-white"
+                disabled={formStatus === 'sending'}
+              />
+            </div>
+
+            <div>
+              <label
+                htmlFor="email"
+                className="block text-sm font-medium text-gray-700 mb-1"
+              >
+                Email *
+              </label>
+              <input
+                type="email"
+                id="email"
+                name="email"
+                required
+                value={formData.email}
+                onChange={handleFormChange}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#F0A800] bg-white"
+                disabled={formStatus === 'sending'}
+              />
+            </div>
+
+            <div>
+              <label
+                htmlFor="subject"
+                className="block text-sm font-medium text-gray-700 mb-1"
+              >
+                Subject *
+              </label>
+              <input
+                type="text"
+                id="subject"
+                name="subject"
+                required
+                value={formData.subject}
+                onChange={handleFormChange}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#F0A800] bg-white"
+                disabled={formStatus === 'sending'}
+              />
+            </div>
+
+            <div>
+              <label
+                htmlFor="message"
+                className="block text-sm font-medium text-gray-700 mb-1"
+              >
+                Message *
+              </label>
+              <textarea
+                id="message"
+                name="message"
+                required
+                rows={6}
+                value={formData.message}
+                onChange={handleFormChange}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#F0A800] resize-none bg-white"
+                disabled={formStatus === 'sending'}
+              />
+            </div>
+
+            <button
+              type="submit"
+              disabled={formStatus === 'sending'}
+              className="w-full px-6 py-3 bg-[#F0A800] hover:bg-[#D89600] disabled:bg-gray-400 disabled:cursor-not-allowed text-black font-medium rounded transition-colors"
+            >
+              {formStatus === 'sending' ? 'Sending...' : 'Send Message'}
+            </button>
+          </form>
+
+          {/* Footer */}
+          <div className="text-center mt-8 pt-6 border-t border-gray-200">
+            <p className="font-bold text-sm mb-1">Alternative Contact</p>
             <p className="text-sm text-gray-600 mb-2">
               questseeker.co.nz · support@questseeker.co.nz
             </p>
