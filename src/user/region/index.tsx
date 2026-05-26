@@ -67,8 +67,10 @@ export default function RegionPage() {
 
           <PickRegion value={selectedRegion} onChange={setSelectedRegion} />
 
-          <RegionMap className="mt-6" />
-
+          <RegionMap className="mt-6 w-full max-w-xl mx-auto" />
+          <p className="text-xl font-semibold mb-4">
+            Seeker Map for Quest Marks!
+          </p>
           <Button className="w-full mt-6" onClick={findQuests}>
             Show me quests
           </Button>
