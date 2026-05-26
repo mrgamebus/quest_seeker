@@ -228,6 +228,11 @@ export default function QuestPage() {
                 onChange={(e) => setSearchTerm(e.target.value)}
               />
 
+              {/* Add the Joined Already checkbox here */}
+              <input type="checkbox">
+
+              </input>
+
               {/* Sort Dropdown */}
               <select
                 value={sortOption}
