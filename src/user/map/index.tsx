@@ -6,11 +6,15 @@ import SignOutButton from '@/components/SignOutButton'
 import { Home } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { useNavigate } from 'react-router-dom'
+import { useCurrentUserProfile } from '@/hooks/userProfiles'
+import RemoteImage from '@/components/RemoteImage'
+import placeHold from '@/assets/images/placeholder_view_vector.svg'
 
 
 
 export default function SeekerMap() {
   const navigate = useNavigate()
+  const { currentProfile } = useCurrentUserProfile()
 
   return (
     <div
@@ -58,6 +62,26 @@ export default function SeekerMap() {
               <SignOutButton />
             </Toolbar>
           </div>
+
+          {currentProfile && (
+            <div className="px-4">
+              <div className="flex items-center gap-3 bg-white/50 p-2 rounded-lg w-full max-w-sm mx-auto">
+                <RemoteImage
+                  path={currentProfile.image_thumbnail || placeHold}
+                  fallback={placeHold}
+                  className="w-12 h-12 rounded-full object-cover"
+                  alt={currentProfile.full_name || 'User avatar'}
+                />
+                <div>
+                  <div className="font-semibold">{currentProfile.full_name}</div>
+                  <div className="text-sm text-muted-foreground">
+                    {currentProfile.role} • {currentProfile.points ?? 0} pts
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
           <RegionMap className="mt-6 w-full max-w-xl mx-auto" />
         </CardContent>
       </Card>
