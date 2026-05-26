@@ -11,6 +11,7 @@ import CreateQuestPage from './user/quest/create'
 import QuestDetailPage from './components/QuestDetailPage'
 import Help from './user/help'
 import Leader from './user/leader'
+import RegionMap from './components/RegionMap'
 import logo from '@/assets/images/no_ordinary.png'
 
 import { useEffect } from 'react'
@@ -100,6 +101,8 @@ const components = {
           className="w-full max-h-20 object-contain px-8"
         />
 
+        <RegionMap className="mt-6 w-full max-w-xl mx-auto" />
+
         <a
           href="/help"
           className="text-yellow-400 text-sm font-medium underline hover:text-yellow-300"
@@ -161,7 +164,9 @@ const components = {
               Create one — it's free
             </button>
           </p>
+
         </div>
+
       )
     },
   },
@@ -194,3 +199,4 @@ const formFields = {
     },
   },
 }
+
