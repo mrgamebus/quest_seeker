@@ -100,6 +100,7 @@ const components = {
           className="w-full max-h-20 object-contain px-8"
         />
 
+
         <a
           href="/help"
           className="text-yellow-400 text-sm font-medium underline hover:text-yellow-300"
@@ -161,7 +162,9 @@ const components = {
               Create one — it's free
             </button>
           </p>
+
         </div>
+
       )
     },
   },
