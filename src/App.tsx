@@ -10,6 +10,7 @@ import QuestPage from './user/quest'
 import CreateQuestPage from './user/quest/create'
 import QuestDetailPage from './components/QuestDetailPage'
 import Help from './user/help'
+import SeekerMap from './user/map'
 import Leader from './user/leader'
 import logo from '@/assets/images/no_ordinary.png'
 
@@ -58,6 +59,7 @@ function UserRoutesInner() {
       <Route path="quest/:id/edit" element={<CreateQuestPage />} />
       <Route path="leader" element={<Leader />} />
       <Route path="help" element={<Help />} />
+      <Route path="map" element={<SeekerMap />} />
       <Route path="auth/*" element={<Navigate to="/user/region" replace />} />
     </Routes>
   )
