@@ -12,7 +12,7 @@ import { useNavigate } from 'react-router-dom'
 
 export default function SeekerMap() {
   const navigate = useNavigate()
-const [activeTab, setActiveTab] = useState<'account' | 'quests' | 'leaderboard' | 'help' | 'home'>('account')
+const [activeTab, setActiveTab] = useState<'account' | 'quests' | 'leaderboard' | 'help' | 'home'>('home')
 const [forceNameUpdate] = useState<boolean>(false)
   return (
     <div
