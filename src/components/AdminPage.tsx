@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useQueryClient } from '@tanstack/react-query'
 import {
   Table,
   TableBody,
@@ -8,7 +9,7 @@ import {
   TableRow,
 } from './ui/table'
 import { usePendingUsers } from '@/hooks/usePendingProfiles'
-import { useAllUsers } from '@/hooks/userProfiles'
+import { useAllUsers, useUpdateProfile } from '@/hooks/userProfiles'
 import { Button } from './ui/button'
 import { useApproveCreator } from '@/hooks/useApproveCreator'
 import { Input } from './ui/input'
@@ -20,6 +21,10 @@ import {
   DialogTitle,
 } from './ui/dialog'
 import { useRejectCreator } from '@/hooks/useRejectCreator'
+import type { GetProfileQuery } from '@/graphql/API'
+import { Field } from './ProfileField'
+
+export type Profile = NonNullable<GetProfileQuery['getProfile']>
 
 export default function AdminPage() {
   const [view, setView] = useState<'pending' | 'seekers' | 'creators'>(
@@ -27,7 +32,11 @@ export default function AdminPage() {
   )
   const [displayCount, setDisplayCount] = useState(10)
   const [searchTerm, setSearchTerm] = useState('')
-  const [selectedUser, setSelectedUser] = useState<any>(null)
+  const [selectedUser, setSelectedUser] = useState<Profile | null>(null)
+  const [isEditing, setIsEditing] = useState(false)
+  const [editForm, setEditForm] = useState<Partial<Profile>>({})
+  const updateProfile = useUpdateProfile()
+  const queryClient = useQueryClient()
 
   const {
     data: pendingUsers,
@@ -87,10 +96,68 @@ export default function AdminPage() {
     }
   }
 
+  const handleSelectUser = (user: Profile) => {
+    setSelectedUser(user)
+    setEditForm({
+      full_name: user.full_name ?? '',
+      email: user.email ?? '',
+      phone: user.phone ?? '',
+      organization_name: user.organization_name ?? '',
+      business_type: user.business_type ?? '',
+      registration_number: user.registration_number ?? '',
+      charity_number: user.charity_number ?? '',
+      organization_description: user.organization_description ?? '',
+      primary_contact_name: user.primary_contact_name ?? '',
+      secondary_contact_name: user.secondary_contact_name ?? '',
+      primary_contact_phone: user.primary_contact_phone ?? '',
+      secondary_contact_phone: user.secondary_contact_phone ?? '',
+      primary_contact_position: user.primary_contact_position ?? '',
+      secondary_contact_position: user.secondary_contact_position ?? '',
+    })
+    setIsEditing(false)
+  }
+
+  const handleSave = async () => {
+    if (!selectedUser) return
+
+    try {
+      await updateProfile.mutateAsync({
+        input: { id: selectedUser.id, ...editForm },
+      })
+      setSelectedUser((prev) => (prev ? { ...prev, ...editForm } : null))
+      await queryClient.invalidateQueries({ queryKey: ['profiles'] })
+      setIsEditing(false)
+    } catch (err) {
+      alert(
+        `Save failed: ${err instanceof Error ? err.message : 'Unknown error'}`,
+      )
+    }
+  }
+
+  const handleFieldChange = (field: keyof Profile, value: string) => {
+    setEditForm((prev) => ({ ...prev, [field]: value }))
+  }
+
+  // const Field = ({ label, field }: { label: string; field: keyof Profile }) => (
+  //   <div>
+  //     <h3 className="font-semibold text-sm text-muted-foreground">{label}</h3>
+  //     {isEditing ? (
+  //       <Input
+  //         value={(editForm[field] ?? '') as string}
+  //         onChange={(e) =>
+  //           setEditForm((prev) => ({ ...prev, [field]: e.target.value }))
+  //         }
+  //       />
+  //     ) : (
+  //       <p>{selectedUser?.[field] || 'N/A'}</p>
+  //     )}
+  //   </div>
+  // )
+
   const filteredUsers =
     view === 'pending'
       ? pendingUsers
-      : allUsers?.filter((user) => user.role === view.slice(0, -1))
+      : allUsers?.filter((user: Profile) => user.role === view.slice(0, -1))
 
   const filteredAndSearchedUsers = filteredUsers?.filter((user) => {
     if (!searchTerm) return true
@@ -198,7 +265,7 @@ export default function AdminPage() {
                 <TableRow
                   key={user.id}
                   className="cursor-pointer hover:bg-muted/50"
-                  onClick={() => setSelectedUser(user)}
+                  onClick={() => handleSelectUser(user as Profile)}
                 >
                   <TableCell className="font-medium">
                     {user.full_name}
@@ -247,7 +314,7 @@ export default function AdminPage() {
                         variant="outline"
                         onClick={(e) => {
                           e.stopPropagation()
-                          setSelectedUser(user)
+                          handleSelectUser(user as Profile)
                         }}
                       >
                         View Details
@@ -282,22 +349,34 @@ export default function AdminPage() {
             <div className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <h3 className="font-semibold text-sm text-muted-foreground">
-                    Full Name
-                  </h3>
-                  <p>{selectedUser.full_name || 'N/A'}</p>
+                  <Field
+                    isEditing={isEditing}
+                    editForm={editForm}
+                    selectedUser={selectedUser}
+                    onChange={handleFieldChange}
+                    label="Full Name"
+                    field="full_name"
+                  />
                 </div>
                 <div>
-                  <h3 className="font-semibold text-sm text-muted-foreground">
-                    Email
-                  </h3>
-                  <p>{selectedUser.email || 'N/A'}</p>
+                  <Field
+                    isEditing={isEditing}
+                    editForm={editForm}
+                    selectedUser={selectedUser}
+                    onChange={handleFieldChange}
+                    label="Email"
+                    field="email"
+                  />
                 </div>
                 <div>
-                  <h3 className="font-semibold text-sm text-muted-foreground">
-                    Phone
-                  </h3>
-                  <p className="capitalize">{selectedUser.phone || 'N/A'}</p>
+                  <Field
+                    isEditing={isEditing}
+                    editForm={editForm}
+                    selectedUser={selectedUser}
+                    onChange={handleFieldChange}
+                    label="Phone"
+                    field="phone"
+                  />
                 </div>
               </div>
 
@@ -309,32 +388,44 @@ export default function AdminPage() {
                     <h3 className="font-semibold mb-2">Organization Details</h3>
                     <div className="grid grid-cols-2 gap-4">
                       <div>
-                        <h4 className="font-semibold text-sm text-muted-foreground">
-                          Organization Name
-                        </h4>
-                        <p>{selectedUser.organization_name || 'N/A'}</p>
+                        <Field
+                          isEditing={isEditing}
+                          editForm={editForm}
+                          selectedUser={selectedUser}
+                          onChange={handleFieldChange}
+                          label="Organisation Name"
+                          field="organization_name"
+                        />
                       </div>
                       <div>
-                        <h4 className="font-semibold text-sm text-muted-foreground">
-                          Business Type
-                        </h4>
-                        <p>{selectedUser.business_type || 'N/A'}</p>
+                        <Field
+                          isEditing={isEditing}
+                          editForm={editForm}
+                          selectedUser={selectedUser}
+                          onChange={handleFieldChange}
+                          label="Business Type"
+                          field="business_type"
+                        />
                       </div>
                       <div>
-                        <h3 className="font-semibold text-sm text-muted-foreground">
-                          Registration Number
-                        </h3>
-                        <p className="text-xs font-mono">
-                          {selectedUser.registration_number || 'N/A'}
-                        </p>
+                        <Field
+                          isEditing={isEditing}
+                          editForm={editForm}
+                          selectedUser={selectedUser}
+                          onChange={handleFieldChange}
+                          label="Registration Number"
+                          field="registration_number"
+                        />
                       </div>
                       <div>
-                        <h3 className="font-semibold text-sm text-muted-foreground">
-                          Charity Number
-                        </h3>
-                        <p className="text-xs font-mono">
-                          {selectedUser.charity_number || 'N/A'}
-                        </p>
+                        <Field
+                          isEditing={isEditing}
+                          editForm={editForm}
+                          selectedUser={selectedUser}
+                          onChange={handleFieldChange}
+                          label="Charity Number"
+                          field="charity_number"
+                        />
                       </div>
                     </div>
                   </div>
@@ -345,65 +436,79 @@ export default function AdminPage() {
 
                     {/* Organization Description - Full Width */}
                     <div className="mb-4">
-                      <h4 className="font-semibold text-sm text-muted-foreground">
-                        Organisation Description
-                      </h4>
-                      <p className="text-sm">
-                        {selectedUser.organization_description || 'N/A'}
-                      </p>
+                      <Field
+                        isEditing={isEditing}
+                        editForm={editForm}
+                        selectedUser={selectedUser}
+                        onChange={handleFieldChange}
+                        label="Organisation Description"
+                        field="organization_description"
+                      />
                     </div>
 
                     {/* Two Column Layout for Contact Info */}
                     <div className="grid grid-cols-2 gap-4">
                       <div>
-                        <h4 className="font-semibold text-sm text-muted-foreground">
-                          Primary Contact
-                        </h4>
-                        <p className="text-sm">
-                          {selectedUser.primary_contact_name || 'N/A'}
-                        </p>
+                        <Field
+                          isEditing={isEditing}
+                          editForm={editForm}
+                          selectedUser={selectedUser}
+                          onChange={handleFieldChange}
+                          label="Primary Contact"
+                          field="primary_contact_name"
+                        />
                       </div>
                       <div>
-                        <h4 className="font-semibold text-sm text-muted-foreground">
-                          Secondary Contact Name
-                        </h4>
-                        <p className="text-sm">
-                          {selectedUser.secondary_contact_name || 'N/A'}
-                        </p>
-                      </div>
-
-                      <div>
-                        <h4 className="font-semibold text-sm text-muted-foreground">
-                          Primary Contact Phone
-                        </h4>
-                        <p className="text-sm">
-                          {selectedUser.primary_contact_phone || 'N/A'}
-                        </p>
-                      </div>
-                      <div>
-                        <h4 className="font-semibold text-sm text-muted-foreground">
-                          Secondary Contact Phone
-                        </h4>
-                        <p className="text-sm">
-                          {selectedUser.secondary_contact_phone || 'N/A'}
-                        </p>
+                        <Field
+                          isEditing={isEditing}
+                          editForm={editForm}
+                          selectedUser={selectedUser}
+                          onChange={handleFieldChange}
+                          label="Secondary Contact Name"
+                          field="secondary_contact_name"
+                        />
                       </div>
 
                       <div>
-                        <h4 className="font-semibold text-sm text-muted-foreground">
-                          Primary Contact Position
-                        </h4>
-                        <p className="text-sm">
-                          {selectedUser.primary_contact_position || 'N/A'}
-                        </p>
+                        <Field
+                          isEditing={isEditing}
+                          editForm={editForm}
+                          selectedUser={selectedUser}
+                          onChange={handleFieldChange}
+                          label="Primary Contact Phone"
+                          field="primary_contact_phone"
+                        />
                       </div>
                       <div>
-                        <h4 className="font-semibold text-sm text-muted-foreground">
-                          Secondary Contact Position
-                        </h4>
-                        <p className="text-sm">
-                          {selectedUser.secondary_contact_position || 'N/A'}
-                        </p>
+                        <Field
+                          isEditing={isEditing}
+                          editForm={editForm}
+                          selectedUser={selectedUser}
+                          onChange={handleFieldChange}
+                          label="Secondary Contact Phone"
+                          field="secondary_contact_phone"
+                        />
+                      </div>
+
+                      <div>
+                        <Field
+                          isEditing={isEditing}
+                          editForm={editForm}
+                          selectedUser={selectedUser}
+                          onChange={handleFieldChange}
+                          label="Primary Contact Position"
+                          field="primary_contact_position"
+                        />
+                      </div>
+                      <div>
+                        <Field
+                          isEditing={isEditing}
+                          editForm={editForm}
+                          selectedUser={selectedUser}
+                          onChange={handleFieldChange}
+                          label="Secondary Contact Position"
+                          field="secondary_contact_position"
+                        />
                       </div>
                     </div>
                   </div>
@@ -411,31 +516,29 @@ export default function AdminPage() {
               )}
 
               {/* Action buttons in modal */}
-              {view === 'pending' && (
-                <div className="border-t pt-4 flex gap-2 justify-end">
-                  <Button
-                    variant="default"
-                    disabled={approveCreator.isPending}
-                    onClick={() => {
-                      handleApprove(
-                        selectedUser.id,
-                        selectedUser.full_name || 'User',
-                      )
-                      setSelectedUser(null)
-                    }}
-                  >
-                    {approveCreator.isPending ? 'Approving...' : 'Approve'}
+              <div className="flex gap-2 justify-end">
+                {isEditing ? (
+                  <>
+                    <Button
+                      variant="outline"
+                      onClick={() => setIsEditing(false)}
+                    >
+                      Cancel
+                    </Button>
+                    <Button
+                      onClick={handleSave}
+                      disabled={updateProfile.isPending}
+                    >
+                      {updateProfile.isPending ? 'Saving...' : 'Save'}
+                    </Button>
+                  </>
+                ) : (
+                  <Button variant="outline" onClick={() => setIsEditing(true)}>
+                    Edit
                   </Button>
-                  <Button
-                    variant="destructive"
-                    onClick={() => {
-                      setSelectedUser(null)
-                    }}
-                  >
-                    Reject
-                  </Button>
-                </div>
-              )}
+                  // i.e. onClick={() => setIsEditing(true)}
+                )}
+              </div>
             </div>
           )}
         </DialogContent>
