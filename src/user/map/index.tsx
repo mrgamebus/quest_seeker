@@ -5,15 +5,13 @@ import { Toolbar } from '@/components/Toolbar'
 import SignOutButton from '@/components/SignOutButton'
 import { Home } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 
 
 
 export default function SeekerMap() {
   const navigate = useNavigate()
-const [activeTab, setActiveTab] = useState<'account' | 'quests' | 'leaderboard' | 'help' | 'home'>('home')
-const [forceNameUpdate] = useState<boolean>(false)
+
   return (
     <div
       className="relative h-screen flex items-center justify-center bg-cover bg-center p-4"
@@ -26,17 +24,18 @@ const [forceNameUpdate] = useState<boolean>(false)
               <Button
                 variant="yellow"
                 onClick={() => navigate('/user/region')}
-                disabled={forceNameUpdate}
+                aria-label="Home"
               >
                 <Home />
               </Button>
+
               <Button
-                variant={activeTab === 'account' ? 'default' : 'yellow'}
-                onClick={() => setActiveTab('account')}
-                disabled={forceNameUpdate}
+                variant="yellow"
+                onClick={() => navigate('/user/account')}
               >
                 My Account
               </Button>
+
               <Button
                 variant="yellow"
                 onClick={() =>
@@ -48,20 +47,14 @@ const [forceNameUpdate] = useState<boolean>(false)
                 My Quests
               </Button>
 
-              <Button
-                variant={activeTab === 'leaderboard' ? 'default' : 'yellow'}
-                onClick={() => setActiveTab('leaderboard')}
-                disabled={forceNameUpdate}
-              >
+              <Button variant="yellow" onClick={() => navigate('/user/leader')}>
                 Leader Board
               </Button>
-              <Button
-                variant={activeTab === 'help' ? 'default' : 'yellow'}
-                onClick={() => setActiveTab('help')}
-                disabled={forceNameUpdate}
-              >
+
+              <Button variant="yellow" onClick={() => navigate('/user/help')}>
                 Help Guide
               </Button>
+
               <SignOutButton />
             </Toolbar>
           </div>
