@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import { Profile, Task, Quest } from '@/types'
 import { getUrl } from 'aws-amplify/storage'
 // import { ensureArray } from '@/tools/ensureArray'
@@ -8,6 +8,8 @@ interface MinimalQuestParticipant {
   profileId: string
   tasks?: any
   status?: any
+  joinedAt?: string | null
+  updatedAt?: string | null
 }
 
 interface CompletedParticipantsListProps {
@@ -29,6 +31,37 @@ export default function CompletedParticipantsList({
   const [pdfLoadingById, setPdfLoadingById] = useState<Record<string, boolean>>(
     {},
   )
+
+  const getCompletionDuration = (participantQuest?: MinimalQuestParticipant) => {
+    if (!participantQuest) return Number.POSITIVE_INFINITY
+    const joinedAt = participantQuest.joinedAt
+    const updatedAt = participantQuest.updatedAt
+    if (!joinedAt || !updatedAt) return Number.POSITIVE_INFINITY
+
+    const joinedTime = new Date(joinedAt).getTime()
+    const updatedTime = new Date(updatedAt).getTime()
+    if (Number.isNaN(joinedTime) || Number.isNaN(updatedTime)) {
+      return Number.POSITIVE_INFINITY
+    }
+
+    return Math.max(0, updatedTime - joinedTime)
+  }
+
+  const sortedCompletedParticipants = useMemo(() => {
+    return [...completedParticipants].sort((a, b) => {
+      const aQuest = questParticipants?.find((uq) => uq.profileId === a.id)
+      const bQuest = questParticipants?.find((uq) => uq.profileId === b.id)
+
+      const aDuration = getCompletionDuration(aQuest)
+      const bDuration = getCompletionDuration(bQuest)
+
+      if (aDuration !== bDuration) {
+        return aDuration - bDuration
+      }
+
+      return a.full_name.localeCompare(b.full_name)
+    })
+  }, [completedParticipants, questParticipants])
 
   // This is the key logic that was lost in the refactor
   const handlePreparePdf = async (participantId: string) => {
@@ -126,11 +159,11 @@ export default function CompletedParticipantsList({
   return (
     <div className="lg:w-[450px] w-full bg-white/70 p-4 rounded-xl shadow">
       <h3 className="text-lg font-bold mb-3">
-        Participants Who Completed This Quest
+        Participants Who Completed This Quest (Fastest finishers first)
       </h3>
 
       <div className="flex flex-col gap-3 mb-4 max-h-72 overflow-y-auto pr-1">
-        {completedParticipants.map((profile) => {
+        {sortedCompletedParticipants.map((profile) => {
           if (!profile?.id) return null
 
           const isLoading = pdfLoadingById[profile.id]

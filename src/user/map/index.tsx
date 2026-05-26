@@ -5,15 +5,17 @@ import { Toolbar } from '@/components/Toolbar'
 import SignOutButton from '@/components/SignOutButton'
 import { Home } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useCurrentUserProfile } from '@/hooks/userProfiles'
+import RemoteImage from '@/components/RemoteImage'
+import placeHold from '@/assets/images/placeholder_view_vector.svg'
 
 
 
 export default function SeekerMap() {
   const navigate = useNavigate()
-const [activeTab, setActiveTab] = useState<'account' | 'quests' | 'leaderboard' | 'help' | 'home'>('account')
-const [forceNameUpdate] = useState<boolean>(false)
+  const { currentProfile } = useCurrentUserProfile()
+
   return (
     <div
       className="relative h-screen flex items-center justify-center bg-cover bg-center p-4"
@@ -26,17 +28,18 @@ const [forceNameUpdate] = useState<boolean>(false)
               <Button
                 variant="yellow"
                 onClick={() => navigate('/user/region')}
-                disabled={forceNameUpdate}
+                aria-label="Home"
               >
                 <Home />
               </Button>
+
               <Button
-                variant={activeTab === 'account' ? 'default' : 'yellow'}
-                onClick={() => setActiveTab('account')}
-                disabled={forceNameUpdate}
+                variant="yellow"
+                onClick={() => navigate('/user/account')}
               >
                 My Account
               </Button>
+
               <Button
                 variant="yellow"
                 onClick={() =>
@@ -48,24 +51,37 @@ const [forceNameUpdate] = useState<boolean>(false)
                 My Quests
               </Button>
 
-              <Button
-                variant={activeTab === 'leaderboard' ? 'default' : 'yellow'}
-                onClick={() => setActiveTab('leaderboard')}
-                disabled={forceNameUpdate}
-              >
+              <Button variant="yellow" onClick={() => navigate('/user/leader')}>
                 Leader Board
               </Button>
-              <Button
-                variant={activeTab === 'help' ? 'default' : 'yellow'}
-                onClick={() => setActiveTab('help')}
-                disabled={forceNameUpdate}
-              >
+
+              <Button variant="yellow" onClick={() => navigate('/user/help')}>
                 Help Guide
               </Button>
+
               <SignOutButton />
             </Toolbar>
           </div>
           <RegionMap className="mt-6 w-full max-w-xl mx-auto" />
+
+          {currentProfile && (
+            <div className="px-4">
+              <div className="flex items-center gap-3 bg-white/50 p-2 rounded-lg w-full max-w-sm mx-auto">
+                <RemoteImage
+                  path={currentProfile.image_thumbnail || placeHold}
+                  fallback={placeHold}
+                  className="w-12 h-12 rounded-full object-cover"
+                  alt={currentProfile.full_name || 'User avatar'}
+                />
+                <div>
+                  <div className="font-semibold">{currentProfile.full_name}</div>
+                  <div className="text-sm text-muted-foreground">
+                    {currentProfile.role} • {currentProfile.points ?? 0} pts
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
         </CardContent>
       </Card>
     </div>
