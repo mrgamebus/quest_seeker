@@ -264,6 +264,17 @@ export default function Leader() {
                 </p>
               </div>
             </div>
+             <div className="flex items-start gap-3 p-3 bg-yellow-50 rounded-lg border border-yellow-200">
+              <span className="text-2xl font-bold text-yellow-600">100</span>
+              <div>
+                <h3 className="font-semibold text-foreground">
+                  Scan a Physical Quest Mark
+                </h3>
+                <p className="text-sm text-muted-foreground">
+                  Earn 100 points for scanning a physical quest mark
+                </p>
+              </div>
+            </div>
           </div>
         </DialogContent>
       </Dialog>
