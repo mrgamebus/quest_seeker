@@ -77,15 +77,24 @@ export default function App() {
       <Route
         path="/user/*"
         element={
-          <Authenticator
-            components={components}
-            formFields={formFields}
-            hideSignUp={true}
-          >
-            {({ user }) => {
-              return user ? <UserRoutes /> : <div>Loading...</div>
+          <div
+            style={{
+              backgroundImage: `url(${bg})`,
+              backgroundSize: 'cover',
+              backgroundPosition: 'center',
+              backgroundRepeat: 'no-repeat',
+              minHeight: '100vh',
+              width: '100%',
             }}
-          </Authenticator>
+          >
+            <Authenticator
+              components={components}
+              formFields={formFields}
+              hideSignUp={true}
+            >
+              {({ user }) => (user ? <UserRoutes /> : <div>Loading...</div>)}
+            </Authenticator>
+          </div>
         }
       />
     </Routes>
@@ -95,7 +104,8 @@ export default function App() {
 const components = {
   Header() {
     return (
-      <div className="w-full bg-white rounded-t-2xl flex flex-col items-center justify-center py-8 px-6 gap-3" style={{ backgroundImage: `url(${bg})` }}>
+
+      <div className="w-full bg-white rounded-t-2xl flex flex-col items-center justify-center py-8 px-6 gap-3" >
         <img
           src={logo}
           alt="QuestSeeker"
@@ -109,6 +119,7 @@ const components = {
           QuestSeeker in a nutshell →
         </a>
       </div>
+
     )
   },
 
