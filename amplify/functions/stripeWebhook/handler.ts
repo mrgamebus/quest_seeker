@@ -173,5 +173,44 @@ export const handler = async (event: LambdaFunctionURLEvent) => {
     }
   }
 
+  if (stripeEvent.type === 'identity.verification_session.verified') {
+    const session = stripeEvent.data
+      .object as Stripe.Identity.VerificationSession
+    const { profileId } = session.metadata ?? {}
+    const now = new Date().toISOString()
+
+    if (!profileId) {
+      console.error('Missing profileId in verification session metadata')
+      return { statusCode: 200, body: JSON.stringify({ received: true }) }
+    }
+
+    await ddb.send(
+      new UpdateCommand({
+        TableName: PROFILE_TABLE,
+        Key: { id: profileId },
+        UpdateExpression: 'SET #role = :role, updatedAt = :now',
+        ExpressionAttributeNames: { '#role': 'role' },
+        ExpressionAttributeValues: { ':role': 'pending', ':now': now },
+      }),
+    )
+
+    console.log(
+      `Profile ${profileId} set to pending after identity verification`,
+    )
+  }
+
+  if (stripeEvent.type === 'identity.verification_session.requires_input') {
+    const session = stripeEvent.data
+      .object as Stripe.Identity.VerificationSession
+    const { profileId } = session.metadata ?? {}
+
+    // Optional: log the failure reason for debugging
+    console.warn(
+      `Verification failed for profile ${profileId}:`,
+      session.last_error?.reason,
+    )
+    // You could send a failure email here using your existing sendEmail helper
+  }
+
   return { statusCode: 200, body: JSON.stringify({ received: true }) }
 }

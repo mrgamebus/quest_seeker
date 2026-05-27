@@ -17,23 +17,25 @@ import { stripeWebhook } from './functions/stripeWebhook/resource'
 import { support } from './functions/support/resource'
 import { rejectCreator } from './functions/rejectCreator/resource'
 import { questCreatorMessage } from './functions/questCreatorMessage/resource'
+import { stripeIdentity } from './functions/stripeIdentity/resource'
 
 const backend = defineBackend({
-  auth,
-  data,
-  storage,
-  expiredQuests,
-  postRegistration,
-  joinQuest,
   approveCreator,
-  rejectCreator,
+  auth,
   becomePending,
-  mutateQuest,
   createQuestEntrySession,
   createStripeSession,
+  data,
+  expiredQuests,
+  joinQuest,
+  mutateQuest,
+  postRegistration,
+  questCreatorMessage,
+  rejectCreator,
+  storage,
+  stripeIdentity,
   stripeWebhook,
   support,
-  questCreatorMessage,
 })
 
 // Tables
@@ -51,6 +53,8 @@ backend.mutateQuest.addEnvironment('QUEST_TABLE_NAME', questTable.tableName)
 
 // --- Stripe Webhook & Session Setup ---
 
+const stripeIdentityLambda = backend.stripeIdentity.resources
+  .lambda as lambda.Function
 const stripeWebhookLambda = backend.stripeWebhook.resources
   .lambda as lambda.Function
 const stripeSessionLambda = backend.createStripeSession.resources
@@ -80,7 +84,11 @@ stripeWebhookLambda.addPermission('StripePublicInvoke', {
 const graphqlUrl =
   backend.data.resources.cfnResources.cfnGraphqlApi.attrGraphQlUrl
 
-const stripeLambdas = [stripeWebhookLambda, stripeSessionLambda]
+const stripeLambdas = [
+  stripeWebhookLambda,
+  stripeSessionLambda,
+  stripeIdentityLambda,
+]
 stripeLambdas.forEach((l) => {
   l.addEnvironment(
     'AMPLIFY_USER_POOL_ID',
@@ -115,6 +123,12 @@ stripeWebhookLambda.addEnvironment(
 profileTable.grantReadWriteData(stripeWebhookLambda)
 stripeWebhookLambda.addEnvironment('PROFILE_TABLE_NAME', profileTable.tableName)
 
+profileTable.grantReadWriteData(stripeIdentityLambda)
+stripeIdentityLambda.addEnvironment(
+  'PROFILE_TABLE_NAME',
+  profileTable.tableName,
+)
+
 const sesPolicy = new iam.PolicyStatement({
   actions: ['ses:SendEmail', 'ses:SendRawEmail'],
   resources: ['*'],
@@ -141,6 +155,7 @@ joinQuestLambda.addToRolePolicy(cognitoPolicy)
 stripeWebhookLambda.addToRolePolicy(cognitoPolicy)
 expiredQuestsLambda.addToRolePolicy(cognitoPolicy)
 questCreatorMessageLambda.addToRolePolicy(cognitoPolicy)
+stripeIdentityLambda.addToRolePolicy(cognitoPolicy)
 
 joinQuestLambda.addEnvironment(
   'AMPLIFY_USER_POOL_ID',
@@ -158,6 +173,11 @@ supportLambda.addEnvironment(
 )
 
 questCreatorMessageLambda.addEnvironment(
+  'AMPLIFY_USER_POOL_ID',
+  backend.auth.resources.userPool.userPoolId,
+)
+
+stripeIdentityLambda.addEnvironment(
   'AMPLIFY_USER_POOL_ID',
   backend.auth.resources.userPool.userPoolId,
 )
@@ -213,6 +233,15 @@ rejectCreatorLambda.addEnvironment(
   backend.auth.resources.userPool.userPoolId,
 )
 
+const stripeIdentityFunctionUrl = stripeIdentityLambda.addFunctionUrl({
+  authType: lambda.FunctionUrlAuthType.NONE,
+  cors: {
+    allowedOrigins: ['*'],
+    allowedMethods: [lambda.HttpMethod.POST],
+    allowedHeaders: ['content-type', 'stripe-signature'],
+  },
+})
+
 const supportFunctionUrl = supportLambda.addFunctionUrl({
   authType: lambda.FunctionUrlAuthType.NONE,
   cors: {
@@ -220,6 +249,12 @@ const supportFunctionUrl = supportLambda.addFunctionUrl({
     allowedMethods: [lambda.HttpMethod.POST],
     allowedHeaders: ['*'],
   },
+})
+
+stripeIdentityLambda.addPermission('StripePublicInvoke', {
+  principal: new iam.AnyPrincipal(),
+  action: 'lambda:InvokeFunctionUrl',
+  functionUrlAuthType: lambda.FunctionUrlAuthType.NONE,
 })
 
 supportLambda.addPermission('SupportPublicInvoke', {
@@ -231,5 +266,6 @@ supportLambda.addPermission('SupportPublicInvoke', {
 backend.addOutput({
   custom: {
     supportFunctionUrl: supportFunctionUrl.url,
+    stripeIdentityFunctionUrl: stripeIdentityFunctionUrl.url,
   },
 })

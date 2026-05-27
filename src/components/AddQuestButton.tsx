@@ -18,6 +18,8 @@ import {
 import { useCurrentUserProfile } from '@/hooks/userProfiles'
 import { ProfileRole } from '@/graphql/API'
 import { Plus } from 'lucide-react'
+import outputs from '../../amplify_outputs.json'
+import { toast } from '@/hooks/use-toast'
 
 type AddQuestButtonProps = {
   to: string
@@ -46,10 +48,27 @@ export default function AddQuestButton({ to }: AddQuestButtonProps) {
     setLoading(true)
     try {
       setModalOpen(false)
-      navigate('/user/account', { state: { defaultTab: 'status' } })
+
+      const res = await fetch(outputs.custom.stripeIdentityFunctionUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          profileId: currentProfile.id,
+          email: currentProfile.email,
+        }),
+      })
+
+      if (!res.ok) throw new Error(`Lambda error: ${res.status}`)
+
+      const { url } = await res.json()
+      window.location.href = url // redirect to Stripe's hosted verification page
     } catch (err) {
-      console.error('Failed to become creator:', err)
-      alert('Something went wrong — please try again.')
+      console.error(err)
+      toast({
+        variant: 'destructive',
+        title: 'Something went wrong',
+        description: 'Failed to start verification. Please try again.',
+      })
     } finally {
       setLoading(false)
     }
