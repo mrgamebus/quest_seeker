@@ -60,7 +60,7 @@ export type Profile = {
 
 export interface MinimalQuestParticipant {
   profileId: string
-  tasks: string | Task[] | any[] | null
+  tasks: Task[] | undefined
   status?: string | null
 }
 
