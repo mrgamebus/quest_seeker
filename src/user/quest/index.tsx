@@ -61,6 +61,7 @@ export default function QuestPage() {
         image_thumbnail: p.image_thumbnail ?? '',
         role: p.role ?? 'seeker',
         points: p.points ?? 0,
+        seeker_rank: p.seeker_rank ?? 'wanderer',
       }
     })
 
