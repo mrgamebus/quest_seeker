@@ -18,6 +18,8 @@ import { support } from './functions/support/resource'
 import { rejectCreator } from './functions/rejectCreator/resource'
 import { questCreatorMessage } from './functions/questCreatorMessage/resource'
 import { stripeIdentity } from './functions/stripeIdentity/resource'
+import { updateSeekerRank } from './functions/updateSeekerRank/resource'
+import { StartingPosition } from 'aws-cdk-lib/aws-lambda'
 
 const backend = defineBackend({
   approveCreator,
@@ -32,6 +34,7 @@ const backend = defineBackend({
   postRegistration,
   questCreatorMessage,
   rejectCreator,
+  updateSeekerRank,
   storage,
   stripeIdentity,
   stripeWebhook,
@@ -42,6 +45,18 @@ const backend = defineBackend({
 
 const questTable = backend.data.resources.tables['Quest']
 const profileTable = backend.data.resources.tables['Profile']
+
+const cfnTable = backend.data.node
+  .findAll()
+  .find(
+    (c) =>
+      c.node.path.toLowerCase().includes('profile') &&
+      (c as any).cfnResourceType === 'Custom::AmplifyDynamoDBTable',
+  ) as any
+
+cfnTable.addPropertyOverride('StreamSpecification', {
+  StreamViewType: 'NEW_AND_OLD_IMAGES',
+})
 
 // mutateQuest permissions
 
@@ -64,6 +79,8 @@ const expiredQuestsLambda = backend.expiredQuests.resources
   .lambda as lambda.Function
 const supportLambda = backend.support.resources.lambda as lambda.Function
 const questCreatorMessageLambda = backend.questCreatorMessage.resources
+  .lambda as lambda.Function
+const updateSeekerRankLambda = backend.updateSeekerRank.resources
   .lambda as lambda.Function
 
 stripeWebhookLambda.addFunctionUrl({
@@ -127,6 +144,31 @@ profileTable.grantReadWriteData(stripeIdentityLambda)
 stripeIdentityLambda.addEnvironment(
   'PROFILE_TABLE_NAME',
   profileTable.tableName,
+)
+
+profileTable.grantReadWriteData(updateSeekerRankLambda)
+updateSeekerRankLambda.addEnvironment(
+  'PROFILE_TABLE_NAME',
+  profileTable.tableName,
+)
+
+updateSeekerRankLambda.addEventSourceMapping('ProfileStreamTrigger', {
+  eventSourceArn: profileTable.tableStreamArn!,
+  startingPosition: StartingPosition.LATEST,
+  batchSize: 10,
+  bisectBatchOnError: true,
+})
+
+updateSeekerRankLambda.addToRolePolicy(
+  new iam.PolicyStatement({
+    actions: [
+      'dynamodb:GetRecords',
+      'dynamodb:GetShardIterator',
+      'dynamodb:DescribeStream',
+      'dynamodb:ListStreams',
+    ],
+    resources: [`${profileTable.tableArn}/stream/*`],
+  }),
 )
 
 const sesPolicy = new iam.PolicyStatement({

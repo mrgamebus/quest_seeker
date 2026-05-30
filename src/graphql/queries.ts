@@ -33,6 +33,7 @@ export const getProfile = /* GraphQL */ `query GetProfile($id: ID!) {
     secondary_contact_name
     secondary_contact_phone
     secondary_contact_position
+    seeker_rank
     updatedAt
     __typename
   }
@@ -125,6 +126,7 @@ export const listLeaderboard = /* GraphQL */ `query ListLeaderboard(
       secondary_contact_name
       secondary_contact_phone
       secondary_contact_position
+      seeker_rank
       updatedAt
       __typename
     }
@@ -166,6 +168,7 @@ export const listProfiles = /* GraphQL */ `query ListProfiles(
       secondary_contact_name
       secondary_contact_phone
       secondary_contact_position
+      seeker_rank
       updatedAt
       __typename
     }

@@ -90,7 +90,7 @@ export default function App() {
             <Authenticator
               components={components}
               formFields={formFields}
-              hideSignUp={true}
+              // hideSignUp={true}
             >
               {({ user }) => (user ? <UserRoutes /> : <div>Loading...</div>)}
             </Authenticator>
@@ -104,8 +104,7 @@ export default function App() {
 const components = {
   Header() {
     return (
-
-      <div className="w-full bg-white rounded-t-2xl flex flex-col items-center justify-center py-8 px-6 gap-3" >
+      <div className="w-full bg-white rounded-t-2xl flex flex-col items-center justify-center py-8 px-6 gap-3">
         <img
           src={logo}
           alt="QuestSeeker"
@@ -119,7 +118,6 @@ const components = {
           QuestSeeker in a nutshell →
         </a>
       </div>
-
     )
   },
 
