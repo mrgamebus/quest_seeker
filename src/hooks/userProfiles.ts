@@ -81,6 +81,7 @@ export const useCurrentUserProfile = () => {
               full_name: signInDetails?.loginId ?? 'New User',
               email: signInDetails?.loginId,
               role: 'seeker',
+              seeker_rank: 'wanderer',
             },
           },
           authMode: 'userPool',

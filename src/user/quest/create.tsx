@@ -83,6 +83,7 @@ export default function CreateQuestPage() {
   const [step, setStep] = useState(0)
   const [loading, setLoading] = useState(isUpdating)
   const [modalOpen, setModalOpen] = useState(false)
+  const [isZeroAllowed, setIsZeroAllowed] = useState(false)
 
   const next = () => setStep((s) => s + 1)
   const prev = () => setStep((s) => Math.max(0, s - 1))
@@ -452,18 +453,39 @@ export default function CreateQuestPage() {
         {/* Step 4: Entry Fee */}
         {step === 4 && (
           <>
-            <StepHeader title="Entry Fee" onBack={handleClick} />
+            <StepHeader
+              title="Entry Fee (minimum of $5.00)"
+              onBack={handleClick}
+            />
+            <label>
+              <input
+                type="checkbox"
+                checked={isZeroAllowed}
+                onChange={(e) => {
+                  const checked = e.target.checked
+                  setIsZeroAllowed(checked)
+                  if (checked) setCurrencyValue('0.00') // Instantly set to 0
+                }}
+              />
+              Free Entry
+            </label>
             <Input
               inputMode="decimal"
               type="text"
+              disabled={isZeroAllowed} // Prevents typing when checkbox is active
               value={currencyValue}
               onChange={(e) => {
                 const val = e.target.value
                 if (val === '' || currencyExp.test(val)) setCurrencyValue(val)
               }}
               onBlur={() => {
-                if (currencyValue !== '')
-                  setCurrencyValue(parseFloat(currencyValue).toFixed(2))
+                if (currencyValue !== '') {
+                  const numValue = parseFloat(currencyValue)
+                  // If checkbox is checked, allow 0. Otherwise, enforce minimum of 5.
+                  const minLimit = isZeroAllowed ? 0 : 5
+                  const finalValue = numValue < minLimit ? minLimit : numValue
+                  setCurrencyValue(finalValue.toFixed(2))
+                }
               }}
             />
             <div className="flex justify-between mt-4">

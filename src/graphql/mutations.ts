@@ -62,6 +62,7 @@ export const createProfile = /* GraphQL */ `mutation CreateProfile(
     secondary_contact_name
     secondary_contact_phone
     secondary_contact_position
+    seeker_rank
     updatedAt
     __typename
   }
@@ -185,6 +186,7 @@ export const deleteProfile = /* GraphQL */ `mutation DeleteProfile(
     secondary_contact_name
     secondary_contact_phone
     secondary_contact_position
+    seeker_rank
     updatedAt
     __typename
   }
@@ -353,6 +355,7 @@ export const updateProfile = /* GraphQL */ `mutation UpdateProfile(
     secondary_contact_name
     secondary_contact_phone
     secondary_contact_position
+    seeker_rank
     updatedAt
     __typename
   }

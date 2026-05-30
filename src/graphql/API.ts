@@ -27,6 +27,7 @@ export type Profile = {
   secondary_contact_name?: string | null,
   secondary_contact_phone?: string | null,
   secondary_contact_position?: string | null,
+  seeker_rank?: ProfileSeeker_rank | null,
   updatedAt: string,
 };
 
@@ -35,6 +36,15 @@ export enum ProfileRole {
   creator = "creator",
   pending = "pending",
   seeker = "seeker",
+}
+
+
+export enum ProfileSeeker_rank {
+  navigator = "navigator",
+  scout = "scout",
+  tracker = "tracker",
+  trailblazer = "trailblazer",
+  wanderer = "wanderer",
 }
 
 
@@ -120,6 +130,7 @@ export type ModelProfileFilterInput = {
   secondary_contact_name?: ModelStringInput | null,
   secondary_contact_phone?: ModelStringInput | null,
   secondary_contact_position?: ModelStringInput | null,
+  seeker_rank?: ModelProfileSeeker_rankInput | null,
   updatedAt?: ModelStringInput | null,
 };
 
@@ -194,6 +205,11 @@ export type ModelIntInput = {
 export type ModelProfileRoleInput = {
   eq?: ProfileRole | null,
   ne?: ProfileRole | null,
+};
+
+export type ModelProfileSeeker_rankInput = {
+  eq?: ProfileSeeker_rank | null,
+  ne?: ProfileSeeker_rank | null,
 };
 
 export type ModelIntKeyConditionInput = {
@@ -323,6 +339,7 @@ export type ModelProfileConditionInput = {
   secondary_contact_name?: ModelStringInput | null,
   secondary_contact_phone?: ModelStringInput | null,
   secondary_contact_position?: ModelStringInput | null,
+  seeker_rank?: ModelProfileSeeker_rankInput | null,
   updatedAt?: ModelStringInput | null,
 };
 
@@ -348,6 +365,7 @@ export type CreateProfileInput = {
   secondary_contact_name?: string | null,
   secondary_contact_phone?: string | null,
   secondary_contact_position?: string | null,
+  seeker_rank?: ProfileSeeker_rank | null,
 };
 
 export type ModelQuestConditionInput = {
@@ -475,6 +493,7 @@ export type UpdateProfileInput = {
   secondary_contact_name?: string | null,
   secondary_contact_phone?: string | null,
   secondary_contact_position?: string | null,
+  seeker_rank?: ProfileSeeker_rank | null,
 };
 
 export type UpdateQuestInput = {
@@ -533,6 +552,7 @@ export type ModelSubscriptionProfileFilterInput = {
   secondary_contact_name?: ModelSubscriptionStringInput | null,
   secondary_contact_phone?: ModelSubscriptionStringInput | null,
   secondary_contact_position?: ModelSubscriptionStringInput | null,
+  seeker_rank?: ModelSubscriptionStringInput | null,
   updatedAt?: ModelSubscriptionStringInput | null,
 };
 
@@ -652,6 +672,7 @@ export type GetProfileQuery = {
     secondary_contact_name?: string | null,
     secondary_contact_phone?: string | null,
     secondary_contact_position?: string | null,
+    seeker_rank?: ProfileSeeker_rank | null,
     updatedAt: string,
   } | null,
 };
@@ -742,6 +763,7 @@ export type ListLeaderboardQuery = {
       secondary_contact_name?: string | null,
       secondary_contact_phone?: string | null,
       secondary_contact_position?: string | null,
+      seeker_rank?: ProfileSeeker_rank | null,
       updatedAt: string,
     } | null >,
     nextToken?: string | null,
@@ -782,6 +804,7 @@ export type ListProfilesQuery = {
       secondary_contact_name?: string | null,
       secondary_contact_phone?: string | null,
       secondary_contact_position?: string | null,
+      seeker_rank?: ProfileSeeker_rank | null,
       updatedAt: string,
     } | null >,
     nextToken?: string | null,
@@ -957,6 +980,7 @@ export type CreateProfileMutation = {
     secondary_contact_name?: string | null,
     secondary_contact_phone?: string | null,
     secondary_contact_position?: string | null,
+    seeker_rank?: ProfileSeeker_rank | null,
     updatedAt: string,
   } | null,
 };
@@ -1065,6 +1089,7 @@ export type DeleteProfileMutation = {
     secondary_contact_name?: string | null,
     secondary_contact_phone?: string | null,
     secondary_contact_position?: string | null,
+    seeker_rank?: ProfileSeeker_rank | null,
     updatedAt: string,
   } | null,
 };
@@ -1210,6 +1235,7 @@ export type UpdateProfileMutation = {
     secondary_contact_name?: string | null,
     secondary_contact_phone?: string | null,
     secondary_contact_position?: string | null,
+    seeker_rank?: ProfileSeeker_rank | null,
     updatedAt: string,
   } | null,
 };
@@ -1296,6 +1322,7 @@ export type OnCreateProfileSubscription = {
     secondary_contact_name?: string | null,
     secondary_contact_phone?: string | null,
     secondary_contact_position?: string | null,
+    seeker_rank?: ProfileSeeker_rank | null,
     updatedAt: string,
   } | null,
 };
@@ -1381,6 +1408,7 @@ export type OnDeleteProfileSubscription = {
     secondary_contact_name?: string | null,
     secondary_contact_phone?: string | null,
     secondary_contact_position?: string | null,
+    seeker_rank?: ProfileSeeker_rank | null,
     updatedAt: string,
   } | null,
 };
@@ -1466,6 +1494,7 @@ export type OnUpdateProfileSubscription = {
     secondary_contact_name?: string | null,
     secondary_contact_phone?: string | null,
     secondary_contact_position?: string | null,
+    seeker_rank?: ProfileSeeker_rank | null,
     updatedAt: string,
   } | null,
 };

@@ -30,6 +30,27 @@ export default function UpdateAccount({
   const forceNameUpdate =
     forceNameUpdateProp ?? profile.full_name === profile.email
 
+  let rank = ''
+  switch (profile.seeker_rank) {
+    case 'wanderer':
+      rank = '/badges/badge_wanderer.png'
+      break
+    case 'scout':
+      rank = '/badges/badge_scout.png'
+      break
+    case 'tracker':
+      rank = '/badges/badge_tracker.png'
+      break
+    case 'trailblazer':
+      rank = '/badges/badge_trailblazer.png'
+      break
+    case 'navigator':
+      rank = '/badges/badge_navigator.png'
+      break
+    default:
+      rank = '/badges/badge_wanderer.png'
+  }
+
   const [previewImage, setPreviewImage] = useState(profile.image || '')
   const [oldImagePath, setOldImagePath] = useState(profile.image || '')
   const [oldImageThumbPath, setOldImageThumbPath] = useState(
@@ -138,19 +159,30 @@ export default function UpdateAccount({
       )}
       {/* Profile Image */}
       <div className="flex flex-col items-center gap-2">
-        {previewImage ? (
-          <RemoteImage
-            path={previewImage || profile.image_thumbnail}
-            fallback={placeHold}
-            className="w-32 h-32 rounded-full object-cover"
+        {/* 1. Relative wrapper to contain the absolute overlay */}
+        <div className="relative w-32 h-32">
+          {previewImage ? (
+            <RemoteImage
+              path={previewImage || profile.image_thumbnail}
+              fallback={placeHold}
+              className="w-32 h-32 rounded-full object-cover"
+            />
+          ) : (
+            <RemoteImage
+              path={profile.image_thumbnail || placeHold}
+              fallback={placeHold}
+              className="w-32 h-32 rounded-full object-cover"
+            />
+          )}
+
+          {/* 2. Absolute overlay small image in top-left */}
+          <img
+            src={rank}
+            alt="Overlay"
+            className="absolute top-0 left-0 w-8 h-8 rounded-full border-2 border-white object-cover shadow-sm"
           />
-        ) : (
-          <RemoteImage
-            path={profile.image_thumbnail || placeHold}
-            fallback={placeHold}
-            className="w-32 h-32 rounded-full object-cover"
-          />
-        )}
+        </div>
+
         <input
           type="file"
           accept="image/*"

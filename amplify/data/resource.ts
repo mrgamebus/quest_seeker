@@ -192,6 +192,13 @@ export const schema = a
         points: a.integer(),
         leaderboard: a.string().default('GLOBAL'),
         role: a.enum(['seeker', 'creator', 'Admin', 'pending']),
+        seeker_rank: a.enum([
+          'wanderer',
+          'scout',
+          'tracker',
+          'trailblazer',
+          'navigator',
+        ]),
       })
       .secondaryIndexes((index) => [
         index('leaderboard').sortKeys(['points']).queryField('listLeaderboard'),

@@ -597,7 +597,7 @@ export default function Help() {
                   </td>
                   <td className="border border-gray-300 px-3 py-2">$950</td>
                   <td className="border border-gray-300 px-3 py-2">
-                    Up to 3,000
+                    Up to 2,000
                   </td>
                   <td className="border border-gray-300 px-3 py-2">None</td>
                   <td>Optional</td>
@@ -1447,7 +1447,7 @@ export default function Help() {
                   variant={activeTab === 'help' ? 'default' : 'yellow'}
                   onClick={() => navigate('/user/help')}
                 >
-                  About QS
+                  Help Guide
                 </Button>
                 <SignOutButton />
               </Toolbar>
