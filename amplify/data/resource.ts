@@ -233,6 +233,31 @@ export const schema = a
         allow.authenticated().to(['read']),
         allow.groups(['Admin']).to(['read', 'update', 'delete']),
       ]),
+
+    /* ------------------ TAG LOCATION MODEL ------------------ */
+    TagLocation: a
+      .model({
+        address: a.string().required(),
+        lat: a.float(),
+        lng: a.float(),
+      })
+      .authorization((allow) => [
+        allow.authenticated().to(['read']),
+        allow.groups(['Admin']).to(['create', 'update', 'delete', 'read']),
+      ]),
+
+    /* ------------------ NFC SCAN MODEL ------------------ */
+    NfcScan: a
+      .model({
+        profileId: a.string().required(),
+        address: a.string().required(),
+        lastScannedAt: a.datetime(),
+      })
+      .authorization((allow) => [
+        allow.owner().to(['read', 'create', 'update']),
+        allow.authenticated().to(['read']),
+        allow.groups(['Admin']).to(['read', 'update', 'delete']),
+      ]),
   })
   .authorization((allow) => [
     allow.resource(joinQuest),

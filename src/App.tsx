@@ -11,6 +11,7 @@ import CreateQuestPage from './user/quest/create'
 import QuestDetailPage from './components/QuestDetailPage'
 import Help from './user/help'
 import SeekerMap from './user/map'
+import ScanHandler from './user/nfc/ScanHandler'
 import Leader from './user/leader'
 import logo from '@/assets/images/no_ordinary.png'
 import bg from '@/assets/images/background_main.jpeg'
@@ -70,6 +71,7 @@ export default function App() {
     <Routes>
       {/* Public landing */}
       <Route path="/" element={<IndexPage />} />
+      <Route path="/nfc" element={<ScanHandler />} />
       <Route path="/help" element={<Help />} />
       <Route path="legal" element={<Legal />} />
       <Route path="/support" element={<Support />} />
