@@ -17,29 +17,46 @@ import { stripeWebhook } from './functions/stripeWebhook/resource'
 import { support } from './functions/support/resource'
 import { rejectCreator } from './functions/rejectCreator/resource'
 import { questCreatorMessage } from './functions/questCreatorMessage/resource'
+import { stripeIdentity } from './functions/stripeIdentity/resource'
+import { updateSeekerRank } from './functions/updateSeekerRank/resource'
+import { StartingPosition } from 'aws-cdk-lib/aws-lambda'
 
 const backend = defineBackend({
-  auth,
-  data,
-  storage,
-  expiredQuests,
-  postRegistration,
-  joinQuest,
   approveCreator,
-  rejectCreator,
+  auth,
   becomePending,
-  mutateQuest,
   createQuestEntrySession,
   createStripeSession,
+  data,
+  expiredQuests,
+  joinQuest,
+  mutateQuest,
+  postRegistration,
+  questCreatorMessage,
+  rejectCreator,
+  updateSeekerRank,
+  storage,
+  stripeIdentity,
   stripeWebhook,
   support,
-  questCreatorMessage,
 })
 
 // Tables
 
 const questTable = backend.data.resources.tables['Quest']
 const profileTable = backend.data.resources.tables['Profile']
+
+const cfnTable = backend.data.node
+  .findAll()
+  .find(
+    (c) =>
+      c.node.path.toLowerCase().includes('profile') &&
+      (c as any).cfnResourceType === 'Custom::AmplifyDynamoDBTable',
+  ) as any
+
+cfnTable.addPropertyOverride('StreamSpecification', {
+  StreamViewType: 'NEW_AND_OLD_IMAGES',
+})
 
 // mutateQuest permissions
 
@@ -51,6 +68,8 @@ backend.mutateQuest.addEnvironment('QUEST_TABLE_NAME', questTable.tableName)
 
 // --- Stripe Webhook & Session Setup ---
 
+const stripeIdentityLambda = backend.stripeIdentity.resources
+  .lambda as lambda.Function
 const stripeWebhookLambda = backend.stripeWebhook.resources
   .lambda as lambda.Function
 const stripeSessionLambda = backend.createStripeSession.resources
@@ -60,6 +79,8 @@ const expiredQuestsLambda = backend.expiredQuests.resources
   .lambda as lambda.Function
 const supportLambda = backend.support.resources.lambda as lambda.Function
 const questCreatorMessageLambda = backend.questCreatorMessage.resources
+  .lambda as lambda.Function
+const updateSeekerRankLambda = backend.updateSeekerRank.resources
   .lambda as lambda.Function
 
 stripeWebhookLambda.addFunctionUrl({
@@ -80,7 +101,11 @@ stripeWebhookLambda.addPermission('StripePublicInvoke', {
 const graphqlUrl =
   backend.data.resources.cfnResources.cfnGraphqlApi.attrGraphQlUrl
 
-const stripeLambdas = [stripeWebhookLambda, stripeSessionLambda]
+const stripeLambdas = [
+  stripeWebhookLambda,
+  stripeSessionLambda,
+  stripeIdentityLambda,
+]
 stripeLambdas.forEach((l) => {
   l.addEnvironment(
     'AMPLIFY_USER_POOL_ID',
@@ -115,6 +140,37 @@ stripeWebhookLambda.addEnvironment(
 profileTable.grantReadWriteData(stripeWebhookLambda)
 stripeWebhookLambda.addEnvironment('PROFILE_TABLE_NAME', profileTable.tableName)
 
+profileTable.grantReadWriteData(stripeIdentityLambda)
+stripeIdentityLambda.addEnvironment(
+  'PROFILE_TABLE_NAME',
+  profileTable.tableName,
+)
+
+profileTable.grantReadWriteData(updateSeekerRankLambda)
+updateSeekerRankLambda.addEnvironment(
+  'PROFILE_TABLE_NAME',
+  profileTable.tableName,
+)
+
+updateSeekerRankLambda.addEventSourceMapping('ProfileStreamTrigger', {
+  eventSourceArn: profileTable.tableStreamArn!,
+  startingPosition: StartingPosition.LATEST,
+  batchSize: 10,
+  bisectBatchOnError: true,
+})
+
+updateSeekerRankLambda.addToRolePolicy(
+  new iam.PolicyStatement({
+    actions: [
+      'dynamodb:GetRecords',
+      'dynamodb:GetShardIterator',
+      'dynamodb:DescribeStream',
+      'dynamodb:ListStreams',
+    ],
+    resources: [`${profileTable.tableArn}/stream/*`],
+  }),
+)
+
 const sesPolicy = new iam.PolicyStatement({
   actions: ['ses:SendEmail', 'ses:SendRawEmail'],
   resources: ['*'],
@@ -141,6 +197,7 @@ joinQuestLambda.addToRolePolicy(cognitoPolicy)
 stripeWebhookLambda.addToRolePolicy(cognitoPolicy)
 expiredQuestsLambda.addToRolePolicy(cognitoPolicy)
 questCreatorMessageLambda.addToRolePolicy(cognitoPolicy)
+stripeIdentityLambda.addToRolePolicy(cognitoPolicy)
 
 joinQuestLambda.addEnvironment(
   'AMPLIFY_USER_POOL_ID',
@@ -158,6 +215,11 @@ supportLambda.addEnvironment(
 )
 
 questCreatorMessageLambda.addEnvironment(
+  'AMPLIFY_USER_POOL_ID',
+  backend.auth.resources.userPool.userPoolId,
+)
+
+stripeIdentityLambda.addEnvironment(
   'AMPLIFY_USER_POOL_ID',
   backend.auth.resources.userPool.userPoolId,
 )
@@ -213,6 +275,15 @@ rejectCreatorLambda.addEnvironment(
   backend.auth.resources.userPool.userPoolId,
 )
 
+const stripeIdentityFunctionUrl = stripeIdentityLambda.addFunctionUrl({
+  authType: lambda.FunctionUrlAuthType.NONE,
+  cors: {
+    allowedOrigins: ['*'],
+    allowedMethods: [lambda.HttpMethod.POST],
+    allowedHeaders: ['content-type', 'stripe-signature'],
+  },
+})
+
 const supportFunctionUrl = supportLambda.addFunctionUrl({
   authType: lambda.FunctionUrlAuthType.NONE,
   cors: {
@@ -220,6 +291,12 @@ const supportFunctionUrl = supportLambda.addFunctionUrl({
     allowedMethods: [lambda.HttpMethod.POST],
     allowedHeaders: ['*'],
   },
+})
+
+stripeIdentityLambda.addPermission('StripePublicInvoke', {
+  principal: new iam.AnyPrincipal(),
+  action: 'lambda:InvokeFunctionUrl',
+  functionUrlAuthType: lambda.FunctionUrlAuthType.NONE,
 })
 
 supportLambda.addPermission('SupportPublicInvoke', {
@@ -231,5 +308,6 @@ supportLambda.addPermission('SupportPublicInvoke', {
 backend.addOutput({
   custom: {
     supportFunctionUrl: supportFunctionUrl.url,
+    stripeIdentityFunctionUrl: stripeIdentityFunctionUrl.url,
   },
 })

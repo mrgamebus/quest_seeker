@@ -93,7 +93,7 @@ export default function Leader() {
               </Button>
 
               <Button variant="yellow" onClick={() => navigate('/user/help')}>
-                About QS
+                Help Guide
               </Button>
               <SignOutButton />
             </Toolbar>
@@ -243,13 +243,13 @@ export default function Leader() {
             </div>
 
             <div className="flex items-start gap-3 p-3 bg-yellow-50 rounded-lg border border-yellow-200">
-              <span className="text-2xl font-bold text-yellow-600">1</span>
+              <span className="text-2xl font-bold text-yellow-600">10</span>
               <div>
                 <h3 className="font-semibold text-foreground">
                   Complete a Quest Task
                 </h3>
                 <p className="text-sm text-muted-foreground">
-                  Earn 1 point for each task you complete
+                  Earn 10 point for each task you complete
                 </p>
               </div>
             </div>
@@ -264,7 +264,7 @@ export default function Leader() {
                 </p>
               </div>
             </div>
-             <div className="flex items-start gap-3 p-3 bg-yellow-50 rounded-lg border border-yellow-200">
+            <div className="flex items-start gap-3 p-3 bg-yellow-50 rounded-lg border border-yellow-200">
               <span className="text-2xl font-bold text-yellow-600">100</span>
               <div>
                 <h3 className="font-semibold text-foreground">
