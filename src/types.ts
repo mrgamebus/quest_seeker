@@ -35,6 +35,13 @@ export type Quest = {
 // ---------------- Profiles ----------------
 export type Role = 'seeker' | 'creator' | 'pending' | 'Admin'
 
+export type Rank =
+  | 'wanderer'
+  | 'scout'
+  | 'tracker'
+  | 'trailblazer'
+  | 'navigator'
+
 export type Profile = {
   id: string
   full_name: string
@@ -56,11 +63,12 @@ export type Profile = {
   image_thumbnail: string
   role: Role
   points: number
+  seeker_rank: Rank
 }
 
 export interface MinimalQuestParticipant {
   profileId: string
-  tasks: string | Task[] | any[] | null
+  tasks: Task[] | undefined
   status?: string | null
 }
 

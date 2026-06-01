@@ -36,6 +36,7 @@ export const onCreateProfile = /* GraphQL */ `subscription OnCreateProfile(
     secondary_contact_name
     secondary_contact_phone
     secondary_contact_position
+    seeker_rank
     updatedAt
     __typename
   }
@@ -122,6 +123,7 @@ export const onDeleteProfile = /* GraphQL */ `subscription OnDeleteProfile(
     secondary_contact_name
     secondary_contact_phone
     secondary_contact_position
+    seeker_rank
     updatedAt
     __typename
   }
@@ -208,6 +210,7 @@ export const onUpdateProfile = /* GraphQL */ `subscription OnUpdateProfile(
     secondary_contact_name
     secondary_contact_phone
     secondary_contact_position
+    seeker_rank
     updatedAt
     __typename
   }

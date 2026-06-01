@@ -6,8 +6,8 @@ import ParticipantCard from './CompletedParticipantList/ParticipantCard'
 
 interface MinimalQuestParticipant {
   profileId: string
-  tasks?: any
-  status?: any
+  tasks?: Task[]
+  // status?: any
   joinedAt?: string | null
   updatedAt?: string | null
 }
@@ -32,7 +32,9 @@ export default function CompletedParticipantsList({
     {},
   )
 
-  const getCompletionDuration = (participantQuest?: MinimalQuestParticipant) => {
+  const getCompletionDuration = (
+    participantQuest?: MinimalQuestParticipant,
+  ) => {
     if (!participantQuest) return Number.POSITIVE_INFINITY
     const joinedAt = participantQuest.joinedAt
     const updatedAt = participantQuest.updatedAt
@@ -72,11 +74,6 @@ export default function CompletedParticipantsList({
         (uq) => uq.profileId === participantId,
       )
 
-      // Add these debug logs
-      console.log('questParticipants:', questParticipants)
-      console.log('participantQuest found:', participantQuest)
-      console.log('raw tasks:', participantQuest?.tasks)
-
       if (!participantQuest) {
         console.error('No quest entry found for participant:', participantId)
         setPdfLoadingById((prev) => ({ ...prev, [participantId]: false }))
@@ -96,14 +93,12 @@ export default function CompletedParticipantsList({
             }
           })()
 
-      console.log('parsed participantTasks:', participantTasks)
       // Merge quest tasks with participant answers
       const tasksWithAnswers: Task[] = tasks.map((task) => {
         const existingAnswer = participantTasks.find(
           (t: { id: string }) => t.id === task.id,
         )
-        // Add this log
-        console.log(`task ${task.id} - existingAnswer:`, existingAnswer)
+
         return {
           ...task,
           caption: existingAnswer?.caption || '',
@@ -111,7 +106,7 @@ export default function CompletedParticipantsList({
           location: existingAnswer?.location || '',
         }
       })
-      console.log('tasksWithAnswers:', tasksWithAnswers)
+
       // Resolve any image URLs from S3
       const resolvedTasks = await Promise.all(
         tasksWithAnswers.map(async (task) => {

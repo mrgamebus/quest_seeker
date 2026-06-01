@@ -23,6 +23,7 @@ import {
 } from '@/components/ui/dialog'
 import AdminPage from '@/components/AdminPage'
 import { useToast } from '@/hooks/use-toast'
+import outputs from '../../../amplify_outputs.json'
 
 export default function AccountPage() {
   const { data: currentProfile, isLoading, refetch } = useCurrentUserProfile()
@@ -89,13 +90,26 @@ export default function AccountPage() {
     setLoading(true)
     try {
       setModalOpen(false)
-      navigate('/user/account', { state: { defaultTab: 'status' } })
+
+      const res = await fetch(outputs.custom.stripeIdentityFunctionUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          profileId: currentProfile.id,
+          email: currentProfile.email,
+        }),
+      })
+
+      if (!res.ok) throw new Error(`Lambda error: ${res.status}`)
+
+      const { url } = await res.json()
+      window.location.href = url // redirect to Stripe's hosted verification page
     } catch (err) {
-      console.error('Failed to become creator:', err)
+      console.error(err)
       toast({
         variant: 'destructive',
         title: 'Something went wrong',
-        description: 'Failed to update your account. Please try again.',
+        description: 'Failed to start verification. Please try again.',
       })
     } finally {
       setLoading(false)

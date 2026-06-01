@@ -200,7 +200,7 @@ export default function TaskInformationWindow({
 
       const wasCompletedBefore = !!previousTask?.completed
       const shouldAwardPoints = !wasCompletedBefore && taskIsCompleted
-      const pointsDelta = shouldAwardPoints ? 1 : 0
+      const pointsDelta = shouldAwardPoints ? 10 : 0
 
       const updatedTasksForUser = editableTasks.map((t) =>
         t.id === selectedTask.id
@@ -220,7 +220,7 @@ export default function TaskInformationWindow({
 
       const wasQuestCompletedBefore = editableTasks.every((t) => t.completed)
       const questJustCompleted = !wasQuestCompletedBefore && allCompleted
-      const questCompletionBonus = questJustCompleted ? 20 : 0
+      const questCompletionBonus = questJustCompleted ? 50 : 0
 
       const totalPointsDelta = pointsDelta + questCompletionBonus
 
