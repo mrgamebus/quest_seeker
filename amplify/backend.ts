@@ -19,6 +19,7 @@ import { rejectCreator } from './functions/rejectCreator/resource'
 import { questCreatorMessage } from './functions/questCreatorMessage/resource'
 import { stripeIdentity } from './functions/stripeIdentity/resource'
 import { updateSeekerRank } from './functions/updateSeekerRank/resource'
+import { nfcAward } from './functions/nfcAward/resource'
 import { StartingPosition } from 'aws-cdk-lib/aws-lambda'
 
 const backend = defineBackend({
@@ -30,6 +31,7 @@ const backend = defineBackend({
   data,
   expiredQuests,
   joinQuest,
+  nfcAward,
   mutateQuest,
   postRegistration,
   questCreatorMessage,
@@ -150,6 +152,27 @@ profileTable.grantReadWriteData(updateSeekerRankLambda)
 updateSeekerRankLambda.addEnvironment(
   'PROFILE_TABLE_NAME',
   profileTable.tableName,
+)
+
+const nfcAwardLambda = backend.nfcAward.resources.lambda as lambda.Function
+
+profileTable.grantReadWriteData(nfcAwardLambda)
+nfcAwardLambda.addEnvironment('PROFILE_TABLE_NAME', profileTable.tableName)
+
+// Provide GraphQL endpoint for functions
+nfcAwardLambda.addEnvironment('AMPLIFY_DATA_ENDPOINT', graphqlUrl)
+
+// Grant access to data API tables for nfcAward
+backend.data.resources.tables['TagLocation'].grantReadWriteData(nfcAwardLambda)
+nfcAwardLambda.addEnvironment(
+  'TAG_LOCATION_TABLE_NAME',
+  backend.data.resources.tables['TagLocation'].tableName,
+)
+
+backend.data.resources.tables['NfcScan'].grantReadWriteData(nfcAwardLambda)
+nfcAwardLambda.addEnvironment(
+  'NFC_SCANS_TABLE_NAME',
+  backend.data.resources.tables['NfcScan'].tableName,
 )
 
 updateSeekerRankLambda.addEventSourceMapping('ProfileStreamTrigger', {

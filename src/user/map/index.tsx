@@ -5,7 +5,8 @@ import { Toolbar } from '@/components/Toolbar'
 import SignOutButton from '@/components/SignOutButton'
 import { Home } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useLocation } from 'react-router-dom'
+import { useEffect, useState } from 'react'
 import { useCurrentUserProfile } from '@/hooks/userProfiles'
 import RemoteImage from '@/components/RemoteImage'
 import placeHold from '@/assets/images/placeholder_view_vector.svg'
@@ -15,6 +16,32 @@ import placeHold from '@/assets/images/placeholder_view_vector.svg'
 export default function SeekerMap() {
   const navigate = useNavigate()
   const { currentProfile } = useCurrentUserProfile()
+  const location = useLocation()
+  const [coordinates, setCoordinates] = useState<null | { lat: number; lng: number }>(null)
+  const [markerLabel, setMarkerLabel] = useState<string | undefined>(undefined)
+
+  useEffect(() => {
+    const params = new URLSearchParams(location.search)
+    const lat = params.get('lat')
+    const lng = params.get('lng')
+    const address = params.get('address')
+
+    if (lat && lng) {
+      const latN = Number(lat)
+      const lngN = Number(lng)
+      if (!Number.isNaN(latN) && !Number.isNaN(lngN)) {
+        setCoordinates({ lat: latN, lng: lngN })
+        setMarkerLabel(undefined)
+        return
+      }
+    }
+
+    if (address) {
+      setMarkerLabel(address)
+      setCoordinates(null)
+      return
+    }
+  }, [location.search])
 
   return (
     <div
@@ -62,7 +89,11 @@ export default function SeekerMap() {
               <SignOutButton />
             </Toolbar>
           </div>
-          <RegionMap className="mt-6 w-full max-w-xl mx-auto" />
+          <RegionMap
+            className="mt-6 w-full max-w-xl mx-auto"
+            coordinates={coordinates ?? undefined}
+            markerLabel={markerLabel}
+          />
 
           {currentProfile && (
             <div className="px-4">
