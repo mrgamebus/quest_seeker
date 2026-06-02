@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom'
 import placeHold from '@/assets/images/placeholder_view_vector.svg'
 import RemoteImage from './RemoteImage'
 import { Schema } from 'amplify/data/resource'
-// import { useQuestParticipants } from '@/hooks/userQuests'
+import { useProfile } from '@/hooks/userProfiles'
 
 type UserQuest = Schema['UserQuest']['type'] & { tasks: Task[] }
 
@@ -25,7 +25,7 @@ const QuestListItem = React.memo(function QuestListItem({
   const startDate = new Date(quest.quest_start_at ?? '')
   const endDate = new Date(quest.quest_end_at ?? '')
   const fundraise = quest.quest_entry ? quest.quest_entry * participantCount : 0
-
+  const questCreatorProfile = useProfile(quest?.creator_id || '')
   const hasJoined = userQuests?.some((uq) => uq.questId === quest.id) ?? false
 
   const currentQuest = endDate < now
@@ -33,9 +33,8 @@ const QuestListItem = React.memo(function QuestListItem({
 
   const handleClick = () => navigate(`/user/quest/${quest.id}`)
 
-  const threeDays = 3 * 24 * 60 * 60 * 1000
   const isUpcoming =
-    startDate.getTime() - now.getTime() <= threeDays &&
+    startDate.getTime() - now.getTime() &&
     startDate.getTime() - now.getTime() > 0
 
   const isLive = now >= startDate && now <= endDate
@@ -79,7 +78,9 @@ const QuestListItem = React.memo(function QuestListItem({
         <p className="text-xs text-gray-500">
           Ends: {quest.quest_end_at ? quest.quest_end_at.split('T')[0] : 'N/A'}
         </p>
-
+        <p className="text-xs text-gray-500">
+          Creator: {questCreatorProfile.data?.organization_name}
+        </p>
         {fundraise > 0 && (
           <div className="mt-2 pt-2 border-t border-gray-200">
             <p className="text-sm font-semibold text-green-600">
