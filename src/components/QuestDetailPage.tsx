@@ -719,6 +719,9 @@ export default function QuestDetailPage() {
               prizes={prizes}
               participantCount={participantIds.length}
               completedParticipantCount={completedParticipants.length}
+              creatorBusinessType={
+                questCreatorProfile.data?.business_type ?? undefined
+              }
               joining={joining}
               deleting={deleting}
               onJoin={handleJoinQuest}

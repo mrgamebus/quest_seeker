@@ -2,6 +2,8 @@ interface JoinQuestButtonProps {
   hasJoined: boolean
   joining: boolean
   entryFee?: number | null
+  isParticipationFull: boolean
+  participantLimit: number | null
   onJoin: () => void
 }
 
@@ -9,8 +11,18 @@ export default function JoinQuestButton({
   hasJoined,
   joining,
   entryFee = 0,
+  isParticipationFull,
+  participantLimit,
   onJoin,
 }: JoinQuestButtonProps) {
+  if (isParticipationFull) {
+    return (
+      <p className="text-sm text-red-500">
+        Quest full ({participantLimit?.toLocaleString()} participant limit
+        reached)
+      </p>
+    )
+  }
   if (hasJoined) {
     return (
       <div className="flex items-center gap-2 px-4 py-2 bg-green-50 border border-green-300 rounded-lg">
@@ -42,12 +54,6 @@ export default function JoinQuestButton({
           <>{isFreeQuest ? '🎉 Join Free Quest!' : `💳 Join for $${fee}`}</>
         )}
       </button>
-
-      {/* {!isFreeQuest && (
-        <p className="text-xs text-gray-500 text-center">
-          Entry fee supports the cause
-        </p>
-      )} */}
     </div>
   )
 }

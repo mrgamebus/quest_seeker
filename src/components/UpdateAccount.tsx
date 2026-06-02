@@ -176,11 +176,17 @@ export default function UpdateAccount({
           )}
 
           {/* 2. Absolute overlay small image in top-left */}
-          <img
-            src={rank}
-            alt="Overlay"
-            className="absolute top-0 left-0 w-8 h-8 rounded-full border-2 border-white object-cover shadow-sm"
-          />
+          <div className="absolute top-0 left-0 group">
+            <img
+              src={rank}
+              alt={profile.seeker_rank}
+              className="w-8 h-8 rounded-full border-2 border-white object-cover shadow-sm transition-transform duration-200 group-hover:scale-125"
+            />
+            {/* Rank label on hover */}
+            <span className="absolute left-1/2 -translate-x-1/2 top-9 hidden group-hover:block bg-black/75 text-white text-xs px-2 py-0.5 rounded-full whitespace-nowrap capitalize z-10">
+              {profile.seeker_rank}
+            </span>
+          </div>
         </div>
 
         <input
@@ -259,21 +265,6 @@ export default function UpdateAccount({
                   <SelectItem value="National Quests">
                     National Quests
                   </SelectItem>
-                  {/* New stuff above */}
-                  {/* <SelectItem value="Registered Company">
-                    Registered Company
-                  </SelectItem>
-                  <SelectItem value="Small Business">Small Business</SelectItem>
-                  <SelectItem value="Charitable Trust">
-                    Charitable Trust
-                  </SelectItem>
-                  <SelectItem value="Not for Profit">Not for Profit</SelectItem>
-                  <SelectItem value="Whanau Fund Raising">
-                    Whanau Fund Raising
-                  </SelectItem>
-                  <SelectItem value="Registered Charity">
-                    Registered Charity
-                  </SelectItem> */}
                 </SelectContent>
               </Select>
             </div>

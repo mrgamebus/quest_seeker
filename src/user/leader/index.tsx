@@ -25,6 +25,7 @@ import { useEffect, useState } from 'react'
 import RemoteImage from '@/components/RemoteImage'
 import placeHold from '@/assets/images/placeholder_view_vector.svg'
 import { Profile } from '@/types'
+import SeekerRank from '@/components/SeekerRank'
 
 export default function Leader() {
   const { currentProfile } = useCurrentUserProfile()
@@ -193,11 +194,14 @@ export default function Leader() {
 
           {selectedProfile && (
             <div className="flex flex-col items-center gap-4 py-4">
-              <RemoteImage
-                path={selectedProfile.image_thumbnail || placeHold}
-                fallback={placeHold}
-                className="w-32 h-32 rounded-full object-cover border-4 border-yellow-500"
-              />
+              <div className="relative w-32 h-32">
+                <RemoteImage
+                  path={selectedProfile.image_thumbnail || placeHold}
+                  fallback={placeHold}
+                  className="w-32 h-32 rounded-full object-cover border-4 border-yellow-500"
+                />
+                <SeekerRank profile={selectedProfile} />
+              </div>
               <div className="text-center">
                 <h2 className="text-2xl font-bold">
                   {selectedProfile.full_name}
