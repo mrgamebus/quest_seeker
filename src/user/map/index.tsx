@@ -10,6 +10,43 @@ import { useEffect, useState } from 'react'
 import { useCurrentUserProfile } from '@/hooks/userProfiles'
 import RemoteImage from '@/components/RemoteImage'
 import placeHold from '@/assets/images/placeholder_view_vector.svg'
+import { useQuery } from '@tanstack/react-query'
+import { generateClient } from 'aws-amplify/api'
+import type { GraphQLResult } from 'aws-amplify/api'
+
+const client = generateClient()
+
+const listTagLocations = /* GraphQL */ `query ListTagLocations {
+  listTagLocations {
+    items {
+      id
+      address
+      lat
+      lng
+      createdAt
+      updatedAt
+      __typename
+    }
+    nextToken
+    __typename
+  }
+}`
+
+type TagLocation = {
+  id: string
+  address: string
+  lat?: number | null
+  lng?: number | null
+  createdAt?: string
+  updatedAt?: string
+}
+
+type ListTagLocationsResponse = {
+  listTagLocations?: {
+    items: TagLocation[]
+    nextToken?: string
+  }
+}
 
 
 
@@ -19,6 +56,18 @@ export default function SeekerMap() {
   const location = useLocation()
   const [coordinates, setCoordinates] = useState<null | { lat: number; lng: number }>(null)
   const [markerLabel, setMarkerLabel] = useState<string | undefined>(undefined)
+  const [highlightedTagId, setHighlightedTagId] = useState<string | undefined>(undefined)
+
+  // Fetch all tag locations
+  const { data: tagLocationsData } = useQuery({
+    queryKey: ['tagLocations'],
+    queryFn: async () => {
+      const result = (await client.graphql({
+        query: listTagLocations,
+      })) as GraphQLResult<ListTagLocationsResponse>
+      return result.data?.listTagLocations?.items || []
+    },
+  })
 
   useEffect(() => {
     const params = new URLSearchParams(location.search)
@@ -32,6 +81,13 @@ export default function SeekerMap() {
       if (!Number.isNaN(latN) && !Number.isNaN(lngN)) {
         setCoordinates({ lat: latN, lng: lngN })
         setMarkerLabel(undefined)
+        // Find and highlight the tag with these coordinates
+        if (tagLocationsData) {
+          const matched = tagLocationsData.find(
+            (tag: any) => Math.abs(tag.lat - latN) < 0.001 && Math.abs(tag.lng - lngN) < 0.001
+          )
+          setHighlightedTagId(matched?.id)
+        }
         return
       }
     }
@@ -39,9 +95,16 @@ export default function SeekerMap() {
     if (address) {
       setMarkerLabel(address)
       setCoordinates(null)
+      // Find and highlight the tag with this address
+      if (tagLocationsData) {
+        const matched = tagLocationsData.find(
+          (tag: any) => tag.address?.toLowerCase() === address.toLowerCase()
+        )
+        setHighlightedTagId(matched?.id)
+      }
       return
     }
-  }, [location.search])
+  }, [location.search, tagLocationsData])
 
   return (
     <div
@@ -93,6 +156,8 @@ export default function SeekerMap() {
             className="mt-6 w-full max-w-xl mx-auto"
             coordinates={coordinates ?? undefined}
             markerLabel={markerLabel}
+            tagLocations={tagLocationsData}
+            highlightedTagId={highlightedTagId}
           />
 
           {currentProfile && (
