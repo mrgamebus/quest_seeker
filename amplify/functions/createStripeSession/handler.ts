@@ -11,12 +11,11 @@ export const handler: Schema['createStripeSession']['functionHandler'] = async (
   const { questId, profileId, returnUrl } = event.arguments
 
   const priceMap: Record<string, number> = {
-    'Registered Company': 95000,
-    'Small Business': 29900,
-    'Charitable Trust': 5000,
     'Not for Profit': 5000,
-    'Whanau Fund Raising': 5000,
-    'Registered Charity': 5000,
+    'Charitable Trust': 5000,
+    'Individual Quest': 14900,
+    'Local Quests': 29900,
+    'National Quests': 95000,
   }
 
   const query = /* GraphQL */ `

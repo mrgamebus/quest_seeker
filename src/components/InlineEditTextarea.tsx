@@ -6,6 +6,7 @@ interface InlineEditTextareaProps {
   value: string
   onSave: (newValue: string) => void
   required?: boolean
+  disabled?: boolean
 }
 
 export default function InlineEditTextarea({
@@ -13,6 +14,7 @@ export default function InlineEditTextarea({
   value,
   onSave,
   required = false,
+  disabled = false,
 }: InlineEditTextareaProps) {
   const [editing, setEditing] = useState(false)
   const [inputValue, setInputValue] = useState(value)
@@ -32,33 +34,42 @@ export default function InlineEditTextarea({
     setEditing(false)
   }
 
+  const handleCancel = () => {
+    setInputValue(value)
+    setError('')
+    setEditing(false)
+  }
+
   return (
     <div className="flex flex-col gap-1">
       <div className="flex items-center gap-2">
         <strong>{label}:</strong>
-        {editing ? (
-          <>
-            <textarea
-              className={`border p-1 rounded flex-1 ${error ? 'border-red-500' : ''}`}
-              rows={4}
-              value={inputValue}
-              onChange={(e) => setInputValue(e.target.value)}
-              onBlur={handleSave}
-            />
-            <Button size="small" onClick={handleSave}>
-              Save
-            </Button>
-          </>
-        ) : (
+        <div className="flex flex-col flex-1 gap-1">
           <textarea
-            className={`border p-1 rounded flex-1 ${error ? 'border-red-500' : ''}`}
+            className={`border p-1 rounded w-full ${error ? 'border-red-500' : ''} ${
+              disabled ? 'bg-gray-100 text-gray-500 cursor-not-allowed' : ''
+            }`}
             rows={4}
             value={inputValue}
-            onChange={(e) => setInputValue(e.target.value)}
-            onBlur={handleSave}
+            disabled={disabled}
+            onChange={(e) => {
+              setInputValue(e.target.value)
+              setEditing(true)
+            }}
           />
-        )}
+          {editing && (
+            <div className="flex gap-1 justify-end">
+              <Button size="small" onClick={handleSave}>
+                Save
+              </Button>
+              <Button size="small" variation="warning" onClick={handleCancel}>
+                Cancel
+              </Button>
+            </div>
+          )}
+        </div>
       </div>
+      {error && <span className="text-red-500 text-sm">{error}</span>}
     </div>
   )
 }
