@@ -217,7 +217,10 @@ export default function Help() {
             waypoints that you can tap any time to earn points throughout the
             year.
           </p>
-
+          <p className="text-[#555555] text-sm mb-4">
+            *Please Note: Keeping in the spirit of the game, each QuestMarks is
+            limited to crediting your account 100 points per week.
+          </p>
           <h3 className="font-bold text-[#111111] text-base mb-3">
             🏅 Points, Badges & the Leaderboard
           </h3>
@@ -448,7 +451,7 @@ export default function Help() {
               {
                 num: '1',
                 title: 'Register as a Creator',
-                desc: 'From the app menu, select My Account. Under the QuestSeeker section, tap Become a Quest Creator. Complete your host profile: organisation or trading name, type, registration number (if applicable), description, primary contact details and account details for fundraising payouts.',
+                desc: 'From the app menu, select My Account. Under the QuestSeeker section, tap Become a Creator. Complete your host profile and provide all required fields for verification purposes. We review all Quest Creators once you have completed required fields in your profile and completed the verification process through Stripe.',
               },
               {
                 num: '2',
@@ -536,7 +539,7 @@ export default function Help() {
                     Plan
                   </th>
                   <th className="border border-gray-300 px-3 py-2 text-left font-bold">
-                    Fee
+                    Flat Fee
                   </th>
                   <th className="border border-gray-300 px-3 py-2 text-left font-bold">
                     Participants
@@ -547,15 +550,12 @@ export default function Help() {
                   <th className="border border-gray-300 px-3 py-2 text-left font-bold">
                     Entry Fee
                   </th>
-                  <th className="border border-gray-300 px-3 py-2 text-left font-bold">
-                    Free Entry
-                  </th>
                 </tr>
               </thead>
               <tbody>
                 <tr>
                   <td className="border border-gray-300 px-3 py-2 font-semibold">
-                    Non-Profit Quest
+                    Non-Profit Quest (1 x QM)
                   </td>
                   <td className="border border-gray-300 px-3 py-2">$50</td>
                   <td className="border border-gray-300 px-3 py-2">
@@ -565,54 +565,52 @@ export default function Help() {
                     15% on entry fees
                   </td>
                   <td>Required</td>
-                  <td>No</td>
                 </tr>
                 <tr className="bg-gray-50">
                   <td className="border border-gray-300 px-3 py-2 font-semibold">
-                    Individual Quest
+                    Individual Quest (1 x QM)
                   </td>
                   <td className="border border-gray-300 px-3 py-2">$149</td>
                   <td className="border border-gray-300 px-3 py-2">
                     Up to 500
                   </td>
-                  <td className="border border-gray-300 px-3 py-2">None</td>
-                  <td>Optional</td>
-                  <td>Yes</td>
+                  <td className="border border-gray-300 px-3 py-2">
+                    15% on entry fees
+                  </td>
+                  <td>Required</td>
                 </tr>
                 <tr>
                   <td className="border border-gray-300 px-3 py-2 font-semibold">
-                    Local Business Quest
+                    Local Quest (2 x QM)
                   </td>
                   <td className="border border-gray-300 px-3 py-2">$299</td>
                   <td className="border border-gray-300 px-3 py-2">
                     Up to 500
                   </td>
-                  <td className="border border-gray-300 px-3 py-2">None</td>
+                  <td className="border border-gray-300 px-3 py-2">
+                    0% for free entry quests 15% on entry fees
+                  </td>
                   <td>Optional</td>
-                  <td>Yes</td>
                 </tr>
                 <tr>
                   <td className="border border-gray-300 px-3 py-2 font-semibold">
-                    National Business Quest
+                    National Quest (1-10 x QM)
                   </td>
                   <td className="border border-gray-300 px-3 py-2">$950</td>
                   <td className="border border-gray-300 px-3 py-2">
                     Up to 2,000
                   </td>
                   <td className="border border-gray-300 px-3 py-2">None</td>
-                  <td>Optional</td>
-                  <td>Yes</td>
+                  <td>0% for free entry quests 15% on entry fees</td>
                 </tr>
               </tbody>
             </table>
             <p className="text-[#555555] text-sm mb-4">
-              Note: Non-Profit Quests must charge an entry fee — free-entry
-              Quests are not available for this plan type. A 15% service fee
-              applies to all entry fees collected by Non-Profit and Individual
-              Quest hosts. Local and National Business Quest hosts do not pay
-              commission on entry fees collected.
+              Note: Non-Profit & Individual Quests must charge an entry fee —
+              free-entry Quests are not available for this Quest Creator type. A
+              15% service fee applies to all entry fees. Local and National
+              hosts do not pay commission for Quests with “Free Entry”.
             </p>
-
             <h3 className="font-bold text-[#111111] text-lg mb-3">
               📌 QuestMarks
             </h3>
@@ -625,15 +623,24 @@ export default function Help() {
               QuestMarks for Quest Creators
             </h4>
             <p className="text-[#555555] text-sm mb-4">
-              Quest Creators receive QuestMarks as part of their plan. The
-              number included varies by plan type, and additional QuestMarks can
-              be purchased at $50.00 each. Each QuestMark represents a single
-              location pin on the Seeker map — multiple locations require
-              individual QuestMarks, each delivering its own analytics.
+              Quest Creators are entitled to receive QuestMarks as part of their
+              plan. The number included varies by plan type, and additional
+              QuestMarks can be purchased at $50.00 each. Each QuestMark
+              represents a single location pin on the Seeker map — multiple
+              locations require individual QuestMarks, each delivering its own
+              analytics.
             </p>
+
+            <p className="text-[#555555] text-sm mb-4">
+              To receive your QuestMarks, your profile contact details must be
+              up to date so arrangements can be made. All Quest Stop locations
+              are subject to approval by our administration team
+            </p>
+
             <h4 className="font-bold text-[#111111] text-lg mb-3">
               Quest Stops — QuestMarks Without a Creator Account
             </h4>
+
             <p className="text-[#555555] text-sm mb-4">
               Any business or location can participate in the QuestSeeker
               community by registering as a Quest Stop — without needing to
@@ -643,10 +650,13 @@ export default function Help() {
               participation and make more of your community discoverable to
               seekers.
             </p>
+
             <p className="text-[#555555] text-sm mb-4">
               Quest Stop analytics — including tap counts and peak visit times —
-              are accessed through My Account for verified Quest Stop holders.
+              are reported monthly and at a later stage will be accessed through
+              the Quest Stop holders Dashboard.
             </p>
+
             <h4 className="font-bold text-[#111111] text-lg mb-3">
               QuestMarks as a Sponsor Benefit (Non-Profits)
             </h4>
@@ -712,9 +722,8 @@ export default function Help() {
             <li>Primary contact name, position, and phone number</li>
           </ul>
           <p className="text-sm text-gray-700 mb-3">
-            Once your profile is complete, you'll choose the plan that fits your
-            organisation type and expected Quest scale. Your flat fee is charged
-            via Stripe when you publish your Quest — not at registration.
+            Your flat fee is charged via Stripe when you publish your Quest —
+            not at registration.
           </p>
           <div className="bg-blue-50 border-l-4 border-blue-400 p-4 mb-6">
             <p className="text-sm">
@@ -818,10 +827,10 @@ export default function Help() {
             collected.
           </p>
           <p className="text-sm text-gray-700 mb-3">
-            Business-hosted Quests (Local and National) can choose to offer free
-            entry or charge a fee if fundraising for a partner cause — for
-            example, a business raising funds for a charity it supports. No
-            commission applies to business Quest entry fees.
+            Local and National hosted Quests can choose to offer free entry or
+            charge a fee if fundraising for a partner cause — for example, a
+            business raising funds for a charity it supports. Commission only
+            applies when entry fees are required.
           </p>
           <div className="bg-blue-50 border-l-4 border-blue-400 p-4 mb-5">
             <p className="text-sm">
