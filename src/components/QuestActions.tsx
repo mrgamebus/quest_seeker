@@ -15,11 +15,20 @@ interface QuestActionsProps {
   prizes: Prize[]
   participantCount: number
   completedParticipantCount?: number
+  creatorBusinessType?: string
   joining?: boolean
   deleting?: boolean
   onJoin: () => Promise<void>
   onDelete: (quest: Quest) => Promise<void>
   onRestart: () => Promise<void>
+}
+
+const PARTICIPANT_LIMITS: Record<string, number | null> = {
+  'Not for Profit': null,
+  'Charitable Trust': null,
+  'Individual Business': 500,
+  'Local Quest': 500,
+  'National Quest': 2000,
 }
 
 export default function QuestActions({
@@ -31,6 +40,7 @@ export default function QuestActions({
   prizes,
   participantCount,
   completedParticipantCount = 0,
+  creatorBusinessType,
   joining = false,
   deleting = false,
   onJoin,
@@ -41,6 +51,12 @@ export default function QuestActions({
 
   const canDelete = participantCount < 1 && !isExpired
   const canRestart = isExpired && completedParticipantCount === 0
+
+  const participantLimit = creatorBusinessType
+    ? (PARTICIPANT_LIMITS[creatorBusinessType] ?? null)
+    : null
+  const isParticipationFull =
+    participantLimit !== null && participantCount >= participantLimit
 
   return (
     <div className="mt-4 flex flex-col gap-3 w-full">
@@ -77,6 +93,8 @@ export default function QuestActions({
               hasJoined={hasJoined}
               joining={joining}
               entryFee={quest.quest_entry}
+              isParticipationFull={isParticipationFull}
+              participantLimit={participantLimit}
               onJoin={onJoin}
             />
           )}
