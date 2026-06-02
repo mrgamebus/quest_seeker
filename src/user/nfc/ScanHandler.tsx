@@ -5,9 +5,11 @@ import { useCurrentUserProfile } from '@/hooks/userProfiles'
 export default function ScanHandler() {
   const navigate = useNavigate()
   const [message, setMessage] = useState('Processing scan...')
-  const { currentProfile } = useCurrentUserProfile()
+  const { currentProfile, currentError, isLoading } = useCurrentUserProfile()
 
   useEffect(() => {
+    if (isLoading) return
+
     const params = new URLSearchParams(window.location.search)
     const address = params.get('address')
     const lat = params.get('lat')
@@ -19,16 +21,24 @@ export default function ScanHandler() {
         return
       }
 
+      const targetParams = new URLSearchParams()
+      if (lat && lng) {
+        targetParams.set('lat', lat)
+        targetParams.set('lng', lng)
+      } else if (address) {
+        targetParams.set('address', address)
+      }
+
+      const profileId = currentProfile?.id
+      if (!profileId) {
+        setMessage('Not signed in — redirecting to the map. Sign in to earn points.')
+        setTimeout(() => {
+          navigate(`/user/map?${targetParams.toString()}`)
+        }, 1100)
+        return
+      }
+
       try {
-        // NOTE: replace `/api/nfcAward` with the actual function URL or API Gateway path
-        const profileId = currentProfile?.id
-
-        if (!profileId) {
-          setMessage('Please sign in to receive points')
-          setTimeout(() => navigate('/user/account'), 1200)
-          return
-        }
-
         const resp = await fetch('/api/nfcAward', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -52,22 +62,13 @@ export default function ScanHandler() {
         setMessage('Network error — continuing to map...')
       }
 
-      // Redirect to the user map with the same params so the map can highlight the location
-      const targetParams = new URLSearchParams()
-      if (lat && lng) {
-        targetParams.set('lat', lat)
-        targetParams.set('lng', lng)
-      } else if (address) {
-        targetParams.set('address', address)
-      }
-
       setTimeout(() => {
         navigate(`/user/map?${targetParams.toString()}`)
       }, 1100)
     }
 
     handleScan()
-  }, [navigate])
+  }, [navigate, currentProfile, currentError, isLoading])
 
   return (
     <div className="min-h-screen flex items-center justify-center">

@@ -71,7 +71,7 @@ export default function App() {
     <Routes>
       {/* Public landing */}
       <Route path="/" element={<IndexPage />} />
-      <Route path="/nfc" element={<ScanHandler />} />
+      <Route path="/nfc/*" element={<ScanHandler />} />
       <Route path="/help" element={<Help />} />
       <Route path="legal" element={<Legal />} />
       <Route path="/support" element={<Support />} />
