@@ -149,7 +149,7 @@ export default function UpdateAccount({
       return { fullPath: '', thumbPath: '' }
     }
   }
-
+  console.log('profile.business_type: ', profile.business_type)
   return (
     <div className="flex flex-col gap-4 w-full max-w-md mx-auto mb-2">
       {forceNameUpdate && (
@@ -196,6 +196,7 @@ export default function UpdateAccount({
         label="Name"
         value={profile.full_name || ''}
         onSave={(newValue) => onUpdate({ full_name: newValue })}
+        disabled={!!profile.full_name}
         required
       />
 
@@ -203,6 +204,7 @@ export default function UpdateAccount({
         label="Phone"
         value={profile.phone || ''}
         onSave={(newValue) => onUpdate({ phone: newValue })}
+        disabled={!!profile.phone}
         required
       />
 
@@ -224,6 +226,7 @@ export default function UpdateAccount({
               label="Organisation Name"
               value={profile.organization_name || ''}
               onSave={(newValue) => onUpdate({ organization_name: newValue })}
+              disabled={!!profile.organization_name}
               required
             />
 
@@ -237,6 +240,7 @@ export default function UpdateAccount({
                 onValueChange={(newValue) =>
                   onUpdate({ business_type: newValue })
                 }
+                disabled={!!profile.business_type}
               >
                 <SelectTrigger className="w-full h-12 text-base">
                   {' '}
@@ -244,7 +248,19 @@ export default function UpdateAccount({
                   <SelectValue placeholder="Select Business Type" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="Registered Company">
+                  <SelectItem value="Not for Profit">Not for Profit</SelectItem>
+                  <SelectItem value="Charitable Trust">
+                    Charitable Trust
+                  </SelectItem>
+                  <SelectItem value="Individual Business">
+                    Individual Business
+                  </SelectItem>
+                  <SelectItem value="Local Quests">Local Quests</SelectItem>
+                  <SelectItem value="National Quests">
+                    National Quests
+                  </SelectItem>
+                  {/* New stuff above */}
+                  {/* <SelectItem value="Registered Company">
                     Registered Company
                   </SelectItem>
                   <SelectItem value="Small Business">Small Business</SelectItem>
@@ -257,7 +273,7 @@ export default function UpdateAccount({
                   </SelectItem>
                   <SelectItem value="Registered Charity">
                     Registered Charity
-                  </SelectItem>
+                  </SelectItem> */}
                 </SelectContent>
               </Select>
             </div>
@@ -303,6 +319,7 @@ export default function UpdateAccount({
               onSave={(newValue) =>
                 onUpdate({ primary_contact_name: newValue })
               }
+              disabled={!!profile.primary_contact_name}
               required
             />
             <InlineEditField
@@ -311,6 +328,7 @@ export default function UpdateAccount({
               onSave={(newValue) =>
                 onUpdate({ primary_contact_position: newValue })
               }
+              disabled={!!profile.primary_contact_position}
               required
             />
             <InlineEditField
@@ -319,6 +337,7 @@ export default function UpdateAccount({
               onSave={(newValue) =>
                 onUpdate({ primary_contact_phone: newValue })
               }
+              disabled={!!profile.primary_contact_phone}
               required
             />
           </section>

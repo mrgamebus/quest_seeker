@@ -6,6 +6,7 @@ interface InlineEditFieldProps {
   value: string
   onSave: (newValue: string) => void
   required?: boolean
+  disabled?: boolean
 }
 
 export default function InlineEditField({
@@ -13,6 +14,7 @@ export default function InlineEditField({
   value,
   onSave,
   required = false,
+  disabled = false,
 }: InlineEditFieldProps) {
   const [editing, setEditing] = useState(false)
   const [inputValue, setInputValue] = useState(value)
@@ -29,6 +31,12 @@ export default function InlineEditField({
     }
     setError('')
     onSave(inputValue)
+    setEditing(false)
+  }
+
+  const handleCancel = () => {
+    setInputValue(value) // 👈 revert to original
+    setError('')
     setEditing(false)
   }
 
@@ -50,11 +58,18 @@ export default function InlineEditField({
             <Button size="small" onClick={handleSave} className="ml-auto">
               Save
             </Button>
+            <Button size="small" variation="warning" onClick={handleCancel}>
+              Cancel
+            </Button>
           </>
         ) : (
           <div
-            className="flex-1 cursor-pointer border p-1 rounded bg-gray-50 break-words"
-            onClick={() => setEditing(true)}
+            className={`flex-1 cursor-pointer border p-1 rounded bg-gray-50 break-words ${
+              disabled
+                ? 'bg-gray-100 text-gray-500 cursor-not-allowed'
+                : 'bg-gray-50 cursor-pointer'
+            }`}
+            onClick={() => !disabled && setEditing(true)}
           >
             {inputValue || (
               <span className="text-gray-400">Click to update</span>
