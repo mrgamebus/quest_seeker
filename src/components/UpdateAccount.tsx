@@ -13,6 +13,7 @@ import {
   SelectValue,
 } from './ui/select'
 import imageCompression from 'browser-image-compression'
+import SeekerRank from './SeekerRank'
 
 type ProfileProps = {
   profile: Profile
@@ -29,27 +30,6 @@ export default function UpdateAccount({
 }: ProfileProps) {
   const forceNameUpdate =
     forceNameUpdateProp ?? profile.full_name === profile.email
-
-  let rank = ''
-  switch (profile.seeker_rank) {
-    case 'wanderer':
-      rank = '/badges/badge_wanderer.png'
-      break
-    case 'scout':
-      rank = '/badges/badge_scout.png'
-      break
-    case 'tracker':
-      rank = '/badges/badge_tracker.png'
-      break
-    case 'trailblazer':
-      rank = '/badges/badge_trailblazer.png'
-      break
-    case 'navigator':
-      rank = '/badges/badge_navigator.png'
-      break
-    default:
-      rank = '/badges/badge_wanderer.png'
-  }
 
   const [previewImage, setPreviewImage] = useState(profile.image || '')
   const [oldImagePath, setOldImagePath] = useState(profile.image || '')
@@ -149,7 +129,7 @@ export default function UpdateAccount({
       return { fullPath: '', thumbPath: '' }
     }
   }
-  console.log('profile.business_type: ', profile.business_type)
+
   return (
     <div className="flex flex-col gap-4 w-full max-w-md mx-auto mb-2">
       {forceNameUpdate && (
@@ -175,12 +155,7 @@ export default function UpdateAccount({
             />
           )}
 
-          {/* 2. Absolute overlay small image in top-left */}
-          <img
-            src={rank}
-            alt="Overlay"
-            className="absolute top-0 left-0 w-8 h-8 rounded-full border-2 border-white object-cover shadow-sm"
-          />
+          <SeekerRank profile={profile} />
         </div>
 
         <input
@@ -259,21 +234,6 @@ export default function UpdateAccount({
                   <SelectItem value="National Quests">
                     National Quests
                   </SelectItem>
-                  {/* New stuff above */}
-                  {/* <SelectItem value="Registered Company">
-                    Registered Company
-                  </SelectItem>
-                  <SelectItem value="Small Business">Small Business</SelectItem>
-                  <SelectItem value="Charitable Trust">
-                    Charitable Trust
-                  </SelectItem>
-                  <SelectItem value="Not for Profit">Not for Profit</SelectItem>
-                  <SelectItem value="Whanau Fund Raising">
-                    Whanau Fund Raising
-                  </SelectItem>
-                  <SelectItem value="Registered Charity">
-                    Registered Charity
-                  </SelectItem> */}
                 </SelectContent>
               </Select>
             </div>

@@ -6,6 +6,7 @@ import {
   DialogOverlay,
   DialogTitle,
   DialogTrigger,
+  Portal,
 } from '@radix-ui/react-dialog'
 import RemoteImage from '../RemoteImage'
 import { Sponsor } from '@/types'
@@ -50,54 +51,55 @@ export default function SponsorsCard({ sponsors }: SponsorsCardProps) {
             ))}
           </div>
         </DialogTrigger>
+        <Portal>
+          <DialogOverlay className="fixed inset-0 bg-black/30 z-40" />
+          <DialogContent className="fixed top-1/2 left-1/2 z-50 max-w-md w-full bg-white rounded-xl p-6 shadow-lg -translate-x-1/2 -translate-y-1/2 overflow-y-auto max-h-[90vh]">
+            <DialogTitle className="text-lg font-bold mb-4">
+              Featured Sponsors
+            </DialogTitle>
 
-        <DialogOverlay className="fixed inset-0 bg-black/30 z-40" />
-        <DialogContent className="fixed top-1/2 left-1/2 z-50 max-h-[90vh] w-full max-w-lg bg-white rounded-xl p-6 shadow-lg -translate-x-1/2 -translate-y-1/2 overflow-y-auto">
-          <DialogTitle className="text-lg font-bold mb-4">
-            Featured Sponsors
-          </DialogTitle>
-
-          <div className="overflow-hidden" ref={emblaRef}>
-            <div className="flex">
-              {sponsors.map((sponsor) => (
-                <div
-                  key={sponsor.id}
-                  className="flex-[0_0_100%] flex flex-col items-center justify-center p-4"
-                >
-                  <RemoteImage
-                    path={sponsor.image || placeHold}
-                    fallback={placeHold}
-                    className="w-24 h-24 object-contain rounded-full mb-2"
-                  />
-                  <p className="font-semibold text-sm text-gray-700">
-                    {sponsor.name}
-                  </p>
-                </div>
-              ))}
+            <div className="overflow-hidden" ref={emblaRef}>
+              <div className="flex">
+                {sponsors.map((sponsor) => (
+                  <div
+                    key={sponsor.id}
+                    className="flex-[0_0_100%] flex flex-col items-center justify-center p-4"
+                  >
+                    <RemoteImage
+                      path={sponsor.image || placeHold}
+                      fallback={placeHold}
+                      className="w-24 h-24 object-contain rounded-full mb-2"
+                    />
+                    <p className="font-semibold text-sm text-gray-700">
+                      {sponsor.name}
+                    </p>
+                  </div>
+                ))}
+              </div>
             </div>
-          </div>
 
-          <div className="flex justify-between items-center mt-4">
-            <button
-              onClick={scrollPrev}
-              className="text-sm text-blue-600 hover:underline"
-            >
-              Previous
-            </button>
-            <button
-              onClick={scrollNext}
-              className="text-sm text-blue-600 hover:underline"
-            >
-              Next
-            </button>
-          </div>
+            <div className="flex justify-between items-center mt-4">
+              <button
+                onClick={scrollPrev}
+                className="text-sm text-blue-600 hover:underline"
+              >
+                Previous
+              </button>
+              <button
+                onClick={scrollNext}
+                className="text-sm text-blue-600 hover:underline"
+              >
+                Next
+              </button>
+            </div>
 
-          <DialogClose asChild>
-            <button className="mt-6 bg-gray-200 hover:bg-gray-300 px-4 py-2 rounded w-full">
-              Close
-            </button>
-          </DialogClose>
-        </DialogContent>
+            <DialogClose asChild>
+              <button className="mt-6 bg-gray-200 hover:bg-gray-300 px-4 py-2 rounded w-full">
+                Close
+              </button>
+            </DialogClose>
+          </DialogContent>
+        </Portal>
       </div>
     </Dialog>
   )

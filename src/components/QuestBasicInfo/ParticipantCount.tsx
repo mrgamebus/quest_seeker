@@ -5,6 +5,7 @@ import {
   DialogOverlay,
   DialogTitle,
   DialogTrigger,
+  Portal,
 } from '@radix-ui/react-dialog'
 import RemoteImage from '../RemoteImage'
 import { Profile } from '@/types'
@@ -44,44 +45,45 @@ export default function ParticipantCount({
             {participantIds.length > 1 ? 's' : ''}
           </button>
         </DialogTrigger>
+        <Portal>
+          <DialogOverlay className="fixed inset-0 bg-black/30 z-40" />
+          <DialogContent className="fixed top-1/2 left-1/2 z-50 max-w-md w-full bg-white rounded-xl p-6 shadow-lg -translate-x-1/2 -translate-y-1/2 overflow-y-auto max-h-[90vh]">
+            <DialogTitle className="text-lg font-bold mb-4">
+              Participants
+            </DialogTitle>
 
-        <DialogOverlay className="fixed inset-0 bg-black/30 z-40" />
-        <DialogContent className="fixed top-1/2 left-1/2 z-50 max-h-[70vh] w-full max-w-md bg-white rounded-xl p-6 shadow-lg -translate-x-1/2 -translate-y-1/2 overflow-y-auto">
-          <DialogTitle className="text-lg font-bold mb-4">
-            Participants
-          </DialogTitle>
+            <div className="flex flex-col gap-3">
+              {participantProfiles.length > 0 ? (
+                participantProfiles.map((profile) => (
+                  <div key={profile.id} className="flex items-center gap-3">
+                    <RemoteImage
+                      path={profile.image_thumbnail || placeHold}
+                      fallback={placeHold}
+                      className="w-12 h-12 rounded-full object-cover shrink-0"
+                    />
 
-          <div className="flex flex-col gap-3">
-            {participantProfiles.length > 0 ? (
-              participantProfiles.map((profile) => (
-                <div key={profile.id} className="flex items-center gap-3">
-                  <RemoteImage
-                    path={profile.image_thumbnail || placeHold}
-                    fallback={placeHold}
-                    className="w-12 h-12 rounded-full object-cover shrink-0"
-                  />
-
-                  <div className="flex flex-col flex-1 min-w-0">
-                    <span className="text-sm font-medium truncate">
-                      <strong>{profile.full_name || 'Unknown'}</strong>
-                    </span>
-                    <span className="text-xs text-gray-600 truncate">
-                      {profile.about_me || ''}
-                    </span>
+                    <div className="flex flex-col flex-1 min-w-0">
+                      <span className="text-sm font-medium truncate">
+                        <strong>{profile.full_name || 'Unknown'}</strong>
+                      </span>
+                      <span className="text-xs text-gray-600 truncate">
+                        {profile.about_me || ''}
+                      </span>
+                    </div>
                   </div>
-                </div>
-              ))
-            ) : (
-              <p className="text-gray-500 text-center py-4">Loading...</p>
-            )}
-          </div>
+                ))
+              ) : (
+                <p className="text-gray-500 text-center py-4">Loading...</p>
+              )}
+            </div>
 
-          <DialogClose asChild>
-            <button className="mt-6 w-full bg-gray-200 hover:bg-gray-300 px-4 py-2 rounded transition-colors">
-              Close
-            </button>
-          </DialogClose>
-        </DialogContent>
+            <DialogClose asChild>
+              <button className="mt-6 w-full bg-gray-200 hover:bg-gray-300 px-4 py-2 rounded transition-colors">
+                Close
+              </button>
+            </DialogClose>
+          </DialogContent>
+        </Portal>
       </Dialog>
     </div>
   )
