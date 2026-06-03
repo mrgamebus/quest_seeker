@@ -309,8 +309,12 @@ export default function Help() {
               </thead>
               <tbody>
                 <tr>
-                  <td className="border border-gray-300 px-3 py-2 font-semibold">
-                    🧭 Wanderer
+                  <td className="border border-gray-300 px-3 py-2 font-semibold flex items-center gap-2">
+                    <img
+                      src="/badges/badge_wanderer.png"
+                      className="w-5 h-5 rounded-full border-2 border-white object-cover shadow-sm transition-transform duration-200 group-hover:scale-125"
+                    />
+                    Wanderer
                   </td>
                   <td className="border border-gray-300 px-3 py-2">
                     First 20% of new users
@@ -320,8 +324,12 @@ export default function Help() {
                   </td>
                 </tr>
                 <tr>
-                  <td className="border border-gray-300 px-3 py-2 font-semibold">
-                    🔭 Scout
+                  <td className="border border-gray-300 px-3 py-2 font-semibold flex items-center gap-2">
+                    <img
+                      src="/badges/badge_scout.png"
+                      className="w-5 h-5 rounded-full border-2 border-white object-cover shadow-sm transition-transform duration-200 group-hover:scale-125"
+                    />
+                    Scout
                   </td>
                   <td className="border border-gray-300 px-3 py-2">Next 20%</td>
                   <td className="border border-gray-300 px-3 py-2">
@@ -329,8 +337,12 @@ export default function Help() {
                   </td>
                 </tr>
                 <tr>
-                  <td className="border border-gray-300 px-3 py-2 font-semibold">
-                    👣 Tracker
+                  <td className="border border-gray-300 px-3 py-2 font-semibold flex items-center gap-2">
+                    <img
+                      src="/badges/badge_tracker.png"
+                      className="w-5 h-5 rounded-full border-2 border-white object-cover shadow-sm transition-transform duration-200 group-hover:scale-125"
+                    />
+                    Tracker
                   </td>
                   <td className="border border-gray-300 px-3 py-2">Next 20%</td>
                   <td className="border border-gray-300 px-3 py-2">
@@ -338,8 +350,12 @@ export default function Help() {
                   </td>
                 </tr>
                 <tr>
-                  <td className="border border-gray-300 px-3 py-2 font-semibold">
-                    🌿Trailblazer
+                  <td className="border border-gray-300 px-3 py-2 font-semibold flex items-center gap-2">
+                    <img
+                      src="/badges/badge_trailblazer.png"
+                      className="w-5 h-5 rounded-full border-2 border-white object-cover shadow-sm transition-transform duration-200 group-hover:scale-125"
+                    />
+                    Trailblazer
                   </td>
                   <td className="border border-gray-300 px-3 py-2">Next 20%</td>
                   <td className="border border-gray-300 px-3 py-2">
@@ -347,8 +363,12 @@ export default function Help() {
                   </td>
                 </tr>
                 <tr>
-                  <td className="border border-gray-300 px-3 py-2 font-semibold">
-                    🧲 Navigator
+                  <td className="border border-gray-300 px-3 py-2 font-semibold flex items-center gap-2">
+                    <img
+                      src="/badges/badge_navigator.png"
+                      className="w-5 h-5 rounded-full border-2 border-white object-cover shadow-sm transition-transform duration-200 group-hover:scale-125"
+                    />
+                    Navigator
                   </td>
                   <td className="border border-gray-300 px-3 py-2">Top 20%</td>
                   <td className="border border-gray-300 px-3 py-2">
@@ -384,8 +404,12 @@ export default function Help() {
               </thead>
               <tbody>
                 <tr>
-                  <td className="border border-gray-300 px-3 py-2 font-semibold">
-                    ⭐ Grand Explorer
+                  <td className="border border-gray-300 px-3 py-2 font-semibold flex items-center gap-2">
+                    <img
+                      src="/badges/badge_grand_explorer.png"
+                      className="w-5 h-5 rounded-full border-2 border-white object-cover shadow-sm transition-transform duration-200 group-hover:scale-125"
+                    />
+                    Grand Explorer
                   </td>
                   <td className="border border-gray-300 px-3 py-2">
                     Positions 6-10
@@ -395,8 +419,12 @@ export default function Help() {
                   </td>
                 </tr>
                 <tr>
-                  <td className="border border-gray-300 px-3 py-2 font-semibold">
-                    🌟 Legendary Seeker
+                  <td className="border border-gray-300 px-3 py-2 font-semibold flex items-center gap-2">
+                    <img
+                      src="/badges/badge_legendary_seeker.png"
+                      className="w-5 h-5 rounded-full border-2 border-white object-cover shadow-sm transition-transform duration-200 group-hover:scale-125"
+                    />
+                    Legendary Seeker
                   </td>
                   <td className="border border-gray-300 px-3 py-2">
                     Postions 2-5
@@ -406,8 +434,12 @@ export default function Help() {
                   </td>
                 </tr>
                 <tr>
-                  <td className="border border-gray-300 px-3 py-2 font-semibold">
-                    👑 Quest Master
+                  <td className="border border-gray-300 px-3 py-2 font-semibold flex items-center gap-2">
+                    <img
+                      src="/badges/quest_master.png"
+                      className="w-5 h-5 rounded-full border-2 border-white object-cover shadow-sm transition-transform duration-200 group-hover:scale-125"
+                    />
+                    Quest Master
                   </td>
                   <td className="border border-gray-300 px-3 py-2">
                     Position 1
@@ -547,9 +579,6 @@ export default function Help() {
                   <th className="border border-gray-300 px-3 py-2 text-left font-bold">
                     Commission
                   </th>
-                  <th className="border border-gray-300 px-3 py-2 text-left font-bold">
-                    Entry Fee
-                  </th>
                 </tr>
               </thead>
               <tbody>
@@ -561,36 +590,34 @@ export default function Help() {
                   <td className="border border-gray-300 px-3 py-2">
                     Unlimited
                   </td>
-                  <td className="border border-gray-300 px-3 py-2">
+                  <td
+                    rowSpan={2}
+                    className="border border-gray-300 px-3 py-2 bg-gray-50"
+                  >
                     15% on entry fees
                   </td>
-                  <td>Required</td>
                 </tr>
-                <tr className="bg-gray-50">
+                <tr>
                   <td className="border border-gray-300 px-3 py-2 font-semibold">
                     Individual Quest (1 x QM)
                   </td>
                   <td className="border border-gray-300 px-3 py-2">$149</td>
-                  <td className="border border-gray-300 px-3 py-2">
+                  <td
+                    rowSpan={2}
+                    className="border border-gray-300 px-3 py-2 bg-gray-50"
+                  >
                     Up to 500
                   </td>
-                  <td className="border border-gray-300 px-3 py-2">
-                    15% on entry fees
-                  </td>
-                  <td>Required</td>
                 </tr>
                 <tr>
                   <td className="border border-gray-300 px-3 py-2 font-semibold">
                     Local Quest (2 x QM)
                   </td>
                   <td className="border border-gray-300 px-3 py-2">$299</td>
-                  <td className="border border-gray-300 px-3 py-2">
-                    Up to 500
-                  </td>
-                  <td className="border border-gray-300 px-3 py-2">
+
+                  <td rowSpan={2} className="border border-gray-300 px-3 py-2">
                     0% for free entry quests 15% on entry fees
                   </td>
-                  <td>Optional</td>
                 </tr>
                 <tr>
                   <td className="border border-gray-300 px-3 py-2 font-semibold">
@@ -600,8 +627,6 @@ export default function Help() {
                   <td className="border border-gray-300 px-3 py-2">
                     Up to 2,000
                   </td>
-                  <td className="border border-gray-300 px-3 py-2">None</td>
-                  <td>0% for free entry quests 15% on entry fees</td>
                 </tr>
               </tbody>
             </table>
