@@ -20,6 +20,7 @@ import {
   TooltipTrigger,
 } from '@radix-ui/react-tooltip'
 import { useToast } from '@/hooks/use-toast'
+import { Portal } from '@radix-ui/react-dialog'
 
 interface TaskInformationWindowProps {
   questId: string
@@ -300,201 +301,206 @@ export default function TaskInformationWindow({
           open={true}
           onOpenChange={(open) => !open && setSelectedTask(null)}
         >
-          <DialogOverlay className="fixed inset-0 bg-black/30 z-40" />
-          <DialogContent className="fixed top-1/2 left-1/2 z-50 max-w-md w-full bg-white rounded-xl p-6 shadow-lg -translate-x-1/2 -translate-y-1/2">
-            {/* Top row: Title + Close button */}
-            <div className="flex justify-between items-center mb-4">
-              <DialogTitle className="text-lg font-bold">
-                {selectedTask.description || 'Quest Task'}
-              </DialogTitle>
-              <DialogClose asChild>
-                <button
-                  onClick={() => setSelectedTask(null)}
-                  aria-label="Close"
-                  className="text-gray-500 hover:text-gray-700 text-xl font-bold"
-                >
-                  ×
-                </button>
-              </DialogClose>
-            </div>
-            {selectedTask.requiresCaption && (
-              <label className="block mb-4 text-sm font-medium">
-                Caption:
-                <TooltipProvider>
-                  <Tooltip>
-                    {/* Only show tooltip if the button is disabled because of readOnly */}
-                    <TooltipTrigger asChild>
-                      <input
-                        type="text"
-                        value={caption}
-                        onChange={(e) => {
-                          setCaption(e.target.value)
-                          if (selectedTask)
-                            handleCaptionChange(selectedTask.id, e.target.value)
-                        }}
-                        className={`border p-1 rounded w-full ${readOnly ? 'bg-gray-100' : ''}`}
-                        placeholder="Enter your caption..."
-                        disabled={readOnly} // disables input for owner
-                      />
-                    </TooltipTrigger>
-                    {readOnly && (
-                      <TooltipContent
-                        side="top"
-                        className="bg-gray-800 text-white text-xs px-2 py-1 rounded shadow-lg"
-                      >
-                        Owners cannot answer tasks on quests they have created
-                      </TooltipContent>
-                    )}
-                  </Tooltip>
-                </TooltipProvider>
-              </label>
-            )}
-            {selectedTask.isImage && (
-              <div className="mb-4">
-                <label className="block text-sm font-medium mb-1">
-                  Upload Image:
-                </label>
-                <TooltipProvider>
-                  <Tooltip>
-                    {/* Only show tooltip if the button is disabled because of readOnly */}
-                    <TooltipTrigger asChild>
-                      <input
-                        type="file"
-                        accept="image/*"
-                        onChange={handleImageChange}
-                        className={`border p-1 rounded w-full ${readOnly ? 'bg-gray-100' : ''}`}
-                        disabled={readOnly} // disables input for owner
-                      />
-                    </TooltipTrigger>
-                    {readOnly && (
-                      <TooltipContent
-                        side="top"
-                        className="bg-gray-800 text-white text-xs px-2 py-1 rounded shadow-lg"
-                      >
-                        Owners cannot answer tasks on quests they have created
-                      </TooltipContent>
-                    )}
-                  </Tooltip>
-                </TooltipProvider>
-                {previewUrl ? (
-                  <RemoteImage
-                    path={previewUrl}
-                    fallback={placeHold}
-                    className="h-20 w-20 rounded object-cover mb-2"
-                  />
-                ) : (
-                  <RemoteImage
-                    path={previewUrl || placeHold}
-                    fallback={placeHold}
-                    className="h-20 w-20 rounded object-cover mb-2"
-                  />
-                )}
-              </div>
-            )}
-            {selectedTask.isLocation && (
-              <div className="mb-4">
-                <label className="block mb-1 text-sm font-medium">
-                  Location:
-                </label>
-
-                <div className="flex gap-2">
-                  <input
-                    type="text"
-                    value={location}
-                    onChange={(e) => {
-                      const value = e.target.value
-                      setLocation(value)
-                      if (selectedTask)
-                        handleLocationChange(selectedTask.id, value)
-                    }}
-                    className={`border p-1 rounded w-full ${readOnly ? 'bg-gray-100' : ''}`}
-                    placeholder="Press button to fill coordinates"
-                    disabled={readOnly}
-                  />
-
+          <Portal>
+            <DialogOverlay className="fixed inset-0 bg-black/30 z-40" />
+            <DialogContent className="fixed top-1/2 left-1/2 z-50 max-w-md w-full bg-white rounded-xl p-6 shadow-lg -translate-x-1/2 -translate-y-1/2 overflow-y-auto max-h-[90vh]">
+              {/* Top row: Title + Close button */}
+              <div className="flex justify-between items-center mb-4">
+                <DialogTitle className="text-lg font-bold">
+                  {selectedTask.description || 'Quest Task'}
+                </DialogTitle>
+                <DialogClose asChild>
                   <button
-                    onClick={getCurrentCoords}
-                    disabled={readOnly || locationStatus === 'loading'}
-                    className={`px-3 py-1 rounded text-white flex items-center gap-2 whitespace-nowrap ${
-                      readOnly
-                        ? 'bg-gray-400 cursor-not-allowed'
-                        : locationStatus === 'success'
-                          ? 'bg-green-600 hover:bg-green-700'
-                          : locationStatus === 'loading'
-                            ? 'bg-blue-400 cursor-wait'
-                            : 'bg-green-600 hover:bg-green-700'
-                    }`}
+                    onClick={() => setSelectedTask(null)}
+                    aria-label="Close"
+                    className="text-gray-500 hover:text-gray-700 text-xl font-bold"
                   >
-                    {locationStatus === 'loading' && (
-                      <svg
-                        className="animate-spin h-4 w-4"
-                        xmlns="http://www.w3.org/2000/svg"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                      >
-                        <circle
-                          className="opacity-25"
-                          cx="12"
-                          cy="12"
-                          r="10"
-                          stroke="currentColor"
-                          strokeWidth="4"
-                        />
-                        <path
-                          className="opacity-75"
-                          fill="currentColor"
-                          d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                        />
-                      </svg>
-                    )}
-                    {locationStatus === 'success' && <span>✓</span>}
-                    {locationStatus === 'loading'
-                      ? 'Getting Location...'
-                      : locationStatus === 'success'
-                        ? 'Location Set!'
-                        : 'Use My Location'}
+                    ×
                   </button>
-                </div>
+                </DialogClose>
               </div>
-            )}
+              {selectedTask.requiresCaption && (
+                <label className="block mb-4 text-sm font-medium">
+                  Caption:
+                  <TooltipProvider>
+                    <Tooltip>
+                      {/* Only show tooltip if the button is disabled because of readOnly */}
+                      <TooltipTrigger asChild>
+                        <input
+                          type="text"
+                          value={caption}
+                          onChange={(e) => {
+                            setCaption(e.target.value)
+                            if (selectedTask)
+                              handleCaptionChange(
+                                selectedTask.id,
+                                e.target.value,
+                              )
+                          }}
+                          className={`border p-1 rounded w-full ${readOnly ? 'bg-gray-100' : ''}`}
+                          placeholder="Enter your caption..."
+                          disabled={readOnly} // disables input for owner
+                        />
+                      </TooltipTrigger>
+                      {readOnly && (
+                        <TooltipContent
+                          side="top"
+                          className="bg-gray-800 text-white text-xs px-2 py-1 rounded shadow-lg"
+                        >
+                          Owners cannot answer tasks on quests they have created
+                        </TooltipContent>
+                      )}
+                    </Tooltip>
+                  </TooltipProvider>
+                </label>
+              )}
+              {selectedTask.isImage && (
+                <div className="mb-4">
+                  <label className="block text-sm font-medium mb-1">
+                    Upload Image:
+                  </label>
+                  <TooltipProvider>
+                    <Tooltip>
+                      {/* Only show tooltip if the button is disabled because of readOnly */}
+                      <TooltipTrigger asChild>
+                        <input
+                          type="file"
+                          accept="image/*"
+                          onChange={handleImageChange}
+                          className={`border p-1 rounded w-full ${readOnly ? 'bg-gray-100' : ''}`}
+                          disabled={readOnly} // disables input for owner
+                        />
+                      </TooltipTrigger>
+                      {readOnly && (
+                        <TooltipContent
+                          side="top"
+                          className="bg-gray-800 text-white text-xs px-2 py-1 rounded shadow-lg"
+                        >
+                          Owners cannot answer tasks on quests they have created
+                        </TooltipContent>
+                      )}
+                    </Tooltip>
+                  </TooltipProvider>
+                  {previewUrl ? (
+                    <RemoteImage
+                      path={previewUrl}
+                      fallback={placeHold}
+                      className="h-20 w-20 rounded object-cover mb-2"
+                    />
+                  ) : (
+                    <RemoteImage
+                      path={previewUrl || placeHold}
+                      fallback={placeHold}
+                      className="h-20 w-20 rounded object-cover mb-2"
+                    />
+                  )}
+                </div>
+              )}
+              {selectedTask.isLocation && (
+                <div className="mb-4">
+                  <label className="block mb-1 text-sm font-medium">
+                    Location:
+                  </label>
 
-            <div className="flex justify-end gap-2 mt-4">
-              <DialogClose asChild>
-                <button
-                  onClick={() => setSelectedTask(null)}
-                  className="bg-gray-200 hover:bg-gray-300 px-4 py-2 rounded"
-                >
-                  Cancel
-                </button>
-              </DialogClose>
-              <TooltipProvider>
-                <Tooltip>
-                  {/* Only show tooltip if the button is disabled because of readOnly */}
-                  <TooltipTrigger asChild>
+                  <div className="flex gap-2">
+                    <input
+                      type="text"
+                      value={location}
+                      onChange={(e) => {
+                        const value = e.target.value
+                        setLocation(value)
+                        if (selectedTask)
+                          handleLocationChange(selectedTask.id, value)
+                      }}
+                      className={`border p-1 rounded w-full ${readOnly ? 'bg-gray-100' : ''}`}
+                      placeholder="Press button to fill coordinates"
+                      disabled={readOnly}
+                    />
+
                     <button
-                      onClick={handleSave}
-                      disabled={saving || readOnly}
-                      className={`px-4 py-2 rounded text-white ${
-                        saving || readOnly
+                      onClick={getCurrentCoords}
+                      disabled={readOnly || locationStatus === 'loading'}
+                      className={`px-3 py-1 rounded text-white flex items-center gap-2 whitespace-nowrap ${
+                        readOnly
                           ? 'bg-gray-400 cursor-not-allowed'
-                          : 'bg-blue-500 hover:bg-blue-600'
+                          : locationStatus === 'success'
+                            ? 'bg-green-600 hover:bg-green-700'
+                            : locationStatus === 'loading'
+                              ? 'bg-blue-400 cursor-wait'
+                              : 'bg-green-600 hover:bg-green-700'
                       }`}
                     >
-                      {saving ? 'Saving...' : 'Save'}
+                      {locationStatus === 'loading' && (
+                        <svg
+                          className="animate-spin h-4 w-4"
+                          xmlns="http://www.w3.org/2000/svg"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                        >
+                          <circle
+                            className="opacity-25"
+                            cx="12"
+                            cy="12"
+                            r="10"
+                            stroke="currentColor"
+                            strokeWidth="4"
+                          />
+                          <path
+                            className="opacity-75"
+                            fill="currentColor"
+                            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                          />
+                        </svg>
+                      )}
+                      {locationStatus === 'success' && <span>✓</span>}
+                      {locationStatus === 'loading'
+                        ? 'Getting Location...'
+                        : locationStatus === 'success'
+                          ? 'Location Set!'
+                          : 'Use My Location'}
                     </button>
-                  </TooltipTrigger>
-                  {readOnly && (
-                    <TooltipContent
-                      side="top"
-                      className="bg-gray-800 text-white text-xs px-2 py-1 rounded shadow-lg"
-                    >
-                      Owners cannot save tasks on quests they have created
-                    </TooltipContent>
-                  )}
-                </Tooltip>
-              </TooltipProvider>
-            </div>
-          </DialogContent>
+                  </div>
+                </div>
+              )}
+
+              <div className="flex justify-end gap-2 mt-4">
+                <DialogClose asChild>
+                  <button
+                    onClick={() => setSelectedTask(null)}
+                    className="bg-gray-200 hover:bg-gray-300 px-4 py-2 rounded"
+                  >
+                    Cancel
+                  </button>
+                </DialogClose>
+                <TooltipProvider>
+                  <Tooltip>
+                    {/* Only show tooltip if the button is disabled because of readOnly */}
+                    <TooltipTrigger asChild>
+                      <button
+                        onClick={handleSave}
+                        disabled={saving || readOnly}
+                        className={`px-4 py-2 rounded text-white ${
+                          saving || readOnly
+                            ? 'bg-gray-400 cursor-not-allowed'
+                            : 'bg-blue-500 hover:bg-blue-600'
+                        }`}
+                      >
+                        {saving ? 'Saving...' : 'Save'}
+                      </button>
+                    </TooltipTrigger>
+                    {readOnly && (
+                      <TooltipContent
+                        side="top"
+                        className="bg-gray-800 text-white text-xs px-2 py-1 rounded shadow-lg"
+                      >
+                        Owners cannot save tasks on quests they have created
+                      </TooltipContent>
+                    )}
+                  </Tooltip>
+                </TooltipProvider>
+              </div>
+            </DialogContent>
+          </Portal>
         </Dialog>
       )}
     </div>

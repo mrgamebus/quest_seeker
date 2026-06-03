@@ -106,7 +106,7 @@ export default function App() {
 const components = {
   Header() {
     return (
-      <div className="w-full bg-white rounded-t-2xl flex flex-col items-center justify-center py-8 px-6 gap-3">
+      <div className="w-full bg-white rounded-t-2xl flex flex-col items-center justify-center py-8 px-6 gap-3 mt-12 md:mt-32">
         <img
           src={logo}
           alt="QuestSeeker"
