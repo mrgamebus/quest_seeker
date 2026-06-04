@@ -326,8 +326,7 @@ export default function TaskInformationWindow({
                     <Tooltip>
                       {/* Only show tooltip if the button is disabled because of readOnly */}
                       <TooltipTrigger asChild>
-                        <input
-                          type="text"
+                        <textarea
                           value={caption}
                           onChange={(e) => {
                             setCaption(e.target.value)
@@ -337,7 +336,8 @@ export default function TaskInformationWindow({
                                 e.target.value,
                               )
                           }}
-                          className={`border p-1 rounded w-full ${readOnly ? 'bg-gray-100' : ''}`}
+                          rows={5} // Controls the initial visible lines of text
+                          className={`border p-1 rounded w-full resize-y ${readOnly ? 'bg-gray-100' : ''}`}
                           placeholder="Enter your caption..."
                           disabled={readOnly} // disables input for owner
                         />
