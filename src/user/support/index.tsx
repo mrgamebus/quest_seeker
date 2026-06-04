@@ -1,20 +1,33 @@
+import { fetchAuthSession } from 'aws-amplify/auth'
 import { Card, CardContent } from '@/components/ui/card'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import bg from '@/assets/images/background_main.jpeg'
+import { Button } from '@/components/ui/button'
 
 const SUPPORT_FUNCTION_URL = import.meta.env.VITE_SUPPORT_FUNCTION_URL
 
 export default function Support() {
+  const [isAuthenticated, setIsAuthenticated] = useState(false)
+  const navigate = useNavigate()
   const [formData, setFormData] = useState({
     name: '',
     email: '',
     subject: '',
     message: '',
   })
+
   const [status, setStatus] = useState<
     'idle' | 'sending' | 'success' | 'error'
   >('idle')
+
   const [errorMessage, setErrorMessage] = useState('')
+
+  useEffect(() => {
+    fetchAuthSession()
+      .then((session) => setIsAuthenticated(!!session.tokens))
+      .catch(() => setIsAuthenticated(false))
+  }, [])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -78,13 +91,23 @@ export default function Support() {
             <h1 className="text-2xl font-bold text-gray-900">
               Contact Support
             </h1>
-
-            <a
-              href="/user"
-              className="px-4 py-2 bg-yellow-500 hover:bg-yellow-600 text-black text-sm font-medium rounded transition-colors"
-            >
-              ← Back to Login
-            </a>
+            {isAuthenticated ? (
+              <Button
+                onClick={() => {
+                  navigate(-1)
+                }}
+                className="inline-block mt-4 px-4 py-2 bg-yellow-500 hover:bg-yellow-600 text-black text-sm font-medium rounded transition-colors"
+              >
+                ← Back
+              </Button>
+            ) : (
+              <a
+                href="/user"
+                className="px-4 py-2 bg-yellow-500 hover:bg-yellow-600 text-black text-sm font-medium rounded transition-colors"
+              >
+                ← Back to Login
+              </a>
+            )}
           </div>
 
           {status === 'success' && (

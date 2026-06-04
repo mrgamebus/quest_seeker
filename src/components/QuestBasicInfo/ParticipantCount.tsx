@@ -10,6 +10,7 @@ import {
 import RemoteImage from '../RemoteImage'
 import { Profile } from '@/types'
 import placeHold from '@/assets/images/placeholder_view_vector.svg'
+import SeekerRank from '../SeekerRank'
 
 interface ParticipantCountProps {
   participantIds: string[]
@@ -52,16 +53,18 @@ export default function ParticipantCount({
               Participants
             </DialogTitle>
 
-            <div className="flex flex-col gap-3">
+            <div className="flex flex-col gap-3 max-h-[240px] overflow-y-auto pr-1">
               {participantProfiles.length > 0 ? (
                 participantProfiles.map((profile) => (
                   <div key={profile.id} className="flex items-center gap-3">
-                    <RemoteImage
-                      path={profile.image_thumbnail || placeHold}
-                      fallback={placeHold}
-                      className="w-12 h-12 rounded-full object-cover shrink-0"
-                    />
-
+                    <div className="relative w-12 h-12 shrink-0">
+                      <RemoteImage
+                        path={profile.image_thumbnail || placeHold}
+                        fallback={placeHold}
+                        className="w-full h-full rounded-full object-cover"
+                      />
+                      <SeekerRank profile={profile} />
+                    </div>
                     <div className="flex flex-col flex-1 min-w-0">
                       <span className="text-sm font-medium truncate">
                         <strong>{profile.full_name || 'Unknown'}</strong>

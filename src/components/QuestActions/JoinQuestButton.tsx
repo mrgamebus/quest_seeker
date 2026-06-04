@@ -4,6 +4,7 @@ interface JoinQuestButtonProps {
   entryFee?: number | null
   isParticipationFull: boolean
   participantLimit: number | null
+  currentParticipants: number
   onJoin: () => void
 }
 
@@ -13,6 +14,7 @@ export default function JoinQuestButton({
   entryFee = 0,
   isParticipationFull,
   participantLimit,
+  currentParticipants,
   onJoin,
 }: JoinQuestButtonProps) {
   if (isParticipationFull) {
@@ -34,6 +36,9 @@ export default function JoinQuestButton({
   const fee = entryFee || 0
   const isFreeQuest = fee === 0
 
+  const isAlmostFull =
+    participantLimit !== null && currentParticipants / participantLimit >= 0.75
+
   return (
     <div className="flex flex-col gap-1">
       <button
@@ -54,6 +59,12 @@ export default function JoinQuestButton({
           <>{isFreeQuest ? '🎉 Join Free Quest!' : `💳 Join for $${fee}`}</>
         )}
       </button>
+
+      {isAlmostFull && (
+        <span className="text-sm text-orange-500 font-medium">
+          🔥 Not many spaces left!
+        </span>
+      )}
     </div>
   )
 }

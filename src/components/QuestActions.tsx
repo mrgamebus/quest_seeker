@@ -95,6 +95,7 @@ export default function QuestActions({
               entryFee={quest.quest_entry}
               isParticipationFull={isParticipationFull}
               participantLimit={participantLimit}
+              currentParticipants={participantCount}
               onJoin={onJoin}
             />
           )}

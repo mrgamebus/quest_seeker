@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react'
 import PickRegion from '@/components/PickRegion'
-// import RegionMap from '@/components/RegionMap'
 import { useNavigate } from 'react-router-dom'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -84,6 +83,17 @@ export default function RegionPage() {
             <LogOut />
             Sign Out
           </Button>
+          <div className="space-x-12 gap-4 text-xs text-gray-600 items-center mt-2">
+            <a href="/legal" className="hover:text-gray-600">
+              Terms of use
+            </a>
+            <a href="/legal?tab=privacy" className="hover:text-gray-600">
+              Privacy policy
+            </a>
+            <a href="/support" className="hover:text-gray-600">
+              Support
+            </a>
+          </div>
         </CardContent>
       </Card>
     </div>
