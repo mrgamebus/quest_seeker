@@ -212,5 +212,36 @@ export const handler = async (event: LambdaFunctionURLEvent) => {
     // You could send a failure email here using your existing sendEmail helper
   }
 
+  // Add this alongside your existing stripeEvent.type checks:
+
+  if (stripeEvent.type === 'account.updated') {
+    const account = stripeEvent.data.object as Stripe.Account
+    const profileId = account.metadata?.profileId
+    const now = new Date().toISOString()
+
+    if (!profileId) {
+      console.warn('account.updated: no profileId in metadata, skipping')
+      return { statusCode: 200, body: JSON.stringify({ received: true }) }
+    }
+
+    const chargesEnabled = account.charges_enabled
+    const detailsSubmitted = account.details_submitted
+    const hasRequirements =
+      (account.requirements?.currently_due ?? []).length > 0
+
+    // Fully onboarded and verified
+    if (chargesEnabled && detailsSubmitted && !hasRequirements) {
+      await ddb.send(
+        new UpdateCommand({
+          TableName: PROFILE_TABLE,
+          Key: { id: profileId },
+          UpdateExpression: 'SET stripeOnboarded = :true, updatedAt = :now',
+          ExpressionAttributeValues: { ':true': true, ':now': now },
+        }),
+      )
+      console.log(`Profile ${profileId} fully onboarded on Stripe Connect`)
+    }
+  }
+
   return { statusCode: 200, body: JSON.stringify({ received: true }) }
 }
