@@ -230,7 +230,8 @@ const termsSections: Section[] = [
       <>
         QuestSeeker features an in-app leaderboard that tracks points earned by
         Quest Seekers across all Quests. Points are awarded for joining Quests,
-        completing tasks, and finishing Quests.
+        completing tasks, and finishing Quests. They are also awarded for Quest
+        Marks at approved physical locations.
         <br />
         <br />
         <strong>Annual leaderboard prizes:</strong> At the end of each year,

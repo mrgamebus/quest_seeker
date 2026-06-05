@@ -91,7 +91,7 @@ export default function AccountPage() {
     try {
       setModalOpen(false)
 
-      const res = await fetch(outputs.custom.stripeIdentityFunctionUrl, {
+      const res = await fetch(outputs.custom.stripeConnectFunctionUrl, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
