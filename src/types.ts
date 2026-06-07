@@ -64,6 +64,8 @@ export type Profile = {
   role: Role
   points: number
   seeker_rank: Rank
+  stripeAccountId?: string
+  stripeOnboarded?: boolean
 }
 
 export interface MinimalQuestParticipant {

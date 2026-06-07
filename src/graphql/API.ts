@@ -2,6 +2,17 @@
 /* eslint-disable */
 //  This file was automatically generated and should not be edited.
 
+export type NfcScan = {
+  __typename: "NfcScan",
+  address: string,
+  createdAt: string,
+  id: string,
+  lastScannedAt?: string | null,
+  owner?: string | null,
+  profileId: string,
+  updatedAt: string,
+};
+
 export type Profile = {
   __typename: "Profile",
   about_me?: string | null,
@@ -28,6 +39,8 @@ export type Profile = {
   secondary_contact_phone?: string | null,
   secondary_contact_position?: string | null,
   seeker_rank?: ProfileSeeker_rank | null,
+  stripeAccountId?: string | null,
+  stripeOnboarded?: boolean | null,
   updatedAt: string,
 };
 
@@ -82,6 +95,16 @@ export enum QuestStatus {
 }
 
 
+export type TagLocation = {
+  __typename: "TagLocation",
+  address: string,
+  createdAt: string,
+  id: string,
+  lat?: number | null,
+  lng?: number | null,
+  updatedAt: string,
+};
+
 export type UserQuest = {
   __typename: "UserQuest",
   createdAt: string,
@@ -131,6 +154,8 @@ export type ModelProfileFilterInput = {
   secondary_contact_phone?: ModelStringInput | null,
   secondary_contact_position?: ModelStringInput | null,
   seeker_rank?: ModelProfileSeeker_rankInput | null,
+  stripeAccountId?: ModelStringInput | null,
+  stripeOnboarded?: ModelBooleanInput | null,
   updatedAt?: ModelStringInput | null,
 };
 
@@ -212,6 +237,13 @@ export type ModelProfileSeeker_rankInput = {
   ne?: ProfileSeeker_rank | null,
 };
 
+export type ModelBooleanInput = {
+  attributeExists?: boolean | null,
+  attributeType?: ModelAttributeTypes | null,
+  eq?: boolean | null,
+  ne?: boolean | null,
+};
+
 export type ModelIntKeyConditionInput = {
   between?: Array< number | null > | null,
   eq?: number | null,
@@ -230,6 +262,25 @@ export enum ModelSortDirection {
 export type ModelProfileConnection = {
   __typename: "ModelProfileConnection",
   items:  Array<Profile | null >,
+  nextToken?: string | null,
+};
+
+export type ModelNfcScanFilterInput = {
+  address?: ModelStringInput | null,
+  and?: Array< ModelNfcScanFilterInput | null > | null,
+  createdAt?: ModelStringInput | null,
+  id?: ModelIDInput | null,
+  lastScannedAt?: ModelStringInput | null,
+  not?: ModelNfcScanFilterInput | null,
+  or?: Array< ModelNfcScanFilterInput | null > | null,
+  owner?: ModelStringInput | null,
+  profileId?: ModelStringInput | null,
+  updatedAt?: ModelStringInput | null,
+};
+
+export type ModelNfcScanConnection = {
+  __typename: "ModelNfcScanConnection",
+  items:  Array<NfcScan | null >,
   nextToken?: string | null,
 };
 
@@ -258,13 +309,6 @@ export type ModelQuestFilterInput = {
   updatedAt?: ModelStringInput | null,
 };
 
-export type ModelBooleanInput = {
-  attributeExists?: boolean | null,
-  attributeType?: ModelAttributeTypes | null,
-  eq?: boolean | null,
-  ne?: boolean | null,
-};
-
 export type ModelQuestStatusInput = {
   eq?: QuestStatus | null,
   ne?: QuestStatus | null,
@@ -273,6 +317,36 @@ export type ModelQuestStatusInput = {
 export type ModelQuestConnection = {
   __typename: "ModelQuestConnection",
   items:  Array<Quest | null >,
+  nextToken?: string | null,
+};
+
+export type ModelTagLocationFilterInput = {
+  address?: ModelStringInput | null,
+  and?: Array< ModelTagLocationFilterInput | null > | null,
+  createdAt?: ModelStringInput | null,
+  id?: ModelIDInput | null,
+  lat?: ModelFloatInput | null,
+  lng?: ModelFloatInput | null,
+  not?: ModelTagLocationFilterInput | null,
+  or?: Array< ModelTagLocationFilterInput | null > | null,
+  updatedAt?: ModelStringInput | null,
+};
+
+export type ModelFloatInput = {
+  attributeExists?: boolean | null,
+  attributeType?: ModelAttributeTypes | null,
+  between?: Array< number | null > | null,
+  eq?: number | null,
+  ge?: number | null,
+  gt?: number | null,
+  le?: number | null,
+  lt?: number | null,
+  ne?: number | null,
+};
+
+export type ModelTagLocationConnection = {
+  __typename: "ModelTagLocationConnection",
+  items:  Array<TagLocation | null >,
   nextToken?: string | null,
 };
 
@@ -313,6 +387,25 @@ export type ModelStringKeyConditionInput = {
   lt?: string | null,
 };
 
+export type ModelNfcScanConditionInput = {
+  address?: ModelStringInput | null,
+  and?: Array< ModelNfcScanConditionInput | null > | null,
+  createdAt?: ModelStringInput | null,
+  lastScannedAt?: ModelStringInput | null,
+  not?: ModelNfcScanConditionInput | null,
+  or?: Array< ModelNfcScanConditionInput | null > | null,
+  owner?: ModelStringInput | null,
+  profileId?: ModelStringInput | null,
+  updatedAt?: ModelStringInput | null,
+};
+
+export type CreateNfcScanInput = {
+  address: string,
+  id?: string | null,
+  lastScannedAt?: string | null,
+  profileId: string,
+};
+
 export type ModelProfileConditionInput = {
   about_me?: ModelStringInput | null,
   and?: Array< ModelProfileConditionInput | null > | null,
@@ -340,6 +433,8 @@ export type ModelProfileConditionInput = {
   secondary_contact_phone?: ModelStringInput | null,
   secondary_contact_position?: ModelStringInput | null,
   seeker_rank?: ModelProfileSeeker_rankInput | null,
+  stripeAccountId?: ModelStringInput | null,
+  stripeOnboarded?: ModelBooleanInput | null,
   updatedAt?: ModelStringInput | null,
 };
 
@@ -366,6 +461,8 @@ export type CreateProfileInput = {
   secondary_contact_phone?: string | null,
   secondary_contact_position?: string | null,
   seeker_rank?: ProfileSeeker_rank | null,
+  stripeAccountId?: string | null,
+  stripeOnboarded?: boolean | null,
 };
 
 export type ModelQuestConditionInput = {
@@ -412,6 +509,24 @@ export type CreateQuestInput = {
   status?: QuestStatus | null,
 };
 
+export type ModelTagLocationConditionInput = {
+  address?: ModelStringInput | null,
+  and?: Array< ModelTagLocationConditionInput | null > | null,
+  createdAt?: ModelStringInput | null,
+  lat?: ModelFloatInput | null,
+  lng?: ModelFloatInput | null,
+  not?: ModelTagLocationConditionInput | null,
+  or?: Array< ModelTagLocationConditionInput | null > | null,
+  updatedAt?: ModelStringInput | null,
+};
+
+export type CreateTagLocationInput = {
+  address: string,
+  id?: string | null,
+  lat?: number | null,
+  lng?: number | null,
+};
+
 export type ModelUserQuestConditionInput = {
   and?: Array< ModelUserQuestConditionInput | null > | null,
   createdAt?: ModelStringInput | null,
@@ -437,11 +552,19 @@ export type CreateUserQuestInput = {
   tasks?: string | null,
 };
 
+export type DeleteNfcScanInput = {
+  id: string,
+};
+
 export type DeleteProfileInput = {
   id: string,
 };
 
 export type DeleteQuestInput = {
+  id: string,
+};
+
+export type DeleteTagLocationInput = {
   id: string,
 };
 
@@ -471,6 +594,13 @@ export type SendEmailResult = {
   message: string,
 };
 
+export type UpdateNfcScanInput = {
+  address?: string | null,
+  id: string,
+  lastScannedAt?: string | null,
+  profileId?: string | null,
+};
+
 export type UpdateProfileInput = {
   about_me?: string | null,
   business_type?: string | null,
@@ -494,6 +624,8 @@ export type UpdateProfileInput = {
   secondary_contact_phone?: string | null,
   secondary_contact_position?: string | null,
   seeker_rank?: ProfileSeeker_rank | null,
+  stripeAccountId?: string | null,
+  stripeOnboarded?: boolean | null,
 };
 
 export type UpdateQuestInput = {
@@ -516,6 +648,13 @@ export type UpdateQuestInput = {
   status?: QuestStatus | null,
 };
 
+export type UpdateTagLocationInput = {
+  address?: string | null,
+  id: string,
+  lat?: number | null,
+  lng?: number | null,
+};
+
 export type UpdateUserQuestInput = {
   id: string,
   joinedAt?: string | null,
@@ -526,33 +665,15 @@ export type UpdateUserQuestInput = {
   tasks?: string | null,
 };
 
-export type ModelSubscriptionProfileFilterInput = {
-  about_me?: ModelSubscriptionStringInput | null,
-  and?: Array< ModelSubscriptionProfileFilterInput | null > | null,
-  business_type?: ModelSubscriptionStringInput | null,
-  charity_number?: ModelSubscriptionStringInput | null,
+export type ModelSubscriptionNfcScanFilterInput = {
+  address?: ModelSubscriptionStringInput | null,
+  and?: Array< ModelSubscriptionNfcScanFilterInput | null > | null,
   createdAt?: ModelSubscriptionStringInput | null,
-  email?: ModelSubscriptionStringInput | null,
-  full_name?: ModelSubscriptionStringInput | null,
   id?: ModelSubscriptionIDInput | null,
-  image?: ModelSubscriptionStringInput | null,
-  image_thumbnail?: ModelSubscriptionStringInput | null,
-  leaderboard?: ModelSubscriptionStringInput | null,
-  or?: Array< ModelSubscriptionProfileFilterInput | null > | null,
-  organization_description?: ModelSubscriptionStringInput | null,
-  organization_name?: ModelSubscriptionStringInput | null,
+  lastScannedAt?: ModelSubscriptionStringInput | null,
+  or?: Array< ModelSubscriptionNfcScanFilterInput | null > | null,
   owner?: ModelStringInput | null,
-  phone?: ModelSubscriptionStringInput | null,
-  points?: ModelSubscriptionIntInput | null,
-  primary_contact_name?: ModelSubscriptionStringInput | null,
-  primary_contact_phone?: ModelSubscriptionStringInput | null,
-  primary_contact_position?: ModelSubscriptionStringInput | null,
-  registration_number?: ModelSubscriptionStringInput | null,
-  role?: ModelSubscriptionStringInput | null,
-  secondary_contact_name?: ModelSubscriptionStringInput | null,
-  secondary_contact_phone?: ModelSubscriptionStringInput | null,
-  secondary_contact_position?: ModelSubscriptionStringInput | null,
-  seeker_rank?: ModelSubscriptionStringInput | null,
+  profileId?: ModelSubscriptionStringInput | null,
   updatedAt?: ModelSubscriptionStringInput | null,
 };
 
@@ -586,6 +707,38 @@ export type ModelSubscriptionIDInput = {
   notIn?: Array< string | null > | null,
 };
 
+export type ModelSubscriptionProfileFilterInput = {
+  about_me?: ModelSubscriptionStringInput | null,
+  and?: Array< ModelSubscriptionProfileFilterInput | null > | null,
+  business_type?: ModelSubscriptionStringInput | null,
+  charity_number?: ModelSubscriptionStringInput | null,
+  createdAt?: ModelSubscriptionStringInput | null,
+  email?: ModelSubscriptionStringInput | null,
+  full_name?: ModelSubscriptionStringInput | null,
+  id?: ModelSubscriptionIDInput | null,
+  image?: ModelSubscriptionStringInput | null,
+  image_thumbnail?: ModelSubscriptionStringInput | null,
+  leaderboard?: ModelSubscriptionStringInput | null,
+  or?: Array< ModelSubscriptionProfileFilterInput | null > | null,
+  organization_description?: ModelSubscriptionStringInput | null,
+  organization_name?: ModelSubscriptionStringInput | null,
+  owner?: ModelStringInput | null,
+  phone?: ModelSubscriptionStringInput | null,
+  points?: ModelSubscriptionIntInput | null,
+  primary_contact_name?: ModelSubscriptionStringInput | null,
+  primary_contact_phone?: ModelSubscriptionStringInput | null,
+  primary_contact_position?: ModelSubscriptionStringInput | null,
+  registration_number?: ModelSubscriptionStringInput | null,
+  role?: ModelSubscriptionStringInput | null,
+  secondary_contact_name?: ModelSubscriptionStringInput | null,
+  secondary_contact_phone?: ModelSubscriptionStringInput | null,
+  secondary_contact_position?: ModelSubscriptionStringInput | null,
+  seeker_rank?: ModelSubscriptionStringInput | null,
+  stripeAccountId?: ModelSubscriptionStringInput | null,
+  stripeOnboarded?: ModelSubscriptionBooleanInput | null,
+  updatedAt?: ModelSubscriptionStringInput | null,
+};
+
 export type ModelSubscriptionIntInput = {
   between?: Array< number | null > | null,
   eq?: number | null,
@@ -596,6 +749,11 @@ export type ModelSubscriptionIntInput = {
   lt?: number | null,
   ne?: number | null,
   notIn?: Array< number | null > | null,
+};
+
+export type ModelSubscriptionBooleanInput = {
+  eq?: boolean | null,
+  ne?: boolean | null,
 };
 
 export type ModelSubscriptionQuestFilterInput = {
@@ -622,9 +780,27 @@ export type ModelSubscriptionQuestFilterInput = {
   updatedAt?: ModelSubscriptionStringInput | null,
 };
 
-export type ModelSubscriptionBooleanInput = {
-  eq?: boolean | null,
-  ne?: boolean | null,
+export type ModelSubscriptionTagLocationFilterInput = {
+  address?: ModelSubscriptionStringInput | null,
+  and?: Array< ModelSubscriptionTagLocationFilterInput | null > | null,
+  createdAt?: ModelSubscriptionStringInput | null,
+  id?: ModelSubscriptionIDInput | null,
+  lat?: ModelSubscriptionFloatInput | null,
+  lng?: ModelSubscriptionFloatInput | null,
+  or?: Array< ModelSubscriptionTagLocationFilterInput | null > | null,
+  updatedAt?: ModelSubscriptionStringInput | null,
+};
+
+export type ModelSubscriptionFloatInput = {
+  between?: Array< number | null > | null,
+  eq?: number | null,
+  ge?: number | null,
+  gt?: number | null,
+  in?: Array< number | null > | null,
+  le?: number | null,
+  lt?: number | null,
+  ne?: number | null,
+  notIn?: Array< number | null > | null,
 };
 
 export type ModelSubscriptionUserQuestFilterInput = {
@@ -640,6 +816,23 @@ export type ModelSubscriptionUserQuestFilterInput = {
   status?: ModelSubscriptionStringInput | null,
   tasks?: ModelSubscriptionStringInput | null,
   updatedAt?: ModelSubscriptionStringInput | null,
+};
+
+export type GetNfcScanQueryVariables = {
+  id: string,
+};
+
+export type GetNfcScanQuery = {
+  getNfcScan?:  {
+    __typename: "NfcScan",
+    address: string,
+    createdAt: string,
+    id: string,
+    lastScannedAt?: string | null,
+    owner?: string | null,
+    profileId: string,
+    updatedAt: string,
+  } | null,
 };
 
 export type GetProfileQueryVariables = {
@@ -673,6 +866,8 @@ export type GetProfileQuery = {
     secondary_contact_phone?: string | null,
     secondary_contact_position?: string | null,
     seeker_rank?: ProfileSeeker_rank | null,
+    stripeAccountId?: string | null,
+    stripeOnboarded?: boolean | null,
     updatedAt: string,
   } | null,
 };
@@ -702,6 +897,22 @@ export type GetQuestQuery = {
     quest_winners?: string | null,
     region?: string | null,
     status?: QuestStatus | null,
+    updatedAt: string,
+  } | null,
+};
+
+export type GetTagLocationQueryVariables = {
+  id: string,
+};
+
+export type GetTagLocationQuery = {
+  getTagLocation?:  {
+    __typename: "TagLocation",
+    address: string,
+    createdAt: string,
+    id: string,
+    lat?: number | null,
+    lng?: number | null,
     updatedAt: string,
   } | null,
 };
@@ -764,6 +975,31 @@ export type ListLeaderboardQuery = {
       secondary_contact_phone?: string | null,
       secondary_contact_position?: string | null,
       seeker_rank?: ProfileSeeker_rank | null,
+      stripeAccountId?: string | null,
+      stripeOnboarded?: boolean | null,
+      updatedAt: string,
+    } | null >,
+    nextToken?: string | null,
+  } | null,
+};
+
+export type ListNfcScansQueryVariables = {
+  filter?: ModelNfcScanFilterInput | null,
+  limit?: number | null,
+  nextToken?: string | null,
+};
+
+export type ListNfcScansQuery = {
+  listNfcScans?:  {
+    __typename: "ModelNfcScanConnection",
+    items:  Array< {
+      __typename: "NfcScan",
+      address: string,
+      createdAt: string,
+      id: string,
+      lastScannedAt?: string | null,
+      owner?: string | null,
+      profileId: string,
       updatedAt: string,
     } | null >,
     nextToken?: string | null,
@@ -805,6 +1041,8 @@ export type ListProfilesQuery = {
       secondary_contact_phone?: string | null,
       secondary_contact_position?: string | null,
       seeker_rank?: ProfileSeeker_rank | null,
+      stripeAccountId?: string | null,
+      stripeOnboarded?: boolean | null,
       updatedAt: string,
     } | null >,
     nextToken?: string | null,
@@ -840,6 +1078,28 @@ export type ListQuestsQuery = {
       quest_winners?: string | null,
       region?: string | null,
       status?: QuestStatus | null,
+      updatedAt: string,
+    } | null >,
+    nextToken?: string | null,
+  } | null,
+};
+
+export type ListTagLocationsQueryVariables = {
+  filter?: ModelTagLocationFilterInput | null,
+  limit?: number | null,
+  nextToken?: string | null,
+};
+
+export type ListTagLocationsQuery = {
+  listTagLocations?:  {
+    __typename: "ModelTagLocationConnection",
+    items:  Array< {
+      __typename: "TagLocation",
+      address: string,
+      createdAt: string,
+      id: string,
+      lat?: number | null,
+      lng?: number | null,
       updatedAt: string,
     } | null >,
     nextToken?: string | null,
@@ -949,6 +1209,24 @@ export type BecomePendingMutation = {
   becomePending?: string | null,
 };
 
+export type CreateNfcScanMutationVariables = {
+  condition?: ModelNfcScanConditionInput | null,
+  input: CreateNfcScanInput,
+};
+
+export type CreateNfcScanMutation = {
+  createNfcScan?:  {
+    __typename: "NfcScan",
+    address: string,
+    createdAt: string,
+    id: string,
+    lastScannedAt?: string | null,
+    owner?: string | null,
+    profileId: string,
+    updatedAt: string,
+  } | null,
+};
+
 export type CreateProfileMutationVariables = {
   condition?: ModelProfileConditionInput | null,
   input: CreateProfileInput,
@@ -981,6 +1259,8 @@ export type CreateProfileMutation = {
     secondary_contact_phone?: string | null,
     secondary_contact_position?: string | null,
     seeker_rank?: ProfileSeeker_rank | null,
+    stripeAccountId?: string | null,
+    stripeOnboarded?: boolean | null,
     updatedAt: string,
   } | null,
 };
@@ -1037,6 +1317,23 @@ export type CreateStripeSessionMutation = {
   createStripeSession?: string | null,
 };
 
+export type CreateTagLocationMutationVariables = {
+  condition?: ModelTagLocationConditionInput | null,
+  input: CreateTagLocationInput,
+};
+
+export type CreateTagLocationMutation = {
+  createTagLocation?:  {
+    __typename: "TagLocation",
+    address: string,
+    createdAt: string,
+    id: string,
+    lat?: number | null,
+    lng?: number | null,
+    updatedAt: string,
+  } | null,
+};
+
 export type CreateUserQuestMutationVariables = {
   condition?: ModelUserQuestConditionInput | null,
   input: CreateUserQuestInput,
@@ -1054,6 +1351,24 @@ export type CreateUserQuestMutation = {
     questId: string,
     status?: UserQuestStatus | null,
     tasks?: string | null,
+    updatedAt: string,
+  } | null,
+};
+
+export type DeleteNfcScanMutationVariables = {
+  condition?: ModelNfcScanConditionInput | null,
+  input: DeleteNfcScanInput,
+};
+
+export type DeleteNfcScanMutation = {
+  deleteNfcScan?:  {
+    __typename: "NfcScan",
+    address: string,
+    createdAt: string,
+    id: string,
+    lastScannedAt?: string | null,
+    owner?: string | null,
+    profileId: string,
     updatedAt: string,
   } | null,
 };
@@ -1090,6 +1405,8 @@ export type DeleteProfileMutation = {
     secondary_contact_phone?: string | null,
     secondary_contact_position?: string | null,
     seeker_rank?: ProfileSeeker_rank | null,
+    stripeAccountId?: string | null,
+    stripeOnboarded?: boolean | null,
     updatedAt: string,
   } | null,
 };
@@ -1120,6 +1437,23 @@ export type DeleteQuestMutation = {
     quest_winners?: string | null,
     region?: string | null,
     status?: QuestStatus | null,
+    updatedAt: string,
+  } | null,
+};
+
+export type DeleteTagLocationMutationVariables = {
+  condition?: ModelTagLocationConditionInput | null,
+  input: DeleteTagLocationInput,
+};
+
+export type DeleteTagLocationMutation = {
+  deleteTagLocation?:  {
+    __typename: "TagLocation",
+    address: string,
+    createdAt: string,
+    id: string,
+    lat?: number | null,
+    lng?: number | null,
     updatedAt: string,
   } | null,
 };
@@ -1204,6 +1538,24 @@ export type SendQuestCreatorMessageMutation = {
   } | null,
 };
 
+export type UpdateNfcScanMutationVariables = {
+  condition?: ModelNfcScanConditionInput | null,
+  input: UpdateNfcScanInput,
+};
+
+export type UpdateNfcScanMutation = {
+  updateNfcScan?:  {
+    __typename: "NfcScan",
+    address: string,
+    createdAt: string,
+    id: string,
+    lastScannedAt?: string | null,
+    owner?: string | null,
+    profileId: string,
+    updatedAt: string,
+  } | null,
+};
+
 export type UpdateProfileMutationVariables = {
   condition?: ModelProfileConditionInput | null,
   input: UpdateProfileInput,
@@ -1236,6 +1588,8 @@ export type UpdateProfileMutation = {
     secondary_contact_phone?: string | null,
     secondary_contact_position?: string | null,
     seeker_rank?: ProfileSeeker_rank | null,
+    stripeAccountId?: string | null,
+    stripeOnboarded?: boolean | null,
     updatedAt: string,
   } | null,
 };
@@ -1270,6 +1624,23 @@ export type UpdateQuestMutation = {
   } | null,
 };
 
+export type UpdateTagLocationMutationVariables = {
+  condition?: ModelTagLocationConditionInput | null,
+  input: UpdateTagLocationInput,
+};
+
+export type UpdateTagLocationMutation = {
+  updateTagLocation?:  {
+    __typename: "TagLocation",
+    address: string,
+    createdAt: string,
+    id: string,
+    lat?: number | null,
+    lng?: number | null,
+    updatedAt: string,
+  } | null,
+};
+
 export type UpdateUserQuestMutationVariables = {
   condition?: ModelUserQuestConditionInput | null,
   input: UpdateUserQuestInput,
@@ -1287,6 +1658,24 @@ export type UpdateUserQuestMutation = {
     questId: string,
     status?: UserQuestStatus | null,
     tasks?: string | null,
+    updatedAt: string,
+  } | null,
+};
+
+export type OnCreateNfcScanSubscriptionVariables = {
+  filter?: ModelSubscriptionNfcScanFilterInput | null,
+  owner?: string | null,
+};
+
+export type OnCreateNfcScanSubscription = {
+  onCreateNfcScan?:  {
+    __typename: "NfcScan",
+    address: string,
+    createdAt: string,
+    id: string,
+    lastScannedAt?: string | null,
+    owner?: string | null,
+    profileId: string,
     updatedAt: string,
   } | null,
 };
@@ -1323,6 +1712,8 @@ export type OnCreateProfileSubscription = {
     secondary_contact_phone?: string | null,
     secondary_contact_position?: string | null,
     seeker_rank?: ProfileSeeker_rank | null,
+    stripeAccountId?: string | null,
+    stripeOnboarded?: boolean | null,
     updatedAt: string,
   } | null,
 };
@@ -1356,6 +1747,22 @@ export type OnCreateQuestSubscription = {
   } | null,
 };
 
+export type OnCreateTagLocationSubscriptionVariables = {
+  filter?: ModelSubscriptionTagLocationFilterInput | null,
+};
+
+export type OnCreateTagLocationSubscription = {
+  onCreateTagLocation?:  {
+    __typename: "TagLocation",
+    address: string,
+    createdAt: string,
+    id: string,
+    lat?: number | null,
+    lng?: number | null,
+    updatedAt: string,
+  } | null,
+};
+
 export type OnCreateUserQuestSubscriptionVariables = {
   filter?: ModelSubscriptionUserQuestFilterInput | null,
   owner?: string | null,
@@ -1373,6 +1780,24 @@ export type OnCreateUserQuestSubscription = {
     questId: string,
     status?: UserQuestStatus | null,
     tasks?: string | null,
+    updatedAt: string,
+  } | null,
+};
+
+export type OnDeleteNfcScanSubscriptionVariables = {
+  filter?: ModelSubscriptionNfcScanFilterInput | null,
+  owner?: string | null,
+};
+
+export type OnDeleteNfcScanSubscription = {
+  onDeleteNfcScan?:  {
+    __typename: "NfcScan",
+    address: string,
+    createdAt: string,
+    id: string,
+    lastScannedAt?: string | null,
+    owner?: string | null,
+    profileId: string,
     updatedAt: string,
   } | null,
 };
@@ -1409,6 +1834,8 @@ export type OnDeleteProfileSubscription = {
     secondary_contact_phone?: string | null,
     secondary_contact_position?: string | null,
     seeker_rank?: ProfileSeeker_rank | null,
+    stripeAccountId?: string | null,
+    stripeOnboarded?: boolean | null,
     updatedAt: string,
   } | null,
 };
@@ -1442,6 +1869,22 @@ export type OnDeleteQuestSubscription = {
   } | null,
 };
 
+export type OnDeleteTagLocationSubscriptionVariables = {
+  filter?: ModelSubscriptionTagLocationFilterInput | null,
+};
+
+export type OnDeleteTagLocationSubscription = {
+  onDeleteTagLocation?:  {
+    __typename: "TagLocation",
+    address: string,
+    createdAt: string,
+    id: string,
+    lat?: number | null,
+    lng?: number | null,
+    updatedAt: string,
+  } | null,
+};
+
 export type OnDeleteUserQuestSubscriptionVariables = {
   filter?: ModelSubscriptionUserQuestFilterInput | null,
   owner?: string | null,
@@ -1459,6 +1902,24 @@ export type OnDeleteUserQuestSubscription = {
     questId: string,
     status?: UserQuestStatus | null,
     tasks?: string | null,
+    updatedAt: string,
+  } | null,
+};
+
+export type OnUpdateNfcScanSubscriptionVariables = {
+  filter?: ModelSubscriptionNfcScanFilterInput | null,
+  owner?: string | null,
+};
+
+export type OnUpdateNfcScanSubscription = {
+  onUpdateNfcScan?:  {
+    __typename: "NfcScan",
+    address: string,
+    createdAt: string,
+    id: string,
+    lastScannedAt?: string | null,
+    owner?: string | null,
+    profileId: string,
     updatedAt: string,
   } | null,
 };
@@ -1495,6 +1956,8 @@ export type OnUpdateProfileSubscription = {
     secondary_contact_phone?: string | null,
     secondary_contact_position?: string | null,
     seeker_rank?: ProfileSeeker_rank | null,
+    stripeAccountId?: string | null,
+    stripeOnboarded?: boolean | null,
     updatedAt: string,
   } | null,
 };
@@ -1524,6 +1987,22 @@ export type OnUpdateQuestSubscription = {
     quest_winners?: string | null,
     region?: string | null,
     status?: QuestStatus | null,
+    updatedAt: string,
+  } | null,
+};
+
+export type OnUpdateTagLocationSubscriptionVariables = {
+  filter?: ModelSubscriptionTagLocationFilterInput | null,
+};
+
+export type OnUpdateTagLocationSubscription = {
+  onUpdateTagLocation?:  {
+    __typename: "TagLocation",
+    address: string,
+    createdAt: string,
+    id: string,
+    lat?: number | null,
+    lng?: number | null,
     updatedAt: string,
   } | null,
 };
