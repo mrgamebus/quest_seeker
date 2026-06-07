@@ -218,7 +218,14 @@ export default function Help() {
             year.
           </p>
           <p className="text-[#555555] text-sm mb-4">
-            *Please Note: Keeping in the spirit of the game, each QuestMarks is
+            If you are generating NFC tag URLs, point them to the map page like
+            <code className="bg-slate-100 px-1 rounded">/user/map?address=LOCATION&nfc=1</code>
+            or
+            <code className="bg-slate-100 px-1 rounded">/user/map?lat=...&lng=...&nfc=1</code>.
+            That way the map page will process the scan and award points once per week.
+          </p>
+          <p className="text-[#555555] text-sm mb-4">
+            *Please Note: Keeping in the spirit of the game, each QuestMark is
             limited to crediting your account 100 points per week.
           </p>
           <h3 className="font-bold text-[#111111] text-base mb-3">

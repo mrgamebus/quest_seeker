@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { useEffect, useState } from 'react'
 import { useCurrentUserProfile } from '@/hooks/userProfiles'
+import { useToast } from '@/hooks/use-toast'
 import RemoteImage from '@/components/RemoteImage'
 import placeHold from '@/assets/images/placeholder_view_vector.svg'
 import { useQuery } from '@tanstack/react-query'
@@ -58,9 +59,11 @@ export default function SeekerMap() {
   const navigate = useNavigate()
   const { currentProfile } = useCurrentUserProfile()
   const location = useLocation()
+  const { toast } = useToast()
   const [coordinates, setCoordinates] = useState<null | { lat: number; lng: number }>(null)
   const [markerLabel, setMarkerLabel] = useState<string | undefined>(undefined)
   const [highlightedTagId, setHighlightedTagId] = useState<string | undefined>(undefined)
+  const [hasProcessedNfcScan, setHasProcessedNfcScan] = useState(false)
 
   // Fetch all tag locations
   const { data: tagLocationsData } = useQuery({
@@ -88,7 +91,7 @@ export default function SeekerMap() {
         // Find and highlight the tag with these coordinates
         if (tagLocationsData) {
           const matched = tagLocationsData.find(
-            (tag: any) => Math.abs(tag.lat - latN) < 0.001 && Math.abs(tag.lng - lngN) < 0.001
+            (tag: TagLocation) => Math.abs((tag.lat ?? 0) - latN) < 0.001 && Math.abs((tag.lng ?? 0) - lngN) < 0.001
           )
           setHighlightedTagId(matched?.id)
         }
@@ -102,13 +105,71 @@ export default function SeekerMap() {
       // Find and highlight the tag with this address
       if (tagLocationsData) {
         const matched = tagLocationsData.find(
-          (tag: any) => tag.address?.toLowerCase() === address.toLowerCase()
+          (tag: TagLocation) => tag.address?.toLowerCase() === address.toLowerCase()
         )
         setHighlightedTagId(matched?.id)
       }
       return
     }
   }, [location.search, tagLocationsData])
+
+  useEffect(() => {
+    if (hasProcessedNfcScan) return
+    if (!currentProfile?.id) return
+
+    const params = new URLSearchParams(location.search)
+    const nfc = params.get('nfc')
+    const address = params.get('address')
+    const lat = params.get('lat')
+    const lng = params.get('lng')
+
+    if (!nfc || nfc !== '1') return
+    if (!address && !(lat && lng)) return
+
+    setHasProcessedNfcScan(true)
+    const profileId = currentProfile.id
+
+    async function awardScan() {
+      try {
+        const resp = await fetch('/api/nfcAward', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ address, lat, lng, profileId }),
+          credentials: 'include',
+        })
+
+        const data = await resp.json().catch(() => null)
+        if (resp.ok && data) {
+          if (data.awarded) {
+            toast({
+              title: 'NFC Scan successful',
+              description: '+100 points have been added to your profile.',
+            })
+          } else {
+            toast({
+              title: 'NFC Scan noted',
+              description: data.message ?? 'You have already scanned this location recently.',
+            })
+          }
+        } else {
+          toast({
+            title: 'NFC Scan failed',
+            description: data?.error || 'Unable to process tag points at this time.',
+            variant: 'destructive',
+          })
+        }
+      } catch (error) {
+        toast({
+          title: 'NFC Scan error',
+          description: 'Unable to reach the server. Please try again later.',
+          variant: 'destructive',
+        })
+        console.error('Map NFC award error:', error)
+      }
+    }
+
+    awardScan()
+  }, [currentProfile?.id, location.search, hasProcessedNfcScan, toast])
 
   return (
     <div
