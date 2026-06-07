@@ -1,9 +1,12 @@
+import { fetchAuthSession } from 'aws-amplify/auth'
 import { useEffect, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { useSearchParams } from 'react-router-dom'
 import { Card, CardContent } from '@/components/ui/card'
 import bg from '@/assets/images/background_main.jpeg'
 import { ChevronDown, ChevronUp } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { Button } from '@/components/ui/button'
 
 type Section = {
   title: string
@@ -227,7 +230,8 @@ const termsSections: Section[] = [
       <>
         QuestSeeker features an in-app leaderboard that tracks points earned by
         Quest Seekers across all Quests. Points are awarded for joining Quests,
-        completing tasks, and finishing Quests.
+        completing tasks, and finishing Quests. They are also awarded for Quest
+        Marks at approved physical locations.
         <br />
         <br />
         <strong>Annual leaderboard prizes:</strong> At the end of each year,
@@ -610,7 +614,6 @@ const privacySections: Section[] = [
 
 function AccordionSection({ sections }: { sections: Section[] }) {
   const [openIndex, setOpenIndex] = useState<number | null>(null)
-
   const toggle = (index: number) => {
     setOpenIndex(openIndex === index ? null : index)
   }
@@ -647,7 +650,15 @@ function AccordionSection({ sections }: { sections: Section[] }) {
 }
 
 export default function Legal() {
+  const [isAuthenticated, setIsAuthenticated] = useState(false)
   const [searchParams] = useSearchParams()
+  const navigate = useNavigate()
+
+  useEffect(() => {
+    fetchAuthSession()
+      .then((session) => setIsAuthenticated(!!session.tokens))
+      .catch(() => setIsAuthenticated(false))
+  }, [])
 
   useEffect(() => {
     if (searchParams.get('tab') === 'privacy') {
@@ -704,12 +715,23 @@ export default function Legal() {
           ) : (
             <AccordionSection sections={privacySections} />
           )}
-          <a
-            href="/user"
-            className="inline-block mt-4 px-4 py-2 bg-yellow-500 hover:bg-yellow-600 text-black text-sm font-medium rounded transition-colors"
-          >
-            ← Back to Login
-          </a>
+          {isAuthenticated ? (
+            <Button
+              onClick={() => {
+                navigate(-1)
+              }}
+              className="inline-block mt-4 px-4 py-2 bg-yellow-500 hover:bg-yellow-600 text-black text-sm font-medium rounded transition-colors"
+            >
+              ← Back
+            </Button>
+          ) : (
+            <a
+              href="/user"
+              className="inline-block mt-4 px-4 py-2 bg-yellow-500 hover:bg-yellow-600 text-black text-sm font-medium rounded transition-colors"
+            >
+              ← Back to Login
+            </a>
+          )}
         </CardContent>
       </Card>
     </div>

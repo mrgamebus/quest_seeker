@@ -18,6 +18,7 @@ import { support } from './functions/support/resource'
 import { rejectCreator } from './functions/rejectCreator/resource'
 import { questCreatorMessage } from './functions/questCreatorMessage/resource'
 import { stripeIdentity } from './functions/stripeIdentity/resource'
+import { stripeConnect } from './functions/stripeConnect/resource'
 import { updateSeekerRank } from './functions/updateSeekerRank/resource'
 import { nfcAward } from './functions/nfcAward/resource'
 import { StartingPosition } from 'aws-cdk-lib/aws-lambda'
@@ -38,6 +39,7 @@ const backend = defineBackend({
   rejectCreator,
   updateSeekerRank,
   storage,
+  stripeConnect,
   stripeIdentity,
   stripeWebhook,
   support,
@@ -70,6 +72,8 @@ backend.mutateQuest.addEnvironment('QUEST_TABLE_NAME', questTable.tableName)
 
 // --- Stripe Webhook & Session Setup ---
 
+const stripeConnectLambda = backend.stripeConnect.resources
+  .lambda as lambda.Function
 const stripeIdentityLambda = backend.stripeIdentity.resources
   .lambda as lambda.Function
 const stripeWebhookLambda = backend.stripeWebhook.resources
@@ -107,6 +111,7 @@ const stripeLambdas = [
   stripeWebhookLambda,
   stripeSessionLambda,
   stripeIdentityLambda,
+  stripeConnectLambda,
 ]
 stripeLambdas.forEach((l) => {
   l.addEnvironment(
@@ -147,6 +152,9 @@ stripeIdentityLambda.addEnvironment(
   'PROFILE_TABLE_NAME',
   profileTable.tableName,
 )
+
+profileTable.grantReadWriteData(stripeConnectLambda)
+stripeConnectLambda.addEnvironment('PROFILE_TABLE_NAME', profileTable.tableName)
 
 profileTable.grantReadWriteData(updateSeekerRankLambda)
 updateSeekerRankLambda.addEnvironment(
@@ -221,6 +229,7 @@ stripeWebhookLambda.addToRolePolicy(cognitoPolicy)
 expiredQuestsLambda.addToRolePolicy(cognitoPolicy)
 questCreatorMessageLambda.addToRolePolicy(cognitoPolicy)
 stripeIdentityLambda.addToRolePolicy(cognitoPolicy)
+stripeConnectLambda.addToRolePolicy(cognitoPolicy)
 
 joinQuestLambda.addEnvironment(
   'AMPLIFY_USER_POOL_ID',
@@ -243,6 +252,11 @@ questCreatorMessageLambda.addEnvironment(
 )
 
 stripeIdentityLambda.addEnvironment(
+  'AMPLIFY_USER_POOL_ID',
+  backend.auth.resources.userPool.userPoolId,
+)
+
+stripeConnectLambda.addEnvironment(
   'AMPLIFY_USER_POOL_ID',
   backend.auth.resources.userPool.userPoolId,
 )
@@ -307,6 +321,15 @@ const stripeIdentityFunctionUrl = stripeIdentityLambda.addFunctionUrl({
   },
 })
 
+const stripeConnectFunctionUrl = stripeConnectLambda.addFunctionUrl({
+  authType: lambda.FunctionUrlAuthType.NONE,
+  cors: {
+    allowedOrigins: ['*'],
+    allowedMethods: [lambda.HttpMethod.POST],
+    allowedHeaders: ['content-type', 'stripe-signature'],
+  },
+})
+
 const supportFunctionUrl = supportLambda.addFunctionUrl({
   authType: lambda.FunctionUrlAuthType.NONE,
   cors: {
@@ -322,6 +345,12 @@ stripeIdentityLambda.addPermission('StripePublicInvoke', {
   functionUrlAuthType: lambda.FunctionUrlAuthType.NONE,
 })
 
+stripeConnectLambda.addPermission('StripePublicInvoke', {
+  principal: new iam.AnyPrincipal(),
+  action: 'lambda:InvokeFunctionUrl',
+  functionUrlAuthType: lambda.FunctionUrlAuthType.NONE,
+})
+
 supportLambda.addPermission('SupportPublicInvoke', {
   principal: new iam.AnyPrincipal(),
   action: 'lambda:InvokeFunctionUrl',
@@ -332,5 +361,6 @@ backend.addOutput({
   custom: {
     supportFunctionUrl: supportFunctionUrl.url,
     stripeIdentityFunctionUrl: stripeIdentityFunctionUrl.url,
+    stripeConnectFunctionUrl: stripeConnectFunctionUrl.url,
   },
 })

@@ -616,7 +616,7 @@ export default function QuestDetailPage() {
               </Button>
 
               <Button variant="yellow" onClick={() => navigate('/user/help')}>
-                About QS
+                Help Guide
               </Button>
               <SignOutButton />
             </Toolbar>
@@ -690,11 +690,13 @@ export default function QuestDetailPage() {
               />
             ) : (
               <ActiveQuestSidebar
+                quest={quest}
                 isOwner={isOwner}
                 hasJoined={hasJoined}
                 questId={quest.id}
                 tasks={seekerTasks}
                 joinedQuestEntry={joinedQuestEntry}
+                formatDateTime={formatNzDateTime}
                 completedTasks={completedTasks}
                 totalTasks={totalTasks}
                 onTasksUpdated={async () => {
