@@ -77,6 +77,31 @@ export default function SeekerMap() {
   })
 
   useEffect(() => {
+    let active = true
+
+    async function geocodeAddress(inputAddress: string) {
+      try {
+        const url = new URL('https://nominatim.openstreetmap.org/search')
+        url.searchParams.set('format', 'json')
+        url.searchParams.set('limit', '1')
+        url.searchParams.set('q', inputAddress)
+
+        const response = await fetch(url.toString())
+        const results = (await response.json()) as Array<{ lat: string; lon: string }>
+        if (!active || !results.length) return null
+
+        const { lat, lon } = results[0]
+        const latN = Number(lat)
+        const lngN = Number(lon)
+        if (Number.isNaN(latN) || Number.isNaN(lngN)) return null
+
+        return { lat: latN, lng: lngN }
+      } catch (error) {
+        console.error('Geocode error:', error)
+        return null
+      }
+    }
+
     const params = new URLSearchParams(location.search)
     const lat = params.get('lat')
     const lng = params.get('lng')
@@ -100,16 +125,32 @@ export default function SeekerMap() {
     }
 
     if (address) {
+      const matched = tagLocationsData?.find(
+        (tag: TagLocation) => tag.address?.toLowerCase() === address.toLowerCase(),
+      )
+
+      setHighlightedTagId(matched?.id)
+
+      if (matched?.lat && matched?.lng) {
+        setCoordinates({ lat: matched.lat, lng: matched.lng })
+        setMarkerLabel(address)
+        return
+      }
+
       setMarkerLabel(address)
       setCoordinates(null)
-      // Find and highlight the tag with this address
-      if (tagLocationsData) {
-        const matched = tagLocationsData.find(
-          (tag: TagLocation) => tag.address?.toLowerCase() === address.toLowerCase()
-        )
-        setHighlightedTagId(matched?.id)
-      }
+
+      geocodeAddress(address).then((result) => {
+        if (!active || !result) return
+        setCoordinates(result)
+        setMarkerLabel(address)
+      })
+
       return
+    }
+
+    return () => {
+      active = false
     }
   }, [location.search, tagLocationsData])
 
