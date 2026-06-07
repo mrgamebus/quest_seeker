@@ -8,6 +8,25 @@ type GeneratedSubscription<InputType, OutputType> = string & {
   __generatedSubscriptionOutput: OutputType;
 };
 
+export const onCreateNfcScan = /* GraphQL */ `subscription OnCreateNfcScan(
+  $filter: ModelSubscriptionNfcScanFilterInput
+  $owner: String
+) {
+  onCreateNfcScan(filter: $filter, owner: $owner) {
+    address
+    createdAt
+    id
+    lastScannedAt
+    owner
+    profileId
+    updatedAt
+    __typename
+  }
+}
+` as GeneratedSubscription<
+  APITypes.OnCreateNfcScanSubscriptionVariables,
+  APITypes.OnCreateNfcScanSubscription
+>;
 export const onCreateProfile = /* GraphQL */ `subscription OnCreateProfile(
   $filter: ModelSubscriptionProfileFilterInput
   $owner: String
@@ -37,6 +56,8 @@ export const onCreateProfile = /* GraphQL */ `subscription OnCreateProfile(
     secondary_contact_phone
     secondary_contact_position
     seeker_rank
+    stripeAccountId
+    stripeOnboarded
     updatedAt
     __typename
   }
@@ -73,6 +94,23 @@ export const onCreateQuest = /* GraphQL */ `subscription OnCreateQuest($filter: 
   APITypes.OnCreateQuestSubscriptionVariables,
   APITypes.OnCreateQuestSubscription
 >;
+export const onCreateTagLocation = /* GraphQL */ `subscription OnCreateTagLocation(
+  $filter: ModelSubscriptionTagLocationFilterInput
+) {
+  onCreateTagLocation(filter: $filter) {
+    address
+    createdAt
+    id
+    lat
+    lng
+    updatedAt
+    __typename
+  }
+}
+` as GeneratedSubscription<
+  APITypes.OnCreateTagLocationSubscriptionVariables,
+  APITypes.OnCreateTagLocationSubscription
+>;
 export const onCreateUserQuest = /* GraphQL */ `subscription OnCreateUserQuest(
   $filter: ModelSubscriptionUserQuestFilterInput
   $owner: String
@@ -94,6 +132,25 @@ export const onCreateUserQuest = /* GraphQL */ `subscription OnCreateUserQuest(
 ` as GeneratedSubscription<
   APITypes.OnCreateUserQuestSubscriptionVariables,
   APITypes.OnCreateUserQuestSubscription
+>;
+export const onDeleteNfcScan = /* GraphQL */ `subscription OnDeleteNfcScan(
+  $filter: ModelSubscriptionNfcScanFilterInput
+  $owner: String
+) {
+  onDeleteNfcScan(filter: $filter, owner: $owner) {
+    address
+    createdAt
+    id
+    lastScannedAt
+    owner
+    profileId
+    updatedAt
+    __typename
+  }
+}
+` as GeneratedSubscription<
+  APITypes.OnDeleteNfcScanSubscriptionVariables,
+  APITypes.OnDeleteNfcScanSubscription
 >;
 export const onDeleteProfile = /* GraphQL */ `subscription OnDeleteProfile(
   $filter: ModelSubscriptionProfileFilterInput
@@ -124,6 +181,8 @@ export const onDeleteProfile = /* GraphQL */ `subscription OnDeleteProfile(
     secondary_contact_phone
     secondary_contact_position
     seeker_rank
+    stripeAccountId
+    stripeOnboarded
     updatedAt
     __typename
   }
@@ -160,6 +219,23 @@ export const onDeleteQuest = /* GraphQL */ `subscription OnDeleteQuest($filter: 
   APITypes.OnDeleteQuestSubscriptionVariables,
   APITypes.OnDeleteQuestSubscription
 >;
+export const onDeleteTagLocation = /* GraphQL */ `subscription OnDeleteTagLocation(
+  $filter: ModelSubscriptionTagLocationFilterInput
+) {
+  onDeleteTagLocation(filter: $filter) {
+    address
+    createdAt
+    id
+    lat
+    lng
+    updatedAt
+    __typename
+  }
+}
+` as GeneratedSubscription<
+  APITypes.OnDeleteTagLocationSubscriptionVariables,
+  APITypes.OnDeleteTagLocationSubscription
+>;
 export const onDeleteUserQuest = /* GraphQL */ `subscription OnDeleteUserQuest(
   $filter: ModelSubscriptionUserQuestFilterInput
   $owner: String
@@ -181,6 +257,25 @@ export const onDeleteUserQuest = /* GraphQL */ `subscription OnDeleteUserQuest(
 ` as GeneratedSubscription<
   APITypes.OnDeleteUserQuestSubscriptionVariables,
   APITypes.OnDeleteUserQuestSubscription
+>;
+export const onUpdateNfcScan = /* GraphQL */ `subscription OnUpdateNfcScan(
+  $filter: ModelSubscriptionNfcScanFilterInput
+  $owner: String
+) {
+  onUpdateNfcScan(filter: $filter, owner: $owner) {
+    address
+    createdAt
+    id
+    lastScannedAt
+    owner
+    profileId
+    updatedAt
+    __typename
+  }
+}
+` as GeneratedSubscription<
+  APITypes.OnUpdateNfcScanSubscriptionVariables,
+  APITypes.OnUpdateNfcScanSubscription
 >;
 export const onUpdateProfile = /* GraphQL */ `subscription OnUpdateProfile(
   $filter: ModelSubscriptionProfileFilterInput
@@ -211,6 +306,8 @@ export const onUpdateProfile = /* GraphQL */ `subscription OnUpdateProfile(
     secondary_contact_phone
     secondary_contact_position
     seeker_rank
+    stripeAccountId
+    stripeOnboarded
     updatedAt
     __typename
   }
@@ -246,6 +343,23 @@ export const onUpdateQuest = /* GraphQL */ `subscription OnUpdateQuest($filter: 
 ` as GeneratedSubscription<
   APITypes.OnUpdateQuestSubscriptionVariables,
   APITypes.OnUpdateQuestSubscription
+>;
+export const onUpdateTagLocation = /* GraphQL */ `subscription OnUpdateTagLocation(
+  $filter: ModelSubscriptionTagLocationFilterInput
+) {
+  onUpdateTagLocation(filter: $filter) {
+    address
+    createdAt
+    id
+    lat
+    lng
+    updatedAt
+    __typename
+  }
+}
+` as GeneratedSubscription<
+  APITypes.OnUpdateTagLocationSubscriptionVariables,
+  APITypes.OnUpdateTagLocationSubscription
 >;
 export const onUpdateUserQuest = /* GraphQL */ `subscription OnUpdateUserQuest(
   $filter: ModelSubscriptionUserQuestFilterInput

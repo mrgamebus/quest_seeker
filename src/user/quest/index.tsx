@@ -230,9 +230,7 @@ export default function QuestPage() {
               />
 
               {/* Add the Joined Already checkbox here */}
-              <input type="checkbox">
-
-              </input>
+              <input type="checkbox"></input>
 
               {/* Sort Dropdown */}
               <select

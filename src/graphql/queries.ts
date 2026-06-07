@@ -8,6 +8,22 @@ type GeneratedQuery<InputType, OutputType> = string & {
   __generatedQueryOutput: OutputType;
 };
 
+export const getNfcScan = /* GraphQL */ `query GetNfcScan($id: ID!) {
+  getNfcScan(id: $id) {
+    address
+    createdAt
+    id
+    lastScannedAt
+    owner
+    profileId
+    updatedAt
+    __typename
+  }
+}
+` as GeneratedQuery<
+  APITypes.GetNfcScanQueryVariables,
+  APITypes.GetNfcScanQuery
+>;
 export const getProfile = /* GraphQL */ `query GetProfile($id: ID!) {
   getProfile(id: $id) {
     about_me
@@ -34,6 +50,8 @@ export const getProfile = /* GraphQL */ `query GetProfile($id: ID!) {
     secondary_contact_phone
     secondary_contact_position
     seeker_rank
+    stripeAccountId
+    stripeOnboarded
     updatedAt
     __typename
   }
@@ -67,6 +85,21 @@ export const getQuest = /* GraphQL */ `query GetQuest($id: ID!) {
   }
 }
 ` as GeneratedQuery<APITypes.GetQuestQueryVariables, APITypes.GetQuestQuery>;
+export const getTagLocation = /* GraphQL */ `query GetTagLocation($id: ID!) {
+  getTagLocation(id: $id) {
+    address
+    createdAt
+    id
+    lat
+    lng
+    updatedAt
+    __typename
+  }
+}
+` as GeneratedQuery<
+  APITypes.GetTagLocationQueryVariables,
+  APITypes.GetTagLocationQuery
+>;
 export const getUserQuest = /* GraphQL */ `query GetUserQuest($id: ID!) {
   getUserQuest(id: $id) {
     createdAt
@@ -127,6 +160,8 @@ export const listLeaderboard = /* GraphQL */ `query ListLeaderboard(
       secondary_contact_phone
       secondary_contact_position
       seeker_rank
+      stripeAccountId
+      stripeOnboarded
       updatedAt
       __typename
     }
@@ -137,6 +172,30 @@ export const listLeaderboard = /* GraphQL */ `query ListLeaderboard(
 ` as GeneratedQuery<
   APITypes.ListLeaderboardQueryVariables,
   APITypes.ListLeaderboardQuery
+>;
+export const listNfcScans = /* GraphQL */ `query ListNfcScans(
+  $filter: ModelNfcScanFilterInput
+  $limit: Int
+  $nextToken: String
+) {
+  listNfcScans(filter: $filter, limit: $limit, nextToken: $nextToken) {
+    items {
+      address
+      createdAt
+      id
+      lastScannedAt
+      owner
+      profileId
+      updatedAt
+      __typename
+    }
+    nextToken
+    __typename
+  }
+}
+` as GeneratedQuery<
+  APITypes.ListNfcScansQueryVariables,
+  APITypes.ListNfcScansQuery
 >;
 export const listProfiles = /* GraphQL */ `query ListProfiles(
   $filter: ModelProfileFilterInput
@@ -169,6 +228,8 @@ export const listProfiles = /* GraphQL */ `query ListProfiles(
       secondary_contact_phone
       secondary_contact_position
       seeker_rank
+      stripeAccountId
+      stripeOnboarded
       updatedAt
       __typename
     }
@@ -215,6 +276,29 @@ export const listQuests = /* GraphQL */ `query ListQuests(
 ` as GeneratedQuery<
   APITypes.ListQuestsQueryVariables,
   APITypes.ListQuestsQuery
+>;
+export const listTagLocations = /* GraphQL */ `query ListTagLocations(
+  $filter: ModelTagLocationFilterInput
+  $limit: Int
+  $nextToken: String
+) {
+  listTagLocations(filter: $filter, limit: $limit, nextToken: $nextToken) {
+    items {
+      address
+      createdAt
+      id
+      lat
+      lng
+      updatedAt
+      __typename
+    }
+    nextToken
+    __typename
+  }
+}
+` as GeneratedQuery<
+  APITypes.ListTagLocationsQueryVariables,
+  APITypes.ListTagLocationsQuery
 >;
 export const listUserQuests = /* GraphQL */ `query ListUserQuests(
   $filter: ModelUserQuestFilterInput

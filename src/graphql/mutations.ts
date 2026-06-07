@@ -34,6 +34,25 @@ export const becomePending = /* GraphQL */ `mutation BecomePending(
   APITypes.BecomePendingMutationVariables,
   APITypes.BecomePendingMutation
 >;
+export const createNfcScan = /* GraphQL */ `mutation CreateNfcScan(
+  $condition: ModelNfcScanConditionInput
+  $input: CreateNfcScanInput!
+) {
+  createNfcScan(condition: $condition, input: $input) {
+    address
+    createdAt
+    id
+    lastScannedAt
+    owner
+    profileId
+    updatedAt
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.CreateNfcScanMutationVariables,
+  APITypes.CreateNfcScanMutation
+>;
 export const createProfile = /* GraphQL */ `mutation CreateProfile(
   $condition: ModelProfileConditionInput
   $input: CreateProfileInput!
@@ -63,6 +82,8 @@ export const createProfile = /* GraphQL */ `mutation CreateProfile(
     secondary_contact_phone
     secondary_contact_position
     seeker_rank
+    stripeAccountId
+    stripeOnboarded
     updatedAt
     __typename
   }
@@ -136,6 +157,24 @@ export const createStripeSession = /* GraphQL */ `mutation CreateStripeSession(
   APITypes.CreateStripeSessionMutationVariables,
   APITypes.CreateStripeSessionMutation
 >;
+export const createTagLocation = /* GraphQL */ `mutation CreateTagLocation(
+  $condition: ModelTagLocationConditionInput
+  $input: CreateTagLocationInput!
+) {
+  createTagLocation(condition: $condition, input: $input) {
+    address
+    createdAt
+    id
+    lat
+    lng
+    updatedAt
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.CreateTagLocationMutationVariables,
+  APITypes.CreateTagLocationMutation
+>;
 export const createUserQuest = /* GraphQL */ `mutation CreateUserQuest(
   $condition: ModelUserQuestConditionInput
   $input: CreateUserQuestInput!
@@ -157,6 +196,25 @@ export const createUserQuest = /* GraphQL */ `mutation CreateUserQuest(
 ` as GeneratedMutation<
   APITypes.CreateUserQuestMutationVariables,
   APITypes.CreateUserQuestMutation
+>;
+export const deleteNfcScan = /* GraphQL */ `mutation DeleteNfcScan(
+  $condition: ModelNfcScanConditionInput
+  $input: DeleteNfcScanInput!
+) {
+  deleteNfcScan(condition: $condition, input: $input) {
+    address
+    createdAt
+    id
+    lastScannedAt
+    owner
+    profileId
+    updatedAt
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.DeleteNfcScanMutationVariables,
+  APITypes.DeleteNfcScanMutation
 >;
 export const deleteProfile = /* GraphQL */ `mutation DeleteProfile(
   $condition: ModelProfileConditionInput
@@ -187,6 +245,8 @@ export const deleteProfile = /* GraphQL */ `mutation DeleteProfile(
     secondary_contact_phone
     secondary_contact_position
     seeker_rank
+    stripeAccountId
+    stripeOnboarded
     updatedAt
     __typename
   }
@@ -225,6 +285,24 @@ export const deleteQuest = /* GraphQL */ `mutation DeleteQuest(
 ` as GeneratedMutation<
   APITypes.DeleteQuestMutationVariables,
   APITypes.DeleteQuestMutation
+>;
+export const deleteTagLocation = /* GraphQL */ `mutation DeleteTagLocation(
+  $condition: ModelTagLocationConditionInput
+  $input: DeleteTagLocationInput!
+) {
+  deleteTagLocation(condition: $condition, input: $input) {
+    address
+    createdAt
+    id
+    lat
+    lng
+    updatedAt
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.DeleteTagLocationMutationVariables,
+  APITypes.DeleteTagLocationMutation
 >;
 export const deleteUserQuest = /* GraphQL */ `mutation DeleteUserQuest(
   $condition: ModelUserQuestConditionInput
@@ -327,6 +405,25 @@ export const sendQuestCreatorMessage = /* GraphQL */ `mutation SendQuestCreatorM
   APITypes.SendQuestCreatorMessageMutationVariables,
   APITypes.SendQuestCreatorMessageMutation
 >;
+export const updateNfcScan = /* GraphQL */ `mutation UpdateNfcScan(
+  $condition: ModelNfcScanConditionInput
+  $input: UpdateNfcScanInput!
+) {
+  updateNfcScan(condition: $condition, input: $input) {
+    address
+    createdAt
+    id
+    lastScannedAt
+    owner
+    profileId
+    updatedAt
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.UpdateNfcScanMutationVariables,
+  APITypes.UpdateNfcScanMutation
+>;
 export const updateProfile = /* GraphQL */ `mutation UpdateProfile(
   $condition: ModelProfileConditionInput
   $input: UpdateProfileInput!
@@ -356,6 +453,8 @@ export const updateProfile = /* GraphQL */ `mutation UpdateProfile(
     secondary_contact_phone
     secondary_contact_position
     seeker_rank
+    stripeAccountId
+    stripeOnboarded
     updatedAt
     __typename
   }
@@ -394,6 +493,24 @@ export const updateQuest = /* GraphQL */ `mutation UpdateQuest(
 ` as GeneratedMutation<
   APITypes.UpdateQuestMutationVariables,
   APITypes.UpdateQuestMutation
+>;
+export const updateTagLocation = /* GraphQL */ `mutation UpdateTagLocation(
+  $condition: ModelTagLocationConditionInput
+  $input: UpdateTagLocationInput!
+) {
+  updateTagLocation(condition: $condition, input: $input) {
+    address
+    createdAt
+    id
+    lat
+    lng
+    updatedAt
+    __typename
+  }
+}
+` as GeneratedMutation<
+  APITypes.UpdateTagLocationMutationVariables,
+  APITypes.UpdateTagLocationMutation
 >;
 export const updateUserQuest = /* GraphQL */ `mutation UpdateUserQuest(
   $condition: ModelUserQuestConditionInput
