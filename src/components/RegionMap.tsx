@@ -37,7 +37,7 @@ function isLongitude(value: number): boolean {
 
 export default function RegionMap({
   coordinates,
-  zoom = 5,
+  zoom = 4,
   className,
   markerLabel,
   tagLocations,
