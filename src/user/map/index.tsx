@@ -14,7 +14,11 @@ import { useQuery } from '@tanstack/react-query'
 import { generateClient } from 'aws-amplify/api'
 import type { GraphQLResult } from 'aws-amplify/api'
 
-const client = generateClient()
+let apiClient: any = null
+const getApiClient = () => {
+  if (!apiClient) apiClient = generateClient()
+  return apiClient
+}
 
 const listTagLocations = /* GraphQL */ `query ListTagLocations {
   listTagLocations {
@@ -62,7 +66,7 @@ export default function SeekerMap() {
   const { data: tagLocationsData } = useQuery({
     queryKey: ['tagLocations'],
     queryFn: async () => {
-      const result = (await client.graphql({
+      const result = (await getApiClient().graphql({
         query: listTagLocations,
       })) as GraphQLResult<ListTagLocationsResponse>
       return result.data?.listTagLocations?.items || []

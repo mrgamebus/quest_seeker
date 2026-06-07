@@ -37,7 +37,7 @@ export default function QuestPage() {
   const profileMap: Record<string, Profile> = useMemo(() => {
     const map: Record<string, Profile> = {}
 
-    profiles?.forEach((p) => {
+    profiles?.forEach((p: Profile | undefined) => {
       if (!p?.id) return
 
       map[p.id] = {

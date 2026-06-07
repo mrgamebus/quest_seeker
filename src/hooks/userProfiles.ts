@@ -18,13 +18,17 @@ import { updateProfile, createProfile } from '@/graphql/mutations'
 import { getCurrentUser } from 'aws-amplify/auth'
 import { profileKeys } from '@/queryKeys'
 
-const client = generateClient()
+let apiClient: any = null
+const getApiClient = () => {
+  if (!apiClient) apiClient = generateClient()
+  return apiClient
+}
 
 export const useProfileList = () => {
   return useQuery({
     queryKey: ['profiles'],
     queryFn: async () => {
-      const result = await client.graphql({ query: listProfiles })
+      const result = await getApiClient().graphql({ query: listProfiles })
       return result.data.listProfiles.items
     },
   })
@@ -42,11 +46,11 @@ export const useProfile = (
     queryFn: async () => {
       if (!id) return null
 
-      const result = await client.graphql<GraphQLResult<GetProfileQuery>>({
+      const result = (await getApiClient().graphql({
         query: getProfile,
         variables: { id },
         authMode: 'userPool',
-      })
+      })) as GraphQLResult<GetProfileQuery>
 
       if ('data' in result) {
         return result.data?.getProfile ?? null
@@ -64,16 +68,16 @@ export const useCurrentUserProfile = () => {
     queryFn: async () => {
       const { userId, signInDetails } = await getCurrentUser()
 
-      const res = await client.graphql<GetProfileQuery>({
+      const res = (await getApiClient().graphql({
         query: getProfile,
         variables: { id: userId },
         authMode: 'userPool',
-      })
+      })) as GraphQLResult<GetProfileQuery>
 
       let profile = 'data' in res ? (res.data?.getProfile ?? null) : null
 
       if (!profile) {
-        const createRes = await client.graphql<CreateProfileMutation>({
+        const createRes = (await getApiClient().graphql({
           query: createProfile,
           variables: {
             input: {
@@ -85,7 +89,7 @@ export const useCurrentUserProfile = () => {
             },
           },
           authMode: 'userPool',
-        })
+        })) as GraphQLResult<CreateProfileMutation>
 
         profile =
           'data' in createRes ? (createRes.data?.createProfile ?? null) : null
@@ -118,7 +122,7 @@ export const useUpdateProfile = (
     UpdateProfileMutationVariables
   >({
     mutationFn: async (variables) => {
-      const result = (await client.graphql<UpdateProfileMutation>({
+      const result = (await getApiClient().graphql({
         query: updateProfile,
         variables,
         authMode: 'userPool',
@@ -150,7 +154,7 @@ export const useUpdateSeeker = () => {
 
   return useMutation({
     mutationFn: async (variables: UpdateProfileMutationVariables) => {
-      const result = (await client.graphql<UpdateProfileMutation>({
+      const result = (await getApiClient().graphql({
         query: updateProfile,
         variables,
       })) as { data: UpdateProfileMutation }
@@ -170,7 +174,7 @@ export const useAllUsers = () => {
   return useQuery({
     queryKey: ['profiles', 'all'],
     queryFn: async () => {
-      const result = await client.graphql({
+      const result = await getApiClient().graphql({
         query: listProfiles,
         authMode: 'userPool',
       })
