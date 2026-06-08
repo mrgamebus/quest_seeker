@@ -51,7 +51,7 @@ export default function AccountPage() {
   if (isLoading || !currentProfile) return null
 
   const admin = currentProfile?.role === 'Admin'
-  const isComplete = isProfileComplete(currentProfile)
+  const isComplete = isProfileComplete(currentProfile as Profile)
   const forceNameUpdate = currentProfile?.full_name === currentProfile?.email
   const handleUpdate = async (updates: Partial<Profile>) => {
     const input: any = {

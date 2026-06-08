@@ -1,5 +1,5 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import { Routes, Route, Navigate, useNavigate } from 'react-router-dom'
+import { Routes, Route, Navigate, useNavigate, useLocation } from 'react-router-dom'
 import { Authenticator, useAuthenticator } from '@aws-amplify/ui-react'
 import { Toaster } from '@/components/ui/toaster'
 import IndexPage from './app/main'
@@ -11,7 +11,6 @@ import CreateQuestPage from './user/quest/create'
 import QuestDetailPage from './components/QuestDetailPage'
 import Help from './user/help'
 import SeekerMap from './user/map'
-import ScanHandler from './user/nfc/ScanHandler'
 import Leader from './user/leader'
 import logo from '@/assets/images/no_ordinary.png'
 import bg from '@/assets/images/background_main.jpeg'
@@ -29,6 +28,21 @@ function UserRoutes() {
       <Toaster />
     </QueryClientProvider>
   )
+}
+
+function NfcRedirect() {
+  const navigate = useNavigate()
+  const location = useLocation()
+
+  useEffect(() => {
+    const params = new URLSearchParams(location.search)
+    if (!params.has('nfc')) {
+      params.set('nfc', '1')
+    }
+    navigate(`/user/map?${params.toString()}`, { replace: true })
+  }, [location.search, navigate])
+
+  return null
 }
 
 function UserRoutesInner() {
@@ -71,7 +85,7 @@ export default function App() {
     <Routes>
       {/* Public landing */}
       <Route path="/" element={<IndexPage />} />
-      <Route path="/nfc/*" element={<ScanHandler />} />
+      <Route path="/nfc/*" element={<NfcRedirect />} />
       <Route path="/help" element={<Help />} />
       <Route path="legal" element={<Legal />} />
       <Route path="/support" element={<Support />} />

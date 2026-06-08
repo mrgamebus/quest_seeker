@@ -1,14 +1,39 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { useCurrentUserProfile } from '@/hooks/userProfiles'
 
 export default function ScanHandler() {
   const navigate = useNavigate()
   const [message, setMessage] = useState('Processing scan...')
-  const { currentProfile, currentError, isLoading } = useCurrentUserProfile()
+  const [profileId, setProfileId] = useState<string | null | undefined>(undefined)
+  const [authChecked, setAuthChecked] = useState(false)
 
   useEffect(() => {
-    if (isLoading) return
+    let cancelled = false
+
+    async function loadAuth() {
+      try {
+        const amplifyModule = await import('aws-amplify')
+        const Auth = (amplifyModule as any).Auth
+        if (!Auth) {
+          throw new Error('Auth not available')
+        }
+        const user: any = await Auth.currentAuthenticatedUser()
+        if (!cancelled) setProfileId(user?.username ?? null)
+      } catch {
+        if (!cancelled) setProfileId(null)
+      } finally {
+        if (!cancelled) setAuthChecked(true)
+      }
+    }
+
+    loadAuth()
+    return () => {
+      cancelled = true
+    }
+  }, [])
+
+  useEffect(() => {
+    if (!authChecked) return
 
     const params = new URLSearchParams(window.location.search)
     const address = params.get('address')
@@ -29,7 +54,6 @@ export default function ScanHandler() {
         targetParams.set('address', address)
       }
 
-      const profileId = currentProfile?.id
       if (!profileId) {
         setMessage('Not signed in — redirecting to the map. Sign in to earn points.')
         setTimeout(() => {
@@ -68,7 +92,7 @@ export default function ScanHandler() {
     }
 
     handleScan()
-  }, [navigate, currentProfile, currentError, isLoading])
+  }, [navigate, authChecked, profileId])
 
   return (
     <div className="min-h-screen flex items-center justify-center">
