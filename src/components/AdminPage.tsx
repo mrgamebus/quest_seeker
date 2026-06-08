@@ -138,28 +138,12 @@ export default function AdminPage() {
     setEditForm((prev) => ({ ...prev, [field]: value }))
   }
 
-  // const Field = ({ label, field }: { label: string; field: keyof Profile }) => (
-  //   <div>
-  //     <h3 className="font-semibold text-sm text-muted-foreground">{label}</h3>
-  //     {isEditing ? (
-  //       <Input
-  //         value={(editForm[field] ?? '') as string}
-  //         onChange={(e) =>
-  //           setEditForm((prev) => ({ ...prev, [field]: e.target.value }))
-  //         }
-  //       />
-  //     ) : (
-  //       <p>{selectedUser?.[field] || 'N/A'}</p>
-  //     )}
-  //   </div>
-  // )
-
   const filteredUsers =
     view === 'pending'
       ? pendingUsers
       : allUsers?.filter((user: Profile) => user.role === view.slice(0, -1))
 
-  const filteredAndSearchedUsers = filteredUsers?.filter((user) => {
+  const filteredAndSearchedUsers = filteredUsers?.filter((user: Profile) => {
     if (!searchTerm) return true
     const search = searchTerm.toLowerCase()
     const name = user.full_name?.toLowerCase() || ''
@@ -261,7 +245,7 @@ export default function AdminPage() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {users.map((user) => (
+              {users.map((user: Profile) => (
                 <TableRow
                   key={user.id}
                   className="cursor-pointer hover:bg-muted/50"
