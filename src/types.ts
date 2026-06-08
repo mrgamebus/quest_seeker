@@ -43,29 +43,33 @@ export type Rank =
   | 'navigator'
 
 export type Profile = {
+  __typename?: 'Profile'
   id: string
-  full_name: string
-  email: string
-  phone: string
-  organization_name: string
-  registration_number: string
-  charity_number: string
-  business_type: string
-  organization_description: string
-  primary_contact_name: string
-  primary_contact_position: string
-  primary_contact_phone: string
-  secondary_contact_name: string
-  secondary_contact_position: string
-  secondary_contact_phone: string
-  about_me: string
-  image: string
-  image_thumbnail: string
-  role: Role
-  points: number
-  seeker_rank: Rank
-  stripeAccountId?: string
-  stripeOnboarded?: boolean
+  createdAt?: string
+  updatedAt?: string
+  owner?: string | null
+  full_name?: string | null
+  email?: string | null
+  phone?: string | null
+  organization_name?: string | null
+  registration_number?: string | null
+  charity_number?: string | null
+  business_type?: string | null
+  organization_description?: string | null
+  primary_contact_name?: string | null
+  primary_contact_position?: string | null
+  primary_contact_phone?: string | null
+  secondary_contact_name?: string | null
+  secondary_contact_position?: string | null
+  secondary_contact_phone?: string | null
+  about_me?: string | null
+  image?: string | null
+  image_thumbnail?: string | null
+  role?: Role | null
+  points?: number | null
+  seeker_rank?: Rank | null
+  stripeAccountId?: string | null
+  stripeOnboarded?: boolean | null
 }
 
 export interface MinimalQuestParticipant {
