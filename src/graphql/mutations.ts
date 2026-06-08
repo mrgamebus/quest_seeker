@@ -112,6 +112,7 @@ export const createQuest = /* GraphQL */ `mutation CreateQuest(
     quest_sponsor
     quest_start_at
     quest_tasks
+    quest_terms
     quest_winners
     region
     status
@@ -275,6 +276,7 @@ export const deleteQuest = /* GraphQL */ `mutation DeleteQuest(
     quest_sponsor
     quest_start_at
     quest_tasks
+    quest_terms
     quest_winners
     region
     status
@@ -350,6 +352,7 @@ export const mutateQuest = /* GraphQL */ `mutation MutateQuest(
   $startAt: AWSDateTime
   $status: String
   $tasks: AWSJSON
+  $terms: String
 ) {
   mutateQuest(
     action: $action
@@ -368,6 +371,7 @@ export const mutateQuest = /* GraphQL */ `mutation MutateQuest(
     startAt: $startAt
     status: $status
     tasks: $tasks
+    terms: $terms
   ) {
     questId
     status
@@ -483,6 +487,7 @@ export const updateQuest = /* GraphQL */ `mutation UpdateQuest(
     quest_sponsor
     quest_start_at
     quest_tasks
+    quest_terms
     quest_winners
     region
     status

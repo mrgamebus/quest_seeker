@@ -64,6 +64,7 @@ export default function CreateQuestPage() {
 
   const [name, setName] = useState('')
   const [details, setDetails] = useState('')
+  const [terms, setTerms] = useState('')
   const [imageFile, setImageFile] = useState<File | null>(null)
   const [previewImage, setPreviewImage] = useState<string>('')
   const [oldImagePath, setOldImagePath] = useState<string>('')
@@ -100,6 +101,7 @@ export default function CreateQuestPage() {
     setOldImageThumbPath(updatingQuest.quest_image_thumb ?? '')
     setName(updatingQuest.quest_name ?? '')
     setDetails(updatingQuest.quest_details ?? '')
+    setTerms(updatingQuest.quest_terms ?? '')
     setPreviewImage(updatingQuest.quest_image ?? '')
     setStartDateTime(updatingQuest.quest_start_at ?? startDateTime)
     setEndDateTime(updatingQuest.quest_end_at ?? endDateTime)
@@ -324,6 +326,7 @@ export default function CreateQuestPage() {
         prizes: prizes?.length ? JSON.stringify(prizes) : null,
         sponsors: sponsors?.length ? JSON.stringify(sponsors) : null,
         tasks: tasks?.length ? JSON.stringify(tasks) : null,
+        terms,
       }
 
       let currentQuestId = effectiveQuestId
@@ -806,6 +809,7 @@ export default function CreateQuestPage() {
         {step === 10 && (
           <>
             <TaskCreatorButton questUpdates={tasks} onNewTask={setTasks} />
+
             <div className="flex justify-between mt-4">
               <Button
                 onClick={() => {
@@ -818,6 +822,29 @@ export default function CreateQuestPage() {
               >
                 Back
               </Button>
+              <Button
+                variant="outline"
+                disabled={!canEdit}
+                onClick={() => saveQuest(QuestStatus.draft)}
+              >
+                {updatingQuest?.status === QuestStatus.published
+                  ? 'Save Changes'
+                  : 'Save as Draft'}
+              </Button>
+              <Button onClick={next}>Next</Button>
+            </div>
+          </>
+        )}
+
+        {step === 11 && (
+          <>
+            <Textarea
+              value={terms}
+              onChange={(e) => setTerms(e.target.value)}
+              className="border rounded p-2 w-full"
+            />
+            <div className="flex justify-between mt-4">
+              <Button onClick={prev}>Back</Button>
               {updatingQuest?.status !== QuestStatus.published && (
                 <Button
                   variant="outline"

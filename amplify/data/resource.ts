@@ -113,6 +113,7 @@ export const schema = a
         quest_winners: a.string(),
         status: a.string(),
         creator_message: a.string(),
+        terms: a.string(),
       })
       .returns(a.ref('MutateQuestResponse'))
       .authorization((allow) => [allow.groups(['creator', 'Admin'])])
@@ -147,6 +148,7 @@ export const schema = a
       .model({
         quest_name: a.string(),
         quest_details: a.string(),
+        quest_terms: a.string(),
         quest_image: a.string(),
         quest_image_thumb: a.string(),
         quest_start_at: a.datetime(),
