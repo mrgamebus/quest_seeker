@@ -5,7 +5,7 @@ import { Input } from './ui/input'
 interface QuestNameStepProps {
   value: string
   onChange: (value: string) => void
-  onBack: () => void
+  backQuest: () => void
   onNext: () => void
   onSave: () => void
   canEdit: boolean
@@ -15,7 +15,7 @@ interface QuestNameStepProps {
 export function QuestNameStep({
   value,
   onChange,
-  onBack,
+  backQuest,
   onNext,
   onSave,
   canEdit,
@@ -23,7 +23,7 @@ export function QuestNameStep({
 }: QuestNameStepProps) {
   return (
     <>
-      <StepHeader title="Name of the quest" onBack={onBack} />
+      <StepHeader title="Name of the quest" onBack={backQuest} />
       <Input value={value} onChange={(e) => onChange(e.target.value)} />
       <StepNavigation
         onNext={onNext}

@@ -216,7 +216,7 @@ export default function QuestDetailPage() {
     return resolved
   }
 
-  const isReady = pdfReadyById[currentUserProfile?.id]
+  const isReady = pdfReadyById[currentUserProfile?.id ?? '']
 
   const completedParticipants = participantProfiles.filter((profile) => {
     const userQuest = questParticipants?.find(
@@ -428,7 +428,7 @@ export default function QuestDetailPage() {
   const isOwner =
     currentUserProfile?.id === quest.creator_id &&
     (currentUserProfile?.role === 'creator' ||
-      currentUserProfile.role === 'Admin')
+      currentUserProfile?.role === 'Admin')
 
   const isAdmin = currentUserProfile?.role === 'Admin'
 
@@ -671,7 +671,7 @@ export default function QuestDetailPage() {
               <ExpiredQuestSidebar
                 isOwner={isOwner}
                 quest={quest}
-                currentUserProfile={currentUserProfile}
+                currentUserProfile={currentUserProfile ?? undefined}
                 completedParticipants={completedParticipants}
                 questParticipants={
                   questParticipants as MinimalQuestParticipant[]

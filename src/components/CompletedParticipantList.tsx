@@ -61,7 +61,7 @@ export default function CompletedParticipantsList({
         return aDuration - bDuration
       }
 
-      return a.full_name.localeCompare(b.full_name)
+      return (a.full_name ?? '').localeCompare(b.full_name ?? '')
     })
   }, [completedParticipants, questParticipants])
 
