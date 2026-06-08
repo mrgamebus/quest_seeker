@@ -5,15 +5,18 @@ import { Toolbar } from '@/components/Toolbar'
 import SignOutButton from '@/components/SignOutButton'
 import { Home } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { useEffect, useState } from 'react'
 import { useCurrentUserProfile } from '@/hooks/userProfiles'
 import { useToast } from '@/hooks/use-toast'
 import RemoteImage from '@/components/RemoteImage'
 import placeHold from '@/assets/images/placeholder_view_vector.svg'
-import { useQuery } from '@tanstack/react-query'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { generateClient } from 'aws-amplify/api'
 import type { GraphQLResult } from 'aws-amplify/api'
+import { createTagLocation } from '@/graphql/mutations'
+import type { CreateTagLocationInput } from '@/graphql/API'
 
 let apiClient: any = null
 const getApiClient = () => {
@@ -60,10 +63,12 @@ export default function SeekerMap() {
   const { currentProfile } = useCurrentUserProfile()
   const location = useLocation()
   const { toast } = useToast()
+  const queryClient = useQueryClient()
   const [coordinates, setCoordinates] = useState<null | { lat: number; lng: number }>(null)
   const [markerLabel, setMarkerLabel] = useState<string | undefined>(undefined)
   const [highlightedTagId, setHighlightedTagId] = useState<string | undefined>(undefined)
   const [hasProcessedNfcScan, setHasProcessedNfcScan] = useState(false)
+  const [newAddress, setNewAddress] = useState('')
 
   // Fetch all tag locations
   const { data: tagLocationsData } = useQuery({
@@ -75,6 +80,92 @@ export default function SeekerMap() {
       return result.data?.listTagLocations?.items || []
     },
   })
+
+  const createTagLocationMutation = useMutation<TagLocation, Error, string>({
+    mutationFn: async (addressToSave: string) => {
+      const normalizedAddress = addressToSave.trim()
+      const params = new URLSearchParams({
+        format: 'json',
+        limit: '1',
+        q: normalizedAddress,
+      })
+      const url = `https://nominatim.openstreetmap.org/search?${params.toString()}`
+      const response = await fetch(url)
+      const results = (await response.json()) as Array<{ lat: string; lon: string }>
+      const geo = results?.[0]
+      const lat = geo ? Number(geo.lat) : undefined
+      const lng = geo ? Number(geo.lon) : undefined
+
+      const input: CreateTagLocationInput = {
+        id: normalizedAddress,
+        address: normalizedAddress,
+        lat: lat && !Number.isNaN(lat) ? lat : undefined,
+        lng: lng && !Number.isNaN(lng) ? lng : undefined,
+      }
+
+      const createResult = (await getApiClient().graphql({
+        query: createTagLocation,
+        variables: { input },
+        authMode: 'userPool',
+      })) as GraphQLResult<{
+        createTagLocation?: TagLocation
+      }>
+
+      if (!createResult.data?.createTagLocation) {
+        throw new Error('Failed to save address')
+      }
+
+      return createResult.data.createTagLocation
+    },
+    onSuccess: (savedLocation: TagLocation) => {
+      queryClient.invalidateQueries({ queryKey: ['tagLocations'] })
+      setHighlightedTagId(savedLocation.id)
+      if (savedLocation.lat && savedLocation.lng) {
+        setCoordinates({ lat: savedLocation.lat, lng: savedLocation.lng })
+      }
+      setMarkerLabel(savedLocation.address)
+      toast({
+        title: 'Address saved',
+        description: 'This location is now available for NFC scans.',
+      })
+    },
+    onError: (error: Error) => {
+      toast({
+        title: 'Save failed',
+        description:
+          error?.message || 'Unable to save this address.',
+        variant: 'destructive',
+      })
+    },
+  })
+
+  const handleSaveAddress = async () => {
+    const addressToSave = newAddress.trim()
+    if (!addressToSave) {
+      toast({ title: 'Enter an address', description: 'Please type an address first.' })
+      return
+    }
+
+    const alreadySaved = tagLocationsData?.find(
+      (tag) => tag.address?.toLowerCase().trim() === addressToSave.toLowerCase().trim(),
+    )
+
+    if (alreadySaved) {
+      setHighlightedTagId(alreadySaved.id)
+      if (alreadySaved.lat && alreadySaved.lng) {
+        setCoordinates({ lat: alreadySaved.lat, lng: alreadySaved.lng })
+      }
+      setMarkerLabel(alreadySaved.address)
+      toast({
+        title: 'Already saved',
+        description: 'This address is already in the database.',
+      })
+      return
+    }
+
+    await createTagLocationMutation.mutateAsync(addressToSave)
+    setNewAddress('')
+  }
 
   useEffect(() => {
     let active = true
@@ -258,6 +349,30 @@ export default function SeekerMap() {
               <SignOutButton />
             </Toolbar>
           </div>
+
+          <div className="px-4 py-4 border-b border-white/20 bg-white/80">
+            <div className="max-w-3xl mx-auto flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+              <div className="flex-1 min-w-0">
+                <label className="block text-sm font-medium text-slate-700 mb-2">
+                  Add a QuestMark address for NFC scans
+                </label>
+                <Input
+                  value={newAddress}
+                  onChange={(event) => setNewAddress(event.target.value)}
+                  placeholder="Enter an address to save for NFC scans"
+                />
+              </div>
+              <Button
+                className="mt-3 sm:mt-0 sm:ml-4"
+                variant="yellow"
+                onClick={handleSaveAddress}
+                disabled={createTagLocationMutation.isPending}
+              >
+                {createTagLocationMutation.isPending ? 'Saving…' : 'Save Address'}
+              </Button>
+            </div>
+          </div>
+
           <RegionMap
             className="mt-6 w-full max-w-xl mx-auto"
             coordinates={coordinates ?? undefined}
