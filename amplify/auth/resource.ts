@@ -6,5 +6,5 @@ export const auth = defineAuth({
   triggers: {
     postConfirmation: postRegistration,
   },
-  groups: ['creator', 'Admin'],
+  groups: ['creator', 'Admin', 'seeker'],
 })

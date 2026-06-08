@@ -350,7 +350,7 @@ export default function SeekerMap() {
             </Toolbar>
           </div>
 
-          {currentProfile?.role === 'creator' && (
+          {currentProfile && (
             <div className="px-4 py-4 border-b border-white/20 bg-white/80">
               <div className="max-w-3xl mx-auto flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                 <div className="flex-1 min-w-0">
