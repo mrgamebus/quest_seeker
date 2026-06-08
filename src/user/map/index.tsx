@@ -350,28 +350,30 @@ export default function SeekerMap() {
             </Toolbar>
           </div>
 
-          <div className="px-4 py-4 border-b border-white/20 bg-white/80">
-            <div className="max-w-3xl mx-auto flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-              <div className="flex-1 min-w-0">
-                <label className="block text-sm font-medium text-slate-700 mb-2">
-                  Add a QuestMark address for NFC scans
-                </label>
-                <Input
-                  value={newAddress}
-                  onChange={(event) => setNewAddress(event.target.value)}
-                  placeholder="Enter an address to save for NFC scans"
-                />
+          {currentProfile?.role === 'creator' && (
+            <div className="px-4 py-4 border-b border-white/20 bg-white/80">
+              <div className="max-w-3xl mx-auto flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                <div className="flex-1 min-w-0">
+                  <label className="block text-sm font-medium text-slate-700 mb-2">
+                    Add a QuestMark address for NFC scans
+                  </label>
+                  <Input
+                    value={newAddress}
+                    onChange={(event) => setNewAddress(event.target.value)}
+                    placeholder="Enter an address to save for NFC scans"
+                  />
+                </div>
+                <Button
+                  className="mt-3 sm:mt-0 sm:ml-4"
+                  variant="yellow"
+                  onClick={handleSaveAddress}
+                  disabled={createTagLocationMutation.isPending}
+                >
+                  {createTagLocationMutation.isPending ? 'Saving…' : 'Save Address'}
+                </Button>
               </div>
-              <Button
-                className="mt-3 sm:mt-0 sm:ml-4"
-                variant="yellow"
-                onClick={handleSaveAddress}
-                disabled={createTagLocationMutation.isPending}
-              >
-                {createTagLocationMutation.isPending ? 'Saving…' : 'Save Address'}
-              </Button>
             </div>
-          </div>
+          )}
 
           <RegionMap
             className="mt-6 w-full max-w-xl mx-auto"
