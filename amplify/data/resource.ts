@@ -199,6 +199,8 @@ export const schema = a
           'trailblazer',
           'navigator',
         ]),
+        stripeAccountId: a.string(),
+        stripeOnboarded: a.boolean(),
       })
       .secondaryIndexes((index) => [
         index('leaderboard').sortKeys(['points']).queryField('listLeaderboard'),
