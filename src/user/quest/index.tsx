@@ -103,9 +103,9 @@ export default function QuestPage() {
   }, [validQuests, searchTerm, profileMap])
 
   const joinedFilteredQuests = useMemo(() => {
-    if (showJoined) return filteredQuests
+    if (!showJoined) return filteredQuests
     return filteredQuests.filter((q) =>
-      userQuests?.some((uq) => uq.questId !== q.id),
+      userQuests?.some((uq) => uq.questId === q.id),
     )
   }, [filteredQuests, showJoined, userQuests])
 
@@ -244,7 +244,7 @@ export default function QuestPage() {
                   checked={showJoined}
                   onChange={(e) => setShowJoined(e.target.checked)}
                 />
-                <span className="text-sm">Include quests I've joined</span>
+                <span className="text-sm">Show only quests I've joined</span>
               </label>
 
               {/* Sort Dropdown */}

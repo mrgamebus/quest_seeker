@@ -63,11 +63,16 @@ export default function ParticipantCount({
                         fallback={placeHold}
                         className="w-full h-full rounded-full object-cover"
                       />
-                      <SeekerRank profile={profile} />
                     </div>
                     <div className="flex flex-col flex-1 min-w-0">
-                      <span className="text-sm font-medium truncate">
+                      <span className="flex items-center gap-1 text-sm font-medium min-w-0">
                         <strong>{profile.full_name || 'Unknown'}</strong>
+                        <SeekerRank
+                          profile={profile}
+                          className="relative w-5 h-5 shrink-0 group z-60"
+                          imgName="w-5 h-5 rounded-full border-2 border-white object-cover shadow-sm transition-transform duration-200 group-hover:scale-125"
+                          rankName="absolute left-1/2 -translate-x-1/2 top-6 hidden group-hover:block bg-black/75 text-white text-xs px-2 py-0.5 rounded-full whitespace-nowrap capitalize z-60"
+                        />
                       </span>
                       <span className="text-xs text-gray-600 truncate">
                         {profile.about_me || ''}
