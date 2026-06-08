@@ -33,6 +33,7 @@ export default function QuestPage() {
 
   const [searchTerm, setSearchTerm] = useState('')
   const [sortOption, setSortOption] = useState('title')
+  const [showJoined, setShowJoined] = useState(false)
 
   const profileMap: Record<string, Profile> = useMemo(() => {
     const map: Record<string, Profile> = {}
@@ -101,8 +102,15 @@ export default function QuestPage() {
     })
   }, [validQuests, searchTerm, profileMap])
 
+  const joinedFilteredQuests = useMemo(() => {
+    if (showJoined) return filteredQuests
+    return filteredQuests.filter((q) =>
+      userQuests?.some((uq) => uq.questId !== q.id),
+    )
+  }, [filteredQuests, showJoined, userQuests])
+
   const sortedQuests = useMemo(() => {
-    const sorted = [...filteredQuests]
+    const sorted = [...joinedFilteredQuests]
 
     switch (sortOption) {
       case 'title':
@@ -146,7 +154,7 @@ export default function QuestPage() {
     }
 
     return sorted
-  }, [filteredQuests, sortOption])
+  }, [joinedFilteredQuests, sortOption])
 
   const pageSize = 12
   const [visibleCount, setVisibleCount] = useState(pageSize)
@@ -230,7 +238,14 @@ export default function QuestPage() {
               />
 
               {/* Add the Joined Already checkbox here */}
-              <input type="checkbox"></input>
+              <label className="flex items-center gap-2 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={showJoined}
+                  onChange={(e) => setShowJoined(e.target.checked)}
+                />
+                <span className="text-sm">Include quests I've joined</span>
+              </label>
 
               {/* Sort Dropdown */}
               <select
