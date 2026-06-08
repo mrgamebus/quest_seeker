@@ -381,7 +381,7 @@ export default function CreateQuestPage() {
             <QuestNameStep
               value={name}
               onChange={setName}
-              onBack={prev}
+              backQuest={handleClick}
               onNext={next}
               onSave={() => saveQuest(QuestStatus.draft)}
               canEdit={canEdit}
@@ -398,6 +398,7 @@ export default function CreateQuestPage() {
               questImage={updatingQuest?.quest_image}
               placeHold={placeHold}
               imageChange={handleImageChange}
+              backQuest={handleClick}
               onBack={prev}
               onNext={next}
               onSave={() => saveQuest(QuestStatus.draft)}
@@ -838,6 +839,10 @@ export default function CreateQuestPage() {
 
         {step === 11 && (
           <>
+            <StepHeader
+              title="Quest Terms and Conditions"
+              onBack={handleClick}
+            />
             <Textarea
               value={terms}
               onChange={(e) => setTerms(e.target.value)}

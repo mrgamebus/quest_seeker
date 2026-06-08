@@ -7,8 +7,9 @@ interface QuestImageStepProps {
   questImage: string | null | undefined
   placeHold: string
   imageChange: (e: React.ChangeEvent<HTMLInputElement>) => void
-  onBack: () => void
+  backQuest: () => void
   onNext: () => void
+  onBack: () => void
   onSave: () => void
   canEdit: boolean
   isPublished: boolean
@@ -19,15 +20,16 @@ export function QuestImageStep({
   questImage,
   placeHold,
   imageChange,
-  onBack,
+  backQuest,
   onNext,
+  onBack,
   onSave,
   canEdit,
   isPublished,
 }: QuestImageStepProps) {
   return (
     <>
-      <StepHeader title="Name of the quest" onBack={onBack} />
+      <StepHeader title="Name of the quest" onBack={backQuest} />
       {previewImage ? (
         <RemoteImage
           path={previewImage || questImage}
@@ -43,6 +45,7 @@ export function QuestImageStep({
       )}
       <input type="file" accept="image/*" onChange={imageChange} />
       <StepNavigation
+        onBack={onBack}
         onNext={onNext}
         onSave={onSave}
         canEdit={canEdit}
