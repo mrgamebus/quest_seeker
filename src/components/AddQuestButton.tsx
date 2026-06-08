@@ -53,8 +53,8 @@ export default function AddQuestButton({ to }: AddQuestButtonProps) {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          profileId: currentProfile.id,
-          email: currentProfile.email,
+          profileId: currentProfile?.id,
+          email: currentProfile?.email,
         }),
       })
 
