@@ -170,7 +170,7 @@ export default function AccountPage() {
                 onClick={() => navigate('/user/leader')}
                 disabled={forceNameUpdate}
               >
-                Leader Board
+                Leaderboard
               </Button>
               <Button
                 variant="yellow"

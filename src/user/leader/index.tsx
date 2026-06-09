@@ -90,7 +90,7 @@ export default function Leader() {
                 variant={activeTab === 'leader' ? 'default' : 'yellow'}
                 onClick={() => navigate('/user/leader')}
               >
-                Leader Board
+                Leaderboard
               </Button>
 
               <Button variant="yellow" onClick={() => navigate('/user/help')}>
