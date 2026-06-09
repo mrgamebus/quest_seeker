@@ -263,7 +263,7 @@ export default function SeekerMap() {
 
     async function awardScan() {
       try {
-        const resp = await fetch('/api/nfcAward', {
+        const resp = await fetch(`${import.meta.env.VITE_SUPPORT_FUNCTION_URL}nfcAward`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ address, lat, lng, profileId }),
@@ -284,9 +284,12 @@ export default function SeekerMap() {
             })
           }
         } else {
+          // Log full response to console to aid debugging
+          console.error('nfcAward response error', { status: resp.status, body: data })
           toast({
             title: 'NFC Scan failed',
-            description: data?.error || 'Unable to process tag points at this time.',
+            description:
+              data?.error || data?.details || 'Unable to process tag points at this time.',
             variant: 'destructive',
           })
         }

@@ -7,6 +7,7 @@ export default function ScanHandler() {
   const [profileId, setProfileId] = useState<string | null | undefined>(undefined)
   const [authChecked, setAuthChecked] = useState(false)
 
+  // Load Amplify auth
   useEffect(() => {
     let cancelled = false
 
@@ -14,10 +15,7 @@ export default function ScanHandler() {
       try {
         const amplifyModule = await import('aws-amplify')
         const Auth = (amplifyModule as any).Auth
-        if (!Auth) {
-          throw new Error('Auth not available')
-        }
-        const user: any = await Auth.currentAuthenticatedUser()
+        const user = await Auth.currentAuthenticatedUser()
         if (!cancelled) setProfileId(user?.username ?? null)
       } catch {
         if (!cancelled) setProfileId(null)
@@ -27,11 +25,10 @@ export default function ScanHandler() {
     }
 
     loadAuth()
-    return () => {
-      cancelled = true
-    }
+    return () => { cancelled = true }
   }, [])
 
+  // Handle scan once auth is known
   useEffect(() => {
     if (!authChecked) return
 
@@ -63,23 +60,25 @@ export default function ScanHandler() {
       }
 
       try {
-        const resp = await fetch('/api/nfcAward', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ address, lat, lng, profileId }),
-          credentials: 'include',
-        })
+        const resp = await fetch(
+          `${import.meta.env.VITE_SUPPORT_FUNCTION_URL}nfcAward`,
+          {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ address, lat, lng, profileId }),
+            credentials: 'include',
+          }
+        )
 
         const data = await resp.json().catch(() => null)
 
-        if (resp.ok && data && data.awarded) {
+        if (resp.ok && data?.awarded) {
           setMessage('+100 points awarded! Redirecting to map...')
-        } else if (resp.ok && data && !data.awarded) {
-          setMessage(
-            data.message || 'Scan received. Redirecting to map...',
-          )
+        } else if (resp.ok) {
+          setMessage(data?.message || 'Scan received. Redirecting to map...')
         } else {
-          setMessage('Scan processed. Redirecting to map...')
+          console.error('nfcAward response error', { status: resp.status, body: data })
+          setMessage(data?.error || data?.details || 'Scan processed. Redirecting to map...')
         }
       } catch (err) {
         console.error('Scan handler error:', err)

@@ -50,43 +50,48 @@ export const handler: Handler<FunctionUrlEvent, FunctionUrlResponse> = async (
 ) => {
   const method = event.requestContext.http.method
 
-  const headers = {
-    'Content-Type': 'application/json',
+
+  const cors = {
+    "Access-Control-Allow-Origin": "http://localhost:5173",
+    "Access-Control-Allow-Credentials": "true",
+    "Access-Control-Allow-Headers": "Content-Type",
+    "Access-Control-Allow-Methods": "POST,OPTIONS"
   }
 
-  if (method === 'OPTIONS') {
+
+  if (method === "OPTIONS") {
     return {
       statusCode: 200,
-      headers,
-      body: '',
+      headers: cors,
+      body: ""
     }
   }
 
-  if (method !== 'POST') {
+  if (method !== "POST") {
     return {
       statusCode: 405,
-      headers,
-      body: JSON.stringify({ error: 'Method not allowed', received: method }),
+      headers: { ...cors, "Content-Type": "application/json" },
+      body: JSON.stringify({ error: "Method not allowed", received: method })
     }
   }
 
   try {
-    const payload = JSON.parse(event.body || '{}')
+    const payload = JSON.parse(event.body || "{}")
     const { address, lat, lng, profileId } = payload
 
     if (!profileId) {
       return {
         statusCode: 401,
-        headers,
-        body: JSON.stringify({ error: 'Missing profileId (user not signed in)' }),
+        headers: { ...cors, "Content-Type": "application/json" },
+        body: JSON.stringify({ error: "Missing profileId (user not signed in)" })
       }
     }
 
     if (!address && !(lat && lng)) {
       return {
         statusCode: 400,
-        headers,
-        body: JSON.stringify({ error: 'Missing address or coordinates' }),
+        headers: { ...cors, "Content-Type": "application/json" },
+        body: JSON.stringify({ error: "Missing address or coordinates" })
       }
     }
 
@@ -94,52 +99,50 @@ export const handler: Handler<FunctionUrlEvent, FunctionUrlResponse> = async (
     const TAG_TABLE = process.env.TAG_LOCATION_TABLE_NAME!
     const SCANS_TABLE = process.env.NFC_SCANS_TABLE_NAME!
 
-    // Normalize address key to use as id
     const addressKey = address ? String(address).trim() : `${lat},${lng}`
 
     const now = Math.floor(Date.now() / 1000)
     const WEEK = 7 * 24 * 60 * 60
     const cutoff = now - WEEK
 
-    // Ensure TagLocation exists (upsert lat/lng if provided)
+    // Ensure TagLocation exists
     try {
       await ddb.send(
         new UpdateCommand({
           TableName: TAG_TABLE,
           Key: { id: addressKey },
           UpdateExpression:
-            'SET address = if_not_exists(address, :address), lat = if_not_exists(lat, :lat), lng = if_not_exists(lng, :lng), createdAt = if_not_exists(createdAt, :now), updatedAt = :now',
+            "SET address = if_not_exists(address, :address), lat = if_not_exists(lat, :lat), lng = if_not_exists(lng, :lng), createdAt = if_not_exists(createdAt, :now), updatedAt = :now",
           ExpressionAttributeValues: {
-            ':address': addressKey,
-            ':lat': lat ? Number(lat) : null,
-            ':lng': lng ? Number(lng) : null,
-            ':now': new Date().toISOString(),
+            ":address": addressKey,
+            ":lat": lat ? Number(lat) : null,
+            ":lng": lng ? Number(lng) : null,
+            ":now": new Date().toISOString(),
           },
-        }),
+        })
       )
     } catch (err) {
-      console.error('Failed to ensure TagLocation:', err)
+      console.error("Failed to ensure TagLocation:", err)
     }
 
-    // NfcScan id combines profileId and address
     const scanId = `${profileId}#${addressKey}`
 
-    // Try to set lastScannedAt if not scanned within the last week
     try {
       await ddb.send(
         new UpdateCommand({
           TableName: SCANS_TABLE,
           Key: { id: scanId },
-          UpdateExpression: 'SET profileId = :profileId, address = :address, lastScannedAt = :now',
+          UpdateExpression:
+            "SET profileId = :profileId, address = :address, lastScannedAt = :now",
           ConditionExpression:
-            'attribute_not_exists(lastScannedAt) OR lastScannedAt <= :cutoff',
+            "attribute_not_exists(lastScannedAt) OR lastScannedAt <= :cutoff",
           ExpressionAttributeValues: {
-            ':profileId': profileId,
-            ':address': addressKey,
-            ':now': now,
-            ':cutoff': cutoff,
+            ":profileId": profileId,
+            ":address": addressKey,
+            ":now": now,
+            ":cutoff": cutoff,
           },
-        }),
+        })
       )
 
       // Award points
@@ -150,64 +153,63 @@ export const handler: Handler<FunctionUrlEvent, FunctionUrlResponse> = async (
             TableName: PROFILE_TABLE,
             Key: { id: profileId },
             UpdateExpression:
-              'SET points = if_not_exists(points, :zero) + :pts, updatedAt = :updatedAt',
+              "SET points = if_not_exists(points, :zero) + :pts, updatedAt = :updatedAt",
             ExpressionAttributeValues: {
-              ':pts': AWARD,
-              ':zero': 0,
-              ':updatedAt': new Date().toISOString(),
+              ":pts": AWARD,
+              ":zero": 0,
+              ":updatedAt": new Date().toISOString(),
             },
-          }),
+          })
         )
       } catch (err) {
-        console.error('Failed to award points:', err)
+        console.error("Failed to award points:", err)
       }
 
       return {
         statusCode: 200,
-        headers,
-        body: JSON.stringify({ awarded: true, message: 'Awarded 100 points' }),
+        headers: { ...cors, "Content-Type": "application/json" },
+        body: JSON.stringify({ awarded: true, message: "Awarded 100 points" })
       }
-    } catch (err) {
-      // Dynamo conditional failed — read existing scan to compute remaining time
-      const dynamoErr: any = err
+    } catch (err: any) {
       const isConditional =
-        dynamoErr && dynamoErr.name === 'ConditionalCheckFailedException'
+        err && err.name === "ConditionalCheckFailedException"
+
       if (isConditional) {
         try {
           const getRes = await ddb.send(
-            new GetCommand({ TableName: SCANS_TABLE, Key: { id: scanId } }),
+            new GetCommand({ TableName: SCANS_TABLE, Key: { id: scanId } })
           )
           const last = getRes.Item?.lastScannedAt ?? null
           if (last) {
             const remaining = Math.max(0, WEEK - (now - Number(last)))
             return {
               statusCode: 200,
-              headers,
+              headers: { ...cors, "Content-Type": "application/json" },
               body: JSON.stringify({
                 awarded: false,
                 secondsUntilNext: remaining,
-                message: 'Scan too soon',
+                message: "Scan too soon",
               }),
             }
           }
         } catch (gerr) {
-          console.error('Failed to fetch existing scan record:', gerr)
+          console.error("Failed to fetch existing scan record:", gerr)
         }
       }
 
-      console.error('Scan update error:', err)
+      console.error("Scan update error:", err)
       return {
         statusCode: 500,
-        headers,
-        body: JSON.stringify({ error: 'Failed to process scan', details: String(err) }),
+        headers: { ...cors, "Content-Type": "application/json" },
+        body: JSON.stringify({ error: "Failed to process scan", details: String(err) })
       }
     }
   } catch (error) {
-    console.error('nfcAward error:', error)
+    console.error("nfcAward error:", error)
     return {
       statusCode: 500,
-      headers,
-      body: JSON.stringify({ error: 'Internal server error', details: String(error) }),
+      headers: { ...cors, "Content-Type": "application/json" },
+      body: JSON.stringify({ error: "Internal server error", details: String(error) })
     }
   }
 }
