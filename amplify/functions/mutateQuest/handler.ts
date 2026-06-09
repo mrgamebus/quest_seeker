@@ -48,6 +48,7 @@ interface AppSyncEvent {
 
     name?: string
     details?: string
+    terms?: string
 
     imagePath?: string
     imageThumbPath?: string
@@ -126,6 +127,7 @@ export const handler = async (event: AppSyncEvent) => {
           status: 'draft',
           quest_name: input.name ?? null,
           quest_details: input.details ?? null,
+          quest_terms: input.terms ?? null,
           quest_image: input.imagePath ?? null,
           quest_image_thumb: input.imageThumbPath ?? null,
           quest_start_at: input.startAt ?? null,
@@ -248,6 +250,7 @@ export const handler = async (event: AppSyncEvent) => {
   const updates: Record<string, unknown> = {
     quest_name: input.name ?? quest.quest_name,
     quest_details: input.details ?? quest.quest_details,
+    quest_terms: input.terms ?? quest.quest_terms,
     quest_image: input.imagePath ?? quest.quest_image,
     quest_image_thumb: input.imageThumbPath ?? quest.quest_image_thumb,
     quest_start_at: input.startAt ?? quest.quest_start_at,

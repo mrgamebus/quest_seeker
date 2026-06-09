@@ -24,21 +24,23 @@ const getApiClient = () => {
   return apiClient
 }
 
-const listTagLocations = /* GraphQL */ `query ListTagLocations {
-  listTagLocations {
-    items {
-      id
-      address
-      lat
-      lng
-      createdAt
-      updatedAt
+const listTagLocations = /* GraphQL */ `
+  query ListTagLocations {
+    listTagLocations {
+      items {
+        id
+        address
+        lat
+        lng
+        createdAt
+        updatedAt
+        __typename
+      }
+      nextToken
       __typename
     }
-    nextToken
-    __typename
   }
-}`
+`
 
 type TagLocation = {
   id: string
@@ -56,20 +58,25 @@ type ListTagLocationsResponse = {
   }
 }
 
-
-
 export default function SeekerMap() {
   const navigate = useNavigate()
   const { currentProfile } = useCurrentUserProfile()
   const location = useLocation()
   const { toast } = useToast()
   const queryClient = useQueryClient()
-  const [coordinates, setCoordinates] = useState<null | { lat: number; lng: number }>(null)
+  const [coordinates, setCoordinates] = useState<null | {
+    lat: number
+    lng: number
+  }>(null)
   const [markerLabel, setMarkerLabel] = useState<string | undefined>(undefined)
-  const [highlightedTagId, setHighlightedTagId] = useState<string | undefined>(undefined)
+  const [highlightedTagId, setHighlightedTagId] = useState<string | undefined>(
+    undefined,
+  )
   const [hasProcessedNfcScan, setHasProcessedNfcScan] = useState(false)
   const [newAddress, setNewAddress] = useState('')
 
+  const seeMap =
+    currentProfile?.role === 'creator' || currentProfile?.role === 'Admin'
   // Fetch all tag locations
   const { data: tagLocationsData } = useQuery({
     queryKey: ['tagLocations'],
@@ -91,7 +98,10 @@ export default function SeekerMap() {
       })
       const url = `https://nominatim.openstreetmap.org/search?${params.toString()}`
       const response = await fetch(url)
-      const results = (await response.json()) as Array<{ lat: string; lon: string }>
+      const results = (await response.json()) as Array<{
+        lat: string
+        lon: string
+      }>
       const geo = results?.[0]
       const lat = geo ? Number(geo.lat) : undefined
       const lng = geo ? Number(geo.lon) : undefined
@@ -132,8 +142,7 @@ export default function SeekerMap() {
     onError: (error: Error) => {
       toast({
         title: 'Save failed',
-        description:
-          error?.message || 'Unable to save this address.',
+        description: error?.message || 'Unable to save this address.',
         variant: 'destructive',
       })
     },
@@ -142,12 +151,17 @@ export default function SeekerMap() {
   const handleSaveAddress = async () => {
     const addressToSave = newAddress.trim()
     if (!addressToSave) {
-      toast({ title: 'Enter an address', description: 'Please type an address first.' })
+      toast({
+        title: 'Enter an address',
+        description: 'Please type an address first.',
+      })
       return
     }
 
     const alreadySaved = tagLocationsData?.find(
-      (tag) => tag.address?.toLowerCase().trim() === addressToSave.toLowerCase().trim(),
+      (tag) =>
+        tag.address?.toLowerCase().trim() ===
+        addressToSave.toLowerCase().trim(),
     )
 
     if (alreadySaved) {
@@ -178,7 +192,10 @@ export default function SeekerMap() {
         url.searchParams.set('q', inputAddress)
 
         const response = await fetch(url.toString())
-        const results = (await response.json()) as Array<{ lat: string; lon: string }>
+        const results = (await response.json()) as Array<{
+          lat: string
+          lon: string
+        }>
         if (!active || !results.length) return null
 
         const { lat, lon } = results[0]
@@ -207,7 +224,9 @@ export default function SeekerMap() {
         // Find and highlight the tag with these coordinates
         if (tagLocationsData) {
           const matched = tagLocationsData.find(
-            (tag: TagLocation) => Math.abs((tag.lat ?? 0) - latN) < 0.001 && Math.abs((tag.lng ?? 0) - lngN) < 0.001
+            (tag: TagLocation) =>
+              Math.abs((tag.lat ?? 0) - latN) < 0.001 &&
+              Math.abs((tag.lng ?? 0) - lngN) < 0.001,
           )
           setHighlightedTagId(matched?.id)
         }
@@ -217,7 +236,8 @@ export default function SeekerMap() {
 
     if (address) {
       const matched = tagLocationsData?.find(
-        (tag: TagLocation) => tag.address?.toLowerCase() === address.toLowerCase(),
+        (tag: TagLocation) =>
+          tag.address?.toLowerCase() === address.toLowerCase(),
       )
 
       setHighlightedTagId(matched?.id)
@@ -280,13 +300,16 @@ export default function SeekerMap() {
           } else {
             toast({
               title: 'NFC Scan noted',
-              description: data.message ?? 'You have already scanned this location recently.',
+              description:
+                data.message ??
+                'You have already scanned this location recently.',
             })
           }
         } else {
           toast({
             title: 'NFC Scan failed',
-            description: data?.error || 'Unable to process tag points at this time.',
+            description:
+              data?.error || 'Unable to process tag points at this time.',
             variant: 'destructive',
           })
         }
@@ -350,7 +373,7 @@ export default function SeekerMap() {
             </Toolbar>
           </div>
 
-          {currentProfile?.role === 'creator' && (
+          {seeMap && (
             <div className="px-4 py-4 border-b border-white/20 bg-white/80">
               <div className="max-w-3xl mx-auto flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                 <div className="flex-1 min-w-0">
@@ -369,7 +392,9 @@ export default function SeekerMap() {
                   onClick={handleSaveAddress}
                   disabled={createTagLocationMutation.isPending}
                 >
-                  {createTagLocationMutation.isPending ? 'Saving…' : 'Save Address'}
+                  {createTagLocationMutation.isPending
+                    ? 'Saving…'
+                    : 'Save Address'}
                 </Button>
               </div>
             </div>
@@ -393,7 +418,9 @@ export default function SeekerMap() {
                   alt={currentProfile.full_name || 'User avatar'}
                 />
                 <div>
-                  <div className="font-semibold">{currentProfile.full_name}</div>
+                  <div className="font-semibold">
+                    {currentProfile.full_name}
+                  </div>
                   <div className="text-sm text-muted-foreground">
                     {currentProfile.role} • {currentProfile.points ?? 0} pts
                   </div>
