@@ -1481,7 +1481,7 @@ export default function Help() {
                   variant="yellow"
                   onClick={() => navigate('/user/leader')}
                 >
-                  Leader Board
+                  Leaderboard
                 </Button>
 
                 <Button

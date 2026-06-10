@@ -215,7 +215,7 @@ export default function QuestPage() {
               </Button>
 
               <Button variant="yellow" onClick={() => navigate('/user/leader')}>
-                Leader Board
+                Leaderboard
               </Button>
 
               <Button variant="yellow" onClick={() => navigate('/user/help')}>

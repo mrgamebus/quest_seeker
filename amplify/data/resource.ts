@@ -260,7 +260,7 @@ export const schema = a
       .authorization((allow) => [
         allow.owner().to(['read', 'create', 'update']),
         allow.authenticated().to(['read']),
-        allow.groups(['Admin']).to(['read', 'update', 'delete']),
+        allow.groups(['Admin', 'creator', 'seeker']).to(['read', 'update', 'delete']),
       ]),
   })
   .authorization((allow) => [
