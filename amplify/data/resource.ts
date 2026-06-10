@@ -246,8 +246,8 @@ export const schema = a
         lng: a.float(),
       })
       .authorization((allow) => [
-        allow.authenticated().to(['read', 'create', 'update']),
-        allow.groups(['Admin', 'creator', 'seeker']).to(['create', 'update', 'delete', 'read']),
+        allow.authenticated().to(['read']),
+        allow.groups(['Admin', 'creator']).to(['create', 'update', 'delete', 'read']),
       ]),
 
     /* ------------------ NFC SCAN MODEL ------------------ */
