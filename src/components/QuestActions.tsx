@@ -11,6 +11,7 @@ interface QuestActionsProps {
   isOwner: boolean
   isAdmin?: boolean
   hasJoined: boolean
+  termsContent?: string
   isExpired: boolean
   prizes: Prize[]
   participantCount: number
@@ -36,6 +37,7 @@ export default function QuestActions({
   isOwner,
   isAdmin = false,
   hasJoined,
+  termsContent,
   isExpired,
   prizes,
   participantCount,
@@ -97,6 +99,7 @@ export default function QuestActions({
               participantLimit={participantLimit}
               currentParticipants={participantCount}
               onJoin={onJoin}
+              termsContent={termsContent}
             />
           )}
         </div>

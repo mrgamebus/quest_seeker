@@ -57,7 +57,7 @@ export default function RegionPage() {
       style={{ backgroundImage: `url(${bg})` }}
     >
       <Card className="bg-white/80 backdrop-blur-md shadow-xl rounded-2xl p-8 max-w-md w-full text-center">
-        <CardContent>
+        <CardContent className="flex flex-col">
           <p className="text-xl font-semibold mb-4">
             Welcome Back {seekerName || 'User'}!
           </p>
@@ -83,14 +83,14 @@ export default function RegionPage() {
             <LogOut />
             Sign Out
           </Button>
-          <div className="space-x-12 gap-4 text-xs text-gray-600 items-center mt-2">
-            <a href="/legal" className="hover:text-gray-600">
+          <div className="flex flex-wrap justify-center gap-x-4 gap-y-1 text-xs text-gray-600 mt-auto pt-4">
+            <a href="/legal" className="hover:text-gray-900">
               Terms of use
             </a>
-            <a href="/legal?tab=privacy" className="hover:text-gray-600">
+            <a href="/legal?tab=privacy" className="hover:text-gray-900">
               Privacy policy
             </a>
-            <a href="/support" className="hover:text-gray-600">
+            <a href="/support" className="hover:text-gray-900">
               Support
             </a>
           </div>
