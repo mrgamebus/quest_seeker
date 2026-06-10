@@ -436,7 +436,7 @@ export default function Help() {
                 <tr>
                   <td className="border border-gray-300 px-3 py-2 font-semibold flex items-center gap-2">
                     <img
-                      src="/badges/quest_master.png"
+                      src="/badges/badge_quest_master.png"
                       className="w-5 h-5 rounded-full border-2 border-white object-cover shadow-sm transition-transform duration-200 group-hover:scale-125"
                     />
                     Quest Master
