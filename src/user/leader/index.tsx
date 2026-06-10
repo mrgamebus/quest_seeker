@@ -93,6 +93,7 @@ export default function Leader() {
                 Leaderboard
               </Button>
 
+
               <Button variant="yellow" onClick={() => navigate('/user/help')}>
                 Help Guide
               </Button>
