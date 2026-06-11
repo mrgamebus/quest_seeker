@@ -4,7 +4,9 @@ import { useNavigate } from 'react-router-dom'
 export default function ScanHandler() {
   const navigate = useNavigate()
   const [message, setMessage] = useState('Processing scan...')
-  const [profileId, setProfileId] = useState<string | null | undefined>(undefined)
+  const [profileId, setProfileId] = useState<string | null | undefined>(
+    undefined,
+  )
   const [authChecked, setAuthChecked] = useState(false)
 
   // Load Amplify auth
@@ -25,7 +27,9 @@ export default function ScanHandler() {
     }
 
     loadAuth()
-    return () => { cancelled = true }
+    return () => {
+      cancelled = true
+    }
   }, [])
 
   // Handle scan once auth is known
@@ -52,7 +56,9 @@ export default function ScanHandler() {
       }
 
       if (!profileId) {
-        setMessage('Not signed in — redirecting to the map. Sign in to earn points.')
+        setMessage(
+          'Not signed in — redirecting to the map. Sign in to earn points.',
+        )
         setTimeout(() => {
           navigate(`/user/map?${targetParams.toString()}`)
         }, 1100)
@@ -61,13 +67,13 @@ export default function ScanHandler() {
 
       try {
         const resp = await fetch(
-          `${import.meta.env.VITE_SUPPORT_FUNCTION_URL}nfcAward`,
+          `${import.meta.env.VITE_NFC_AWARD_FUNCTION_URL}`,
           {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ address, lat, lng, profileId }),
             credentials: 'include',
-          }
+          },
         )
 
         const data = await resp.json().catch(() => null)
@@ -77,8 +83,15 @@ export default function ScanHandler() {
         } else if (resp.ok) {
           setMessage(data?.message || 'Scan received. Redirecting to map...')
         } else {
-          console.error('nfcAward response error', { status: resp.status, body: data })
-          setMessage(data?.error || data?.details || 'Scan processed. Redirecting to map...')
+          console.error('nfcAward response error', {
+            status: resp.status,
+            body: data,
+          })
+          setMessage(
+            data?.error ||
+              data?.details ||
+              'Scan processed. Redirecting to map...',
+          )
         }
       } catch (err) {
         console.error('Scan handler error:', err)
