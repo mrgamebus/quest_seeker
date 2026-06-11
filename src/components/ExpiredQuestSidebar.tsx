@@ -32,7 +32,7 @@ export default function ExpiredQuestSidebar({
   questParticipants,
   tasks,
   seekerTasks,
-  isReady,
+  // isReady,
   completedTasks,
   totalTasks,
   onPreparePdf,
@@ -61,7 +61,7 @@ export default function ExpiredQuestSidebar({
       completedTasks={completedTasks}
       totalTasks={totalTasks}
       seekerTasks={seekerTasks}
-      isReady={isReady}
+      // isReady={isReady}
       onPreparePdf={() => onPreparePdf()}
     />
   ) : null
