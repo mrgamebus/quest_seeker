@@ -50,9 +50,16 @@ export const handler: Handler<FunctionUrlEvent, FunctionUrlResponse> = async (
 ) => {
   const method = event.requestContext.http.method
 
+  const allowedOrigins = [
+    "http://localhost:5173",
+    "https://main.dxg1nclik5g9u.amplifyapp.com"
+  ]
+
+  const origin = event.headers.origin
+  const isAllowed = allowedOrigins.includes(origin)
 
   const cors = {
-    "Access-Control-Allow-Origin": "http://localhost:5173",
+    "Access-Control-Allow-Origin": isAllowed ? origin : "",
     "Access-Control-Allow-Credentials": "true",
     "Access-Control-Allow-Headers": "Content-Type",
     "Access-Control-Allow-Methods": "POST,OPTIONS"
