@@ -1,10 +1,9 @@
 import Stripe from 'stripe'
-import { env } from '$amplify/env/stripeConnect'
 import type { LambdaFunctionURLEvent } from 'aws-lambda'
 import { DynamoDBClient } from '@aws-sdk/client-dynamodb'
 import { DynamoDBDocumentClient, UpdateCommand } from '@aws-sdk/lib-dynamodb'
 
-const stripe = new Stripe(env.STRIPE_SECRET_KEY!)
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!)
 const client = new DynamoDBClient({})
 const ddb = DynamoDBDocumentClient.from(client, {
   marshallOptions: { removeUndefinedValues: true, convertEmptyValues: false },
