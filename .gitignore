@@ -27,6 +27,8 @@ dist-ssr
 .amplify
 amplify_outputs*
 amplifyconfiguration*
+.amplify/artifacts/
+.amplify/#current-cloud-backend/
 
 #amplify-do-not-edit-begin
 amplify/\#current-cloud-backend
