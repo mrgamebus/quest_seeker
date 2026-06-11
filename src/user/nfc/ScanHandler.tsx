@@ -61,7 +61,7 @@ export default function ScanHandler() {
 
       try {
         const resp = await fetch(
-          `${import.meta.env.VITE_SUPPORT_FUNCTION_URL}nfcAward`,
+          `${import.meta.env.VITE_SUPPORT_FUNCTION_URL}`,
           {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
