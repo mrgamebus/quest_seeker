@@ -78,6 +78,8 @@ export default function CreateQuestPage() {
   const [sponsors, setSponsors] = useState<Sponsor[]>([])
   const [currencyValue, setCurrencyValue] = useState('')
   const [selectedRegion, setSelectedRegion] = useState('')
+  const [nfcTagCount, setNfcTagCount] = useState(0)
+  const [postalAddress, setPostalAddress] = useState('')
   const [errors, setErrors] = useState<string>('')
   const [openStart, setOpenStart] = useState(false)
   const [openEnd, setOpenEnd] = useState(false)
@@ -140,6 +142,8 @@ export default function CreateQuestPage() {
 
   const isDraftBeingPublished =
     isUpdating && updatingQuest?.status === QuestStatus.draft
+
+  const nfcExtraCost = Math.max(0, nfcTagCount - 1) * 50
 
   const NZ_TZ = 'Pacific/Auckland'
 
@@ -838,6 +842,68 @@ export default function CreateQuestPage() {
         )}
 
         {step === 11 && (
+          <>
+            <StepHeader title="NFC Tags & Shipping" onBack={handleClick} />
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700">
+                  How many NFC tags would you like?
+                </label>
+                <Input
+                  type="number"
+                  min={0}
+                  value={nfcTagCount}
+                  onChange={(e) => {
+                    const newValue = Math.max(0, Number(e.target.value) || 0)
+                    setNfcTagCount(newValue)
+                    if (newValue === 0) {
+                      setPostalAddress('')
+                    }
+                  }}
+                  className="mt-2 w-24"
+                />
+                <p className="text-sm text-gray-500 mt-2">
+                  First NFC tag is free. Additional tags are $50 each.
+                </p>
+                <p className="text-sm text-gray-700 mt-1">
+                  Extra cost: ${nfcExtraCost.toFixed(2)}
+                </p>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700">
+                  Postal address (optional)
+                </label>
+                <Textarea
+                  value={postalAddress}
+                  onChange={(e) => setPostalAddress(e.target.value)}
+                  disabled={nfcTagCount === 0}
+                  placeholder={
+                    nfcTagCount === 0
+                      ? 'Request tags first to enter a postal address'
+                      : 'Enter postal address'
+                  }
+                  className="border rounded p-2 w-full"
+                />
+              </div>
+            </div>
+            <div className="flex justify-between mt-4">
+              <Button onClick={prev}>Back</Button>
+              <Button
+                variant="outline"
+                disabled={!canEdit}
+                onClick={() => saveQuest(QuestStatus.draft)}
+              >
+                {updatingQuest?.status === QuestStatus.published
+                  ? 'Save Changes'
+                  : 'Save as Draft'}
+              </Button>
+              <Button onClick={next}>Next</Button>
+            </div>
+          </>
+        )}
+
+        {step === 12 && (
           <>
             <StepHeader
               title="Quest Terms and Conditions"
