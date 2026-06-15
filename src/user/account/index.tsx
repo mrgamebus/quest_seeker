@@ -112,7 +112,7 @@ export default function AccountPage() {
         description: 'Failed to start verification. Please try again.',
       })
     } finally {
-      setLoading(false)
+      window.setTimeout(() => setLoading(false), 5000)
     }
   }
 
