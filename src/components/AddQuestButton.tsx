@@ -44,17 +44,19 @@ export default function AddQuestButton({ to }: AddQuestButtonProps) {
     }
   }
 
-  const handleBecomeCreator = async () => {
+const handleBecomeCreator = async () => {
+    if (!currentProfile) return
+
     setLoading(true)
     try {
       setModalOpen(false)
 
-      const res = await fetch(outputs.custom.stripeIdentityFunctionUrl, {
+      const res = await fetch(outputs.custom.stripeConnectFunctionUrl, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          profileId: currentProfile?.id,
-          email: currentProfile?.email,
+          profileId: currentProfile.id,
+          email: currentProfile.email,
         }),
       })
 
