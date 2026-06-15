@@ -119,6 +119,17 @@ const handleBecomeCreator = async () => {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+      {loading && (
+        <div
+          className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center"
+          aria-hidden
+        >
+          <div className="flex flex-col items-center gap-3">
+            <div className="animate-spin rounded-full h-12 w-12 border-4 border-t-transparent border-white" />
+            <div className="text-white">Starting verification…</div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
