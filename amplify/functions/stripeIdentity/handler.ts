@@ -1,8 +1,13 @@
 import Stripe from 'stripe'
 import type { LambdaFunctionURLEvent } from 'aws-lambda'
-import { env } from '$amplify/env/stripeIdentity'
+// NOTE: Some build environments may not provide the generated
+// '$amplify/env/stripeIdentity' module. Fall back to process.env.
+const STRIPE_SECRET_KEY = process.env.STRIPE_SECRET_KEY || ''
+if (!STRIPE_SECRET_KEY) {
+  console.error('STRIPE_SECRET_KEY environment variable is not set')
+}
 
-const stripe = new Stripe(env.STRIPE_SECRET_KEY!)
+const stripe = new Stripe(STRIPE_SECRET_KEY)
 
 type VerificationRequestBody = {
   profileId: string

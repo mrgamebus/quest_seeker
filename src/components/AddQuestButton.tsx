@@ -44,17 +44,19 @@ export default function AddQuestButton({ to }: AddQuestButtonProps) {
     }
   }
 
-  const handleBecomeCreator = async () => {
+const handleBecomeCreator = async () => {
+    if (!currentProfile) return
+
     setLoading(true)
     try {
       setModalOpen(false)
 
-      const res = await fetch(outputs.custom.stripeIdentityFunctionUrl, {
+      const res = await fetch(outputs.custom.stripeConnectFunctionUrl, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          profileId: currentProfile?.id,
-          email: currentProfile?.email,
+          profileId: currentProfile.id,
+          email: currentProfile.email,
         }),
       })
 
@@ -117,6 +119,17 @@ export default function AddQuestButton({ to }: AddQuestButtonProps) {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+      {loading && (
+        <div
+          className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center"
+          aria-hidden
+        >
+          <div className="flex flex-col items-center gap-3">
+            <div className="animate-spin rounded-full h-12 w-12 border-4 border-t-transparent border-white" />
+            <div className="text-white">Starting verification…</div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

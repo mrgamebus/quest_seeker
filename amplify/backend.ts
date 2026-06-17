@@ -183,6 +183,21 @@ nfcAwardLambda.addEnvironment(
   backend.data.resources.tables['NfcScan'].tableName,
 )
 
+const nfcAwardFunctionUrl = nfcAwardLambda.addFunctionUrl({
+  authType: lambda.FunctionUrlAuthType.NONE,
+  cors: {
+    allowedOrigins: ['*'],
+    allowedMethods: [lambda.HttpMethod.POST],
+    allowedHeaders: ['content-type'],
+  },
+})
+
+nfcAwardLambda.addPermission('NfcAwardPublicInvoke', {
+  principal: new iam.AnyPrincipal(),
+  action: 'lambda:InvokeFunctionUrl',
+  functionUrlAuthType: lambda.FunctionUrlAuthType.NONE,
+})
+
 updateSeekerRankLambda.addEventSourceMapping('ProfileStreamTrigger', {
   eventSourceArn: profileTable.tableStreamArn!,
   startingPosition: StartingPosition.LATEST,
@@ -362,5 +377,6 @@ backend.addOutput({
     supportFunctionUrl: supportFunctionUrl.url,
     stripeIdentityFunctionUrl: stripeIdentityFunctionUrl.url,
     stripeConnectFunctionUrl: stripeConnectFunctionUrl.url,
+    nfcAwardFunctionUrl: nfcAwardFunctionUrl.url,
   },
 })

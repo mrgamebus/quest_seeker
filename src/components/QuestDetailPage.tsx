@@ -612,7 +612,7 @@ export default function QuestDetailPage() {
               </Button>
 
               <Button variant="yellow" onClick={() => navigate('/user/leader')}>
-                Leader Board
+                Leaderboard
               </Button>
 
               <Button variant="yellow" onClick={() => navigate('/user/help')}>
@@ -717,6 +717,7 @@ export default function QuestDetailPage() {
               isOwner={isOwner}
               isAdmin={isAdmin}
               hasJoined={hasJoined}
+              termsContent={quest?.quest_terms || ''}
               isExpired={isExpired}
               prizes={prizes}
               participantCount={participantIds.length}
