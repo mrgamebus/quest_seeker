@@ -76,7 +76,7 @@ export default function SeekerMap() {
   const [newAddress, setNewAddress] = useState('')
 
   const seeMap =
-    currentProfile?.role === 'creator' || currentProfile?.role === 'Admin'
+    currentProfile?.role === 'Admin'
   // Fetch all tag locations
   const { data: tagLocationsData } = useQuery({
     queryKey: ['tagLocations'],
